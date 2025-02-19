@@ -1,0 +1,49 @@
+
+/* File Uploader Component */
+.upload-container {
+    width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px dashed #007bff;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.dropzone {
+    cursor: pointer;
+    padding: 20px;
+    background-color: #f9f9f9;
+    transition: 0.3s;
+}
+
+.dropzone:hover {
+    background-color: #e3f2fd;
+}
+
+.file-list {
+    margin-top: 15px;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    background: #fff;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.upload-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
