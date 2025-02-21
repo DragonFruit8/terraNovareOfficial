@@ -20,7 +20,8 @@ export const updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
     const { name, price, stock } = req.body; // ✅ Include stock
-    console.log(req.body, req,params)
+    // console.log(req.body, req,params)
+  
 
     if (!name || !price || stock === undefined) {
       return res.status(400).json({ error: "Name, price, and stock are required" });

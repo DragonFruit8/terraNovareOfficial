@@ -45,7 +45,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
+//  Change to http://terranovare.tech
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(cookieParser());
 
@@ -53,15 +53,17 @@ app.use(cookieParser());
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhookRouter);
 // ✅ Register other routes
 
+// ✅ Secure Admin Routes
+app.use("/api/admin", adminRoutes);
+app.use("/api/auth", authRoutes);
+
+// ✅ User Routes
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/checkout", checkoutRoutes);
-// ✅ Secure Admin Routes
-app.use("/api/auth", authRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
-app.use("/api/admin", adminRoutes);
 
 const upload = multer({ storage });
 

@@ -5,7 +5,7 @@ import sql from "../db.js";
 export const getAllProducts = async (req, res) => {
   try {
     const products = await sql`
-      SELECT product_id, name, price, stock
+      SELECT product_id, name, slug, price, description, stock, is_presale, release_date, stripe_product_id, stripe_price_id
       FROM products
     `;
 
@@ -84,7 +84,7 @@ export const addProduct = async (req, res) => {
     }
 
     const slug = slugify(name, { lower: true, strict: true }); // ✅ Generate slug
-
+    console.log("LOOK: ", name, price, stock, description, image_url)
     const newProduct = await sql`
       INSERT INTO products (name, slug, price, stock, description, image_url)
       VALUES (${name}, ${slug}, ${price}, ${stock}, ${description}, ${image_url})
@@ -100,11 +100,11 @@ export const addProduct = async (req, res) => {
 };
 export const getProductById = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { product_id } = req.params;
 
     // ✅ Fetch product by ID
     const product = await sql`
-      SELECT * FROM products WHERE product_id = ${id}
+      SELECT * FROM products WHERE product_id = ${product_id}
     `;
 
     if (product.length === 0) {
@@ -122,13 +122,15 @@ export const getProductById = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const { name, slug, price, stock, is_presale, stripe_product_id, stripe_price_id } = req.body;
+    const { name, slug, price, stock, is_presale,release_date, description, stripe_product_id, stripe_price_id } = req.body;
+
+    const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
 
     if (!product_id) {
       return res.status(400).json({ error: "Product ID is required." });
     }
 // ADD description!!
-    console.log("🔍 Updating Product:", { product_id, name, slug, price, stock,is_presale, description, stripe_product_id, stripe_price_id });
+    console.log("🔍 Updating Product:", { product_id, name, slug, price, stock,is_presale, release_date, description, stripe_product_id, stripe_price_id });
 
     const updatedProduct = await sql`
       UPDATE products
@@ -137,7 +139,8 @@ export const updateProduct = async (req, res) => {
           price = ${price}, 
           stock = ${stock}, 
           is_presale = ${is_presale},
-          description = ${description}
+          release_date = ${formattedReleaseDate},
+          description = ${description},
           stripe_product_id = ${stripe_product_id}, 
           stripe_price_id = ${stripe_price_id}
       WHERE product_id = ${product_id}
@@ -158,13 +161,13 @@ export const updateProduct = async (req, res) => {
 // ✅ Delete Product (Admin)
 export const deleteProduct = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { product_id } = req.params;
 
-    console.log("🔍 Deleting product with ID:", id);
+    console.log("🔍 Deleting product with ID:", product_id);
 
     // ✅ Check if product exists
     const productExists = await sql`
-      SELECT * FROM products WHERE product_id = ${id}
+      SELECT * FROM products WHERE product_id = ${product_id}
     `;
     if (productExists.length === 0) {
       return res.status(404).json({ error: "Product not found." });
@@ -172,10 +175,10 @@ export const deleteProduct = async (req, res) => {
 
     // ✅ Delete the product
     await sql`
-      DELETE FROM products WHERE product_id = ${id}
+      DELETE FROM products WHERE product_id = ${product_id}
     `;
 
-    console.log(`✅ Product with ID ${id} deleted.`);
+    console.log(`✅ Product with ID ${product_id} deleted.`);
     res.json({ message: "Product deleted successfully!" });
 
   } catch (error) {

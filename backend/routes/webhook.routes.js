@@ -51,6 +51,4 @@ router.post("/stripe/webhook", express.raw({ type: "application/json" }), async 
   }
 });
 
-
-
 export default router;

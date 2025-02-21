@@ -30,7 +30,6 @@ router.post("/webhook", express.raw({ type: "application/json" }), (req, res) =>
 
   res.status(200).json({ received: true });
 });
-
 router.post("/checkout", async (req, res) => {
   try {
     const { product, userEmail } = req.body;
@@ -63,7 +62,5 @@ router.post("/checkout", async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
-
-
 
 export default router;

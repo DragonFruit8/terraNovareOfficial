@@ -39,12 +39,11 @@ export const createCheckoutSession = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 export const syncProductWithStripe = async (product) => {
   try {
     // 🔹 Check if product already has a Stripe ID
     if (product.stripe_product_id && product.stripe_price_id) {
-      console.log(`✅ Product already linked to Stripe: ${product.name}`);
+      // console.log(`✅ Product already linked to Stripe: ${product.name}`);
       return;
     }
 
@@ -76,7 +75,6 @@ export const syncProductWithStripe = async (product) => {
     console.error("❌ Error syncing product with Stripe:", error);
   }
 };
-
 export const syncAllProducts = async () => {
   try {
     const products = await sql`SELECT * FROM products`;

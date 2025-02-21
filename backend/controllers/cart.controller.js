@@ -30,7 +30,6 @@ export const getCart = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 export const addToCart = async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1]; // ✅ Extract token
   if (!token) {
@@ -69,8 +68,7 @@ export const addToCart = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
+// Make sure to impliment same token access to remove from addToCart, to verify user
 export const removeFromCart = async (req, res) => {
   const { product_id } = req.body;
   if (!product_id) return res.status(400).json({ error: "Product ID is required" });
@@ -83,7 +81,6 @@ export const removeFromCart = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
 export const incrementItem = async (req, res) => {
   const { product_id } = req.body;
   if (!product_id) return res.status(400).json({ error: "Product ID is required" });
@@ -96,7 +93,6 @@ export const incrementItem = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
-
 export const decrementItem = async (req, res) => {
   try {
     const { product_id } = req.body;

@@ -6,10 +6,8 @@ const router = express.Router();
 
 // ✅ Fetch all orders for the logged-in user
 router.get("/", authenticateUser, getOrders);
-
 // ✅ Create a new order (Handled via Stripe webhook)
 router.post("/", authenticateUser, createOrder);
-
 // ✅ Fetch a single order with details
 router.get("/:id", authenticateUser, getOrderDetails);
 

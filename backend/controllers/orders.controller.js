@@ -12,7 +12,6 @@ export const getUserOrders = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // 🔹 Get all orders for the logged-in user
 export const getOrders = async (req, res) => {
   try {
@@ -26,7 +25,6 @@ export const getOrders = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // 🔹 Create a new order (Checkout process)
 export const createOrder = async (req, res) => {
   try {
@@ -50,7 +48,6 @@ export const createOrder = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 export const getOrderDetails = async (req, res) => {
   try {
     const user_id = req.user.id;

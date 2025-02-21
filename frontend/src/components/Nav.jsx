@@ -40,7 +40,7 @@ const Nav = () => {
   // console.log("🔍 User Roles in Nav:", userData?.roles);
 
   return (
-    <nav className="navbar navbar-expand-md bg-body-tertiary">
+    <nav className="navbar navbar-expand-md bg-body-tertiary px-5">
       <div className="container-fluid">
         <Link className="navbar-brand fs-1" to="/">
           Terra'Novare
@@ -69,7 +69,7 @@ const Nav = () => {
           <ul className="navbar-nav ms-auto d-flex flex-row">
             {userData ? (
               <>
-                <li className="nav-item">
+                <li className="nav-item me-3">
                   <Link className="nav-link" to="/shop">
                     Shop
                   </Link>
@@ -86,30 +86,33 @@ const Nav = () => {
 
                   {isDropdownOpen && (
                     <div className="dropdown-menu dropdown-menu-end show">
-                      {userData?.roles?.includes("admin") && (
-                        <Link
-                          className="dropdown-item"
-                          to="/admin"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          Admin Dashboard
-                        </Link>
-                      )}
-
-                      <Link
-                        className="dropdown-item"
-                        to="/profile"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        className="dropdown-item"
-                        to="/orders"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        Orders
-                      </Link>
+                      {userData?.roles?.includes("admin") ? (
+                        <>
+                          <Link
+                            className="dropdown-item"
+                            to="/admin"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            Admin Dashboard
+                          </Link>
+                        </>
+                      ) : (
+                          <>
+                            <Link
+                              className="dropdown-item"
+                              to="/profile"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              Profile
+                            </Link>
+                            <Link
+                              className="dropdown-item"
+                              to="/orders"
+                              onClick={() => setIsDropdownOpen(false)}
+                            >
+                              Orders
+                            </Link>
+                          </>)}
                       <button className="dropdown-item" onClick={handleLogout}>
                         <LogOut /> Logout
                       </button>

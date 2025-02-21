@@ -3,9 +3,10 @@ import {
   getAllProducts,
   updateProduct,
   addProduct,
-  deleteProduct
+  deleteProduct,
+  updateUserProfileByAdmin, 
+  updateAdminProfile
 } from "../controllers/admin.controller.js";
-import { updateUserProfileByAdmin, updateAdminProfile } from "../controllers/admin.controller.js";
 import { authenticateUser, isAdmin } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -28,21 +29,21 @@ router.get(
 );
 // ✅ Add new product
 router.post(
-  "/products",
+  "/product",
   authenticateUser,
   isAdmin,
   addProduct
 );
 // ✅ Update product (Ensure correct product ID)
 router.put(
-  "/products/:id",
+  "/products/:product_id",
   authenticateUser,
   isAdmin,
   updateProduct // 🛠️ Removed getProductById & addProduct
 );
 // ✅ Delete product
 router.delete(
-  "/products/:id",
+  "/products/:product_id",
   authenticateUser,
   isAdmin,
   deleteProduct

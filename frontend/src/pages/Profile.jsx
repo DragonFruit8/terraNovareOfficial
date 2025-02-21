@@ -82,7 +82,7 @@ const Profile = () => {
             <p className="card-text"><strong>City:</strong> {userData?.city}</p>
             <p className="card-text"><strong>State:</strong> {userData?.state}</p>
             <p className="card-text"><strong>Country:</strong> {userData?.country}</p>
-            <p className="card-text"><strong>Role:</strong> {userData?.roles?.join(", ") || "User"}</p>
+            <p className="card-text"><strong>Role:</strong> {userData?.roles.join(", ") || "User"}</p>
 
             {/* ✅ Edit Button */}
             <button onClick={() => setEditMode(true)} className="btn btn-warning mt-3">

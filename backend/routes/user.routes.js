@@ -15,5 +15,4 @@ router.put("/update-profile", authenticateUser, updateUserProfile);
 router.put("/update-password", authenticateUser, updateUserPassword);
 // ✅ Protected Route: Get logged-in user details
 
-
 export default router;
