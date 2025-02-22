@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import sql from "../db.js";
+import pool from "../db.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -23,7 +23,6 @@ export const authenticateUser = (req, res, next) => {
       .json({ error: "Unauthorized: Invalid or expired token" });
   }
 };
-
 // ✅ Admin Check Middleware
 export const isAdmin = async (req, res, next) => {
   try {

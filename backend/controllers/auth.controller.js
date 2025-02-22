@@ -1,7 +1,7 @@
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import sql from "../db.js";
+import pool from "../db.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -28,15 +28,16 @@ export const signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 🔹 Insert user with default role ["user"]
-    const newUser = await sql`
-      INSERT INTO users (username, fullname, email, password, roles)
-      VALUES (${username}, ${fullname}, ${email}, ${hashedPassword}, ARRAY['user'])
-      RETURNING user_id, username, fullname, email, roles
-    `;
+    const newUser = await pool.query(
+      `INSERT INTO users (username, fullname, email, password, roles)
+       VALUES ($1, $2, $3, $4, ARRAY['user'])
+       RETURNING user_id, username, fullname, email, roles`,
+      [username, fullname, email, hashedPassword]
+    );
 
     res.json({
       message: "User registered successfully!",
-      user: newUser[0],
+      user: newUser.rows[0],
     });
   } catch (error) {
     console.error("❌ Error registering user:", error);
@@ -48,24 +49,25 @@ export const login = async (req, res) => {
   try {
     const email = req.body.email?.toLowerCase();
     const { password } = req.body;
-    const user = await sql`
-      SELECT user_id, username, roles, password
-      FROM users
-      WHERE email = ${email}
-    `;
+    const user = await pool.query(
+      `SELECT user_id, username, roles, password
+       FROM users
+       WHERE email = $1`,
+      [email]
+    );
 
-    if (user.length === 0) {
+    if (user.rows.length === 0) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // ✅ Compare password
-    const isValidPassword = await bcrypt.compare(password, user[0].password);
+    const isValidPassword = await bcrypt.compare(password, user.rows[0].password);
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
     // ✅ Ensure roles exist
-    if (!user[0].roles || user[0].roles.length === 0) {
+    if (!user.rows[0].roles || user.rows[0].roles.length === 0) {
       console.error("❌ Error: User has no roles assigned!");
       return res.status(500).json({ error: "User roles missing" });
     }
@@ -73,16 +75,15 @@ export const login = async (req, res) => {
     // ✅ Generate Token with Roles
     const token = jwt.sign(
       {
-        user_id: user[0].user_id,
-        username: user[0].username,
-        roles: user[0].roles, // ✅ Ensure roles are stored in the token
+        user_id: user.rows[0].user_id,
+        username: user.rows[0].username,
+        roles: user.rows[0].roles,
       },
       process.env.JWT_SECRET,
       { expiresIn: "12h" }
     );
 
-    // console.log("✅ Token Issued:", token);
-    res.json({ token, user: user[0] });
+    res.json({ token, user: user.rows[0] });
   } catch (error) {
     console.error("❌ Login Error:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -91,22 +92,22 @@ export const login = async (req, res) => {
 // ✅ Fetch User Profile
 export const getUserProfile = async (req, res) => {
   try {
-      const userId = req.user.user_id;
-      const user = await sql`
-          SELECT user_id, username, fullname, email, roles, address, city, state, country
-          FROM users
-          WHERE user_id = ${userId}
-      `;
+    const userId = req.user.user_id;
+    const user = await pool.query(
+      `SELECT user_id, username, fullname, email, roles, address, city, state, country
+       FROM users
+       WHERE user_id = $1`,
+      [userId]
+    );
 
-      if (user.length === 0) {
-          return res.status(404).json({ error: "User not found" });
-      }
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
 
-      // console.log("✅ User data retrieved:", user[0]); // 🔍 Debug
-      res.json(user[0]);
+    res.json(user.rows[0]);
   } catch (error) {
-      console.error("❌ Error fetching user data:", error.message);
-      res.status(500).json({ error: "Internal Server Error" });
+    console.error("❌ Error fetching user data:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 // ✅ Update User Profile
@@ -114,48 +115,39 @@ export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.user_id;
     let { username, fullname, email, address, city, state, country } = req.body;
-
     email = email.toLowerCase();
 
     if (!fullname || !email || !username) {
-      return res
-        .status(400)
-        .json({ error: "Username, full name, and email are required" });
+      return res.status(400).json({ error: "Username, full name, and email are required" });
     }
 
     // 🔹 Check if username already exists (excluding current user)
-    const existingUser = await sql`
-      SELECT user_id FROM users WHERE username = ${username} AND user_id != ${userId}
-    `;
+    const existingUser = await pool.query(
+      `SELECT user_id FROM users WHERE username = $1 AND user_id != $2`,
+      [username, userId]
+    );
 
-    if (existingUser.length > 0) {
+    if (existingUser.rows.length > 0) {
       return res.status(400).json({ error: "Username already taken" });
     }
 
     // 🔹 Update user profile
-    const updatedUser = await sql`
-      UPDATE users
-      SET 
-        username = ${username},  
-        fullname = ${fullname}, 
-        email = ${email}, 
-        address = ${address}, 
-        city = ${city}, 
-        state = ${state}, 
-        country = ${country}
-      WHERE user_id = ${userId}
-      RETURNING user_id, username, fullname, email, roles, address, city, state, country
-    `;
+    const updatedUser = await pool.query(
+      `UPDATE users
+       SET username = $1, fullname = $2, email = $3, address = $4, city = $5, state = $6, country = $7
+       WHERE user_id = $8
+       RETURNING user_id, username, fullname, email, roles, address, city, state, country`,
+      [username, fullname, email, address, city, state, country, userId]
+    );
 
-    if (updatedUser.length === 0) {
+    if (updatedUser.rows.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log("✅ User profile updated:", updatedUser[0]);
-    return res.status(200).json(updatedUser[0]);
+    res.status(200).json(updatedUser.rows[0]);
   } catch (error) {
     console.error("❌ Error updating user profile:", error.message);
-    return res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 // ✅ Update Password
@@ -169,16 +161,17 @@ export const updatePassword = async (req, res) => {
     }
 
     // 🔹 Fetch user data from DB
-    const user = await sql`
-      SELECT password FROM users WHERE user_id = ${userId}
-    `;
+    const user = await pool.query(
+      `SELECT password FROM users WHERE user_id = $1`,
+      [userId]
+    );
 
-    if (user.length === 0) {
+    if (user.rows.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
 
     // 🔹 Validate current password
-    const isMatch = await bcrypt.compare(currentPassword, user[0].password);
+    const isMatch = await bcrypt.compare(currentPassword, user.rows[0].password);
     if (!isMatch) {
       return res.status(400).json({ error: "Incorrect current password" });
     }
@@ -187,11 +180,11 @@ export const updatePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // 🔹 Update password in database
-    await sql`
-      UPDATE users SET password = ${hashedPassword} WHERE user_id = ${userId}
-    `;
+    await pool.query(
+      `UPDATE users SET password = $1 WHERE user_id = $2`,
+      [hashedPassword, userId]
+    );
 
-    console.log("✅ Password updated successfully");
     res.json({ message: "Password updated successfully" });
   } catch (error) {
     console.error("❌ Error updating password:", error);
@@ -202,11 +195,11 @@ export const updatePassword = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await sql`SELECT user_id FROM users WHERE email = ${email}`;
+    const user = await pool.query(`SELECT user_id FROM users WHERE email = $1`, [email]);
 
-    if (user.length === 0) return res.status(404).json({ error: "User not found" });
+    if (user.rows.length === 0) return res.status(404).json({ error: "User not found" });
 
-    const token = jwt.sign({ userId: user[0].user_id }, process.env.JWT_SECRET, { expiresIn: "15m" });
+    const token = jwt.sign({ userId: user.rows[0].user_id }, process.env.JWT_SECRET, { expiresIn: "15m" });
     const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
 
     await transporter.sendMail({
@@ -228,7 +221,7 @@ export const resetPassword = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await sql`UPDATE users SET password = ${hashedPassword} WHERE user_id = ${decoded.userId}`;
+    await pool.query(`UPDATE users SET password = $1 WHERE user_id = $2`, [hashedPassword, decoded.userId]);
 
     res.json({ message: "Password updated successfully!" });
   } catch (error) {

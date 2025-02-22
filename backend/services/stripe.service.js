@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import sql from "../db.js";
+import pool from "../db.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -26,12 +26,13 @@ export const syncProductWithStripe = async (product) => {
     });
 
     // ✅ Save Stripe IDs to Database
-    await sql`
-      UPDATE products 
-      SET stripe_product_id = ${stripeProduct.id}, 
-          stripe_price_id = ${stripePrice.id} 
-      WHERE product_id = ${product.product_id}
-    `;
+    await pool.query(
+      `UPDATE products 
+       SET stripe_product_id = $1, 
+           stripe_price_id = $2 
+       WHERE product_id = $3`,
+      [stripeProduct.id, stripePrice.id, product.product_id]
+    );
 
     console.log(`✅ Stripe Product Synced: ${stripeProduct.id}, Price: ${stripePrice.id}`);
   } catch (error) {
@@ -43,10 +44,9 @@ export const syncAllProducts = async () => {
   try {
     console.log("🔄 Syncing All Products...");
 
-    const products = await sql`SELECT * FROM products;`;
-    // console.log("📦 Existing Products:", products);
+    const products = await pool.query(`SELECT * FROM products;`);
 
-    for (const product of products) {
+    for (const product of products.rows) {
       await syncProductWithStripe(product);
     }
 
@@ -62,37 +62,39 @@ export const purchaseProduct = async (req, res) => {
 
     console.log(`🛒 Attempting Purchase for Product ID: ${productId}`);
 
-    const product = await sql`
-      SELECT stock FROM products WHERE product_id = ${productId};
-    `;
+    const product = await pool.query(
+      `SELECT stock FROM products WHERE product_id = $1`,
+      [productId]
+    );
 
-    if (product.length === 0) {
+    if (product.rows.length === 0) {
       console.error("❌ Product not found in DB");
       return res.status(404).json({ error: "Product not found." });
     }
 
-    console.log(`🔍 Current Stock for Product ${productId}: ${product[0].stock}`);
+    console.log(`🔍 Current Stock for Product ${productId}: ${product.rows[0].stock}`);
 
-    if (product[0].stock <= 0) {
+    if (product.rows[0].stock <= 0) {
       console.warn("⚠️ Out of Stock! Cannot reduce further.");
       return res.status(400).json({ error: "Out of stock!" });
     }
 
     // ✅ Reduce Stock Only for the Purchased Product
-    const updatedStock = await sql`
-      UPDATE products 
-      SET stock = stock - 1 
-      WHERE product_id = ${productId}
-      RETURNING stock;
-    `;
+    const updatedStock = await pool.query(
+      `UPDATE products 
+       SET stock = stock - 1 
+       WHERE product_id = $1
+       RETURNING stock;`,
+      [productId]
+    );
 
-    if (updatedStock.length === 0) {
+    if (updatedStock.rows.length === 0) {
       console.error("❌ Stock update failed in DB.");
       return res.status(500).json({ error: "Stock update failed." });
     }
 
-    console.log(`✅ Purchase Successful! New Stock for Product ${productId}: ${updatedStock[0].stock}`);
-    res.json({ message: "Purchase successful!", newStock: updatedStock[0].stock });
+    console.log(`✅ Purchase Successful! New Stock for Product ${productId}: ${updatedStock.rows[0].stock}`);
+    res.json({ message: "Purchase successful!", newStock: updatedStock.rows[0].stock });
 
   } catch (error) {
     console.error("❌ Error processing purchase:", error);

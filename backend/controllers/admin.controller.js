@@ -1,16 +1,16 @@
 import slugify from "slugify"; // ✅ Import slugify package
-import sql from "../db.js";
+import pool from "../db.js";
 
 // ✅ Fetch All Products (Admin)
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await sql`
-      SELECT product_id, name, slug, price, description, stock, is_presale, release_date, stripe_product_id, stripe_price_id
-      FROM products
-    `;
+    const products = await pool.query(
+      `SELECT product_id, name, slug, price, description, stock, is_presale, release_date, stripe_product_id, stripe_price_id
+       FROM products`
+    );
 
-    console.log("✅ Fetched all products:", products);
-    res.json(products);
+    console.log("✅ Fetched all products:", products.rows);
+    res.json(products.rows);
   } catch (error) {
     console.error("❌ Error fetching products:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -26,18 +26,19 @@ export const updateUserProfileByAdmin = async (req, res) => {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    const updatedUser = await sql`
-      UPDATE users
-      SET fullname = ${fullname}, email = ${email.toLowerCase()}, roles = ${roles}
-      WHERE user_id = ${user_id}
-      RETURNING user_id, fullname, email, roles;
-    `;
+    const updatedUser = await pool.query(
+      `UPDATE users
+       SET fullname = $1, email = $2, roles = $3
+       WHERE user_id = $4
+       RETURNING user_id, fullname, email, roles;`,
+      [fullname, email.toLowerCase(), roles, user_id]
+    );
 
-    if (updatedUser.length === 0) {
+    if (updatedUser.rows.length === 0) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    res.json(updatedUser[0]);
+    res.json(updatedUser.rows[0]);
   } catch (error) {
     console.error("❌ Error updating user profile:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -46,29 +47,26 @@ export const updateUserProfileByAdmin = async (req, res) => {
 export const updateAdminProfile = async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const {  fullname, address, city, state, country } = req.body;
+    const { fullname, address, city, state, country } = req.body;
 
-    // if ( !fullname) {
-    //   return res.status(400).json({ error: "Username and full name are required." });
-    // }
+    const updatedUser = await pool.query(
+      `UPDATE users
+       SET 
+         fullname = $1, 
+         address = $2, 
+         city = $3, 
+         state = $4, 
+         country = $5
+       WHERE user_id = $6
+       RETURNING user_id, fullname, address, city, state, country;`,
+      [fullname, address, city, state, country, userId]
+    );
 
-    const updatedUser = await sql`
-      UPDATE users
-      SET 
-        fullname = ${fullname}, 
-        address = ${address}, 
-        city = ${city}, 
-        state = ${state}, 
-        country = ${country}
-      WHERE user_id = ${userId}
-      RETURNING user_id, fullname, address, city, state, country;
-    `;
-
-    if (updatedUser.length === 0) {
+    if (updatedUser.rows.length === 0) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    res.json(updatedUser[0]);
+    res.json(updatedUser.rows[0]);
   } catch (error) {
     console.error("❌ Error updating profile:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -84,15 +82,17 @@ export const addProduct = async (req, res) => {
     }
 
     const slug = slugify(name, { lower: true, strict: true }); // ✅ Generate slug
-    console.log("LOOK: ", name, price, stock, description, image_url)
-    const newProduct = await sql`
-      INSERT INTO products (name, slug, price, stock, description, image_url)
-      VALUES (${name}, ${slug}, ${price}, ${stock}, ${description}, ${image_url})
-      RETURNING *;
-    `;
+    console.log("LOOK: ", name, price, stock, description, image_url);
 
-    console.log("✅ Product added:", newProduct[0]);
-    res.json(newProduct[0]);
+    const newProduct = await pool.query(
+      `INSERT INTO products (name, slug, price, stock, description, image_url)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *;`,
+      [name, slug, price, stock, description, image_url]
+    );
+
+    console.log("✅ Product added:", newProduct.rows[0]);
+    res.json(newProduct.rows[0]);
   } catch (error) {
     console.error("❌ Error adding product:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -103,16 +103,17 @@ export const getProductById = async (req, res) => {
     const { product_id } = req.params;
 
     // ✅ Fetch product by ID
-    const product = await sql`
-      SELECT * FROM products WHERE product_id = ${product_id}
-    `;
+    const product = await pool.query(
+      `SELECT * FROM products WHERE product_id = $1`, 
+      [product_id]
+    );
 
-    if (product.length === 0) {
+    if (product.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    console.log("✅ Product Fetched:", product[0]);
-    res.json(product[0]);
+    console.log("✅ Product Fetched:", product.rows[0]);
+    res.json(product.rows[0]);
   } catch (error) {
     console.error("❌ Error fetching product by ID:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -122,37 +123,38 @@ export const getProductById = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const { name, slug, price, stock, is_presale,release_date, description, stripe_product_id, stripe_price_id } = req.body;
+    const { name, slug, price, stock, is_presale, release_date, description, stripe_product_id, stripe_price_id } = req.body;
 
     const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
 
     if (!product_id) {
       return res.status(400).json({ error: "Product ID is required." });
     }
-// ADD description!!
-    console.log("🔍 Updating Product:", { product_id, name, slug, price, stock,is_presale, release_date, description, stripe_product_id, stripe_price_id });
 
-    const updatedProduct = await sql`
-      UPDATE products
-      SET name = ${name}, 
-          slug = ${slug}, 
-          price = ${price}, 
-          stock = ${stock}, 
-          is_presale = ${is_presale},
-          release_date = ${formattedReleaseDate},
-          description = ${description},
-          stripe_product_id = ${stripe_product_id}, 
-          stripe_price_id = ${stripe_price_id}
-      WHERE product_id = ${product_id}
-      RETURNING *;
-    `;
+    console.log("🔍 Updating Product:", { product_id, name, slug, price, stock, is_presale, release_date, description, stripe_product_id, stripe_price_id });
 
-    if (updatedProduct.length === 0) {
+    const updatedProduct = await pool.query(
+      `UPDATE products
+       SET name = $1, 
+           slug = $2, 
+           price = $3, 
+           stock = $4, 
+           is_presale = $5,
+           release_date = $6,
+           description = $7,
+           stripe_product_id = $8, 
+           stripe_price_id = $9
+       WHERE product_id = $10
+       RETURNING *;`,
+      [name, slug, price, stock, is_presale, formattedReleaseDate, description, stripe_product_id, stripe_price_id, product_id]
+    );
+
+    if (updatedProduct.rows.length === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    console.log("✅ Product updated:", updatedProduct[0]);
-    res.json(updatedProduct[0]);
+    console.log("✅ Product updated:", updatedProduct.rows[0]);
+    res.json(updatedProduct.rows[0]);
   } catch (error) {
     console.error("❌ Error updating product:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
@@ -166,23 +168,26 @@ export const deleteProduct = async (req, res) => {
     console.log("🔍 Deleting product with ID:", product_id);
 
     // ✅ Check if product exists
-    const productExists = await sql`
-      SELECT * FROM products WHERE product_id = ${product_id}
-    `;
-    if (productExists.length === 0) {
+    const productExists = await pool.query(
+      `SELECT 1 FROM products WHERE product_id = $1`,
+      [product_id]
+    );
+
+    if (productExists.rows.length === 0) {
       return res.status(404).json({ error: "Product not found." });
     }
 
     // ✅ Delete the product
-    await sql`
-      DELETE FROM products WHERE product_id = ${product_id}
-    `;
+    await pool.query(
+      `DELETE FROM products WHERE product_id = $1`,
+      [product_id]
+    );
 
     console.log(`✅ Product with ID ${product_id} deleted.`);
     res.json({ message: "Product deleted successfully!" });
 
   } catch (error) {
-    console.error("❌ Error deleting product:", error);
+    console.error("❌ Error deleting product:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

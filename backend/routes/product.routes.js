@@ -1,7 +1,7 @@
 import express from "express";
 import { getProducts, addProduct, requestProduct } from "../controllers/product.controller.js";
 import {sendProductRequestEmail} from "../controllers/user.controller.js";
-import sql from "../db.js"; // ✅ Import your database connection
+import pool from "../db.js"; // ✅ Import your database connection
 
 
 const router = express.Router();
@@ -19,9 +19,9 @@ router.get("/requested", async (req, res) => {
         return res.status(400).json({ error: "Email is required" });
       }
   
-      const requestedProducts = await sql`
+      const requestedProducts = await  pool.query(`
         SELECT product_id FROM product_requests WHERE user_email = ${email}
-      `;
+      `,[    ]);
   
       console.log("✅ Requested Products Found:", requestedProducts);
       res.json(requestedProducts);
