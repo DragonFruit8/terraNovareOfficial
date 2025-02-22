@@ -1,3 +1,4 @@
+
 import express from "express";
 import Stripe from "stripe";
 import dotenv from "dotenv";
@@ -6,6 +7,12 @@ import pool from "../db.js";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
+console.log("✅ STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Loaded" : "MISSING!");
+if (!process.env.STRIPE_SECRET_KEY) {
+    console.error("❌ Stripe API key is missing! Check your .env file.");
+    process.exit(1); // Stop the server if key is missing
+}
+
 
 router.post("/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
   const sig = req.headers["stripe-signature"];

@@ -11,7 +11,9 @@ const transporter = nodemailer.createTransport({
 });
 export const getUserProfile = async (req, res) => {
   try {
-    const userId = req.user.user_id;
+	
+  console.log("🔍 Incoming Request: ", req.user);  
+  const userId = req.user.user_id;
 
     const user = await pool.query(
       `SELECT user_id, username, fullname, email, roles, address, city, state, country

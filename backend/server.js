@@ -45,8 +45,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-//  Change to http://terranovare.tech
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+//  Change to "https://terranovare.tech"
+app.use(cors({ origin: "https://terranovare.tech", credentials: true }));
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing
@@ -72,6 +72,10 @@ app.post('/upload', upload.array('files'), (req, res) => {
   res.json({ message: 'Files uploaded successfully!', files: req.files });
 });
 app.use("/api", webhookRouter);
+
+app.get('/api/health', (req, res) =>{
+	res.status(200).json({status: 'Server is running!!'})
+});
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {

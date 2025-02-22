@@ -17,8 +17,11 @@ const transporter = nodemailer.createTransport({
 // ✅ Signup Controller - Add Default Role
 export const signup = async (req, res) => {
   try {
-    let { username, fullname, email, password } = req.body;
+    let { username, fullname, email, password, role } = req.body;
     email = email.toLowerCase();
+
+    const validRoles = ['user','admin','moderator'];
+   const userRole = valideRoles.includes(roles) ? roles : 'user';
 
     if (!username || !fullname || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
@@ -30,14 +33,15 @@ export const signup = async (req, res) => {
     // 🔹 Insert user with default role ["user"]
     const newUser = await pool.query(
       `INSERT INTO users (username, fullname, email, password, roles)
-       VALUES ($1, $2, $3, $4, ARRAY['user'])
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING user_id, username, fullname, email, roles`,
-      [username, fullname, email, hashedPassword]
+      [username, fullname, email, hashedPassword, userRole]
     );
 
     res.json({
       message: "User registered successfully!",
-      user: newUser.rows[0],
+      user: newUser.rows[0].id,
+      role: newUser.rows[0].roles
     });
   } catch (error) {
     console.error("❌ Error registering user:", error);

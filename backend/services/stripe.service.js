@@ -1,7 +1,7 @@
 import Stripe from "stripe";
 import pool from "../db.js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {apiVersion: '2023-10-16'});
 
 // ✅ Sync a Single Product with Stripe
 export const syncProductWithStripe = async (product) => {
@@ -101,3 +101,5 @@ export const purchaseProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export default stripe;
