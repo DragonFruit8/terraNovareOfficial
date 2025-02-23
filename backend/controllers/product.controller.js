@@ -1,4 +1,9 @@
 import pool from "../db.js";
+import slugify from "slugify";
+import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+import jwt from "jsonwebtoken"
 // import { sendProductRequestEmail } from "../utils/email.js"; // ✅ For confirmation emails
 
 // ✅ Get all products
@@ -51,94 +56,104 @@ export const updateProduct = async (req, res) => {
   }
 };
 
+// DUPLICATE CODE
 // ✅ Add New Product
 export const addProduct = async (req, res) => {
   try {
-    let { name, price, stock } = req.body;
+    const { name, price, slug, stock, description } = req.body;
+    
+    // Create the product in Stripe
+    const stripeProduct = await stripe.products.create({ name });
+    const stripeProductId = stripeProduct.id;
 
-    console.log("📩 Received Product Data:", { name, price, stock });
+    // Create the price in Stripe for this product (price in cents)
+    const stripePrice = await stripe.prices.create({
+      unit_amount: Math.round(price * 100), // converting dollars to cents
+      currency: "usd",
+      product: stripeProductId
+    });
+    const stripePriceId = stripePrice.id;
 
-    if (!name || !price) {
-      return res.status(400).json({ error: "Name and price are required." });
-    }
+    // Helper function to generate a slug from the product name
+    const generateSlug = (name) => {
+      return name.toLowerCase().trim().replace(/\s+/g, '-');
+    };
 
-    stock = stock !== undefined ? parseInt(stock, 10) : 10;
-
-    console.log("🔄 Final Insert Data:", { name, price, stock });
-
-    const newProduct = await pool.query(
-      `INSERT INTO products (name, price, stock)
-       VALUES ($1, $2, $3)
-       RETURNING product_id, name, price, stock;`,
-      [name, price, stock]
-    );
-
-    console.log("✅ Product added successfully:", newProduct.rows[0]);
-
-    res.status(201).json(newProduct.rows[0]);
+    // Use the provided slug or generate one if not provided
+    const finalSlug = slug || generateSlug(name);
+    
+    // Insert the new product into the DB, now including valid stripe_product_id and stripe_price_id
+    const result = await pool.query(`
+      INSERT INTO products(name, slug, price, stock, stripe_product_id, stripe_price_id, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *;
+    `, [name, finalSlug, price, stock, stripeProductId, stripePriceId, description]);
+    
+    res.status(201).json(result.rows[0]);
+    
   } catch (error) {
-    console.error("❌ Error adding product:", error.message);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("❌ Error adding product:", error);
+    res.status(500).json({ error: "Failed to add product" });
   }
 };
 
+
+
+
 // ✅ Request a product (Users can request a product)
 export const requestProduct = async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1]; // ✅ Extract token
+  const token = req.headers.authorization?.split(" ")[1];
+
   if (!token) {
-    return res.status(401).json({ error: "No authentication token provided" });
+      console.error("❌ No authentication token provided.");
+      return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // ✅ Decode token
-    const user_id = decoded.id;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      console.log("🔑 Decoded Token:", decoded);
 
-    if (!user_id) {
-      return res.status(400).json({ error: "User ID missing" });
-    }
+      const user_id = decoded.user_id;  
+      const user_email = decoded.email; 
 
-    const { product_id } = req.body;
+      if (!user_id || !user_email) {
+          console.error("❌ Missing user ID or email:", decoded);
+          return res.status(400).json({ error: "User ID and email are required." });
+      }
 
-    if (!product_id) {
-      console.error("❌ Missing required field: product_id");
-      return res.status(400).json({ error: "Product ID is required." });
-    }
+      const { product_id } = req.body;
+      if (!product_id) {
+          console.error("❌ Missing required field: product_id");
+          return res.status(400).json({ error: "Product ID is required." });
+      }
 
-    // ✅ Check if the product exists before proceeding
-    const productExists = await pool.query(
-      `SELECT product_id FROM products WHERE product_id = $1`,
-      [product_id]
-    );
+      console.log("📩 Processing request for product:", product_id, "by user:", user_id, user_email);
 
-    if (productExists.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found." });
-    }
+      // ✅ Fetch product name before inserting
+      const productQuery = await pool.query(
+          "SELECT name FROM products WHERE product_id = $1",
+          [product_id]
+      );
 
-    // ✅ Check if request already exists
-    const existingRequest = await pool.query(
-      `SELECT request_id FROM product_requests 
-       WHERE product_id = $1 AND user_id = $2`,
-      [product_id, user_id]
-    );
+      if (productQuery.rows.length === 0) {
+          return res.status(404).json({ error: "Product not found." });
+      }
 
-    if (existingRequest.rows.length > 0) {
-      console.warn(`⚠️ Duplicate request detected for product ${product_id} by user ${user_id}`);
-      return res.status(409).json({ error: "You have already requested this product." });
-    }
+      const product_name = productQuery.rows[0].name;
 
-    // ✅ Insert new product request
-    const newRequest = await pool.query(
-      `INSERT INTO product_requests (product_id, user_id, requested_at) 
-       VALUES ($1, $2, NOW())
-       RETURNING request_id, product_id, user_id, requested_at;`,
-      [product_id, user_id]
-    );
+      // ✅ Insert `product` (product name) in the request
+      const newRequest = await pool.query(
+          `INSERT INTO product_requests (product_id, user_id, user_email, product, requested_at) 
+           VALUES ($1, $2, $3, $4, NOW())
+           RETURNING *;`,
+          [product_id, user_id, user_email, product_name]
+      );
 
-    console.log("✅ Product request saved:", newRequest.rows[0]);
-    res.status(201).json({ message: "Product request submitted successfully!", request: newRequest.rows[0] });
+      console.log("✅ Product request saved:", newRequest.rows[0]);
+      res.status(201).json({ message: "Product request submitted successfully!", request: newRequest.rows[0] });
 
   } catch (error) {
-    console.error("❌ Error processing product request:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+      console.error("❌ Error processing product request:", error);
+      res.status(500).json({ error: "Internal Server Error" });
   }
 };

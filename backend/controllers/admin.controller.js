@@ -1,5 +1,13 @@
 import slugify from "slugify"; // ✅ Import slugify package
+import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+
 import pool from "../db.js";
+
+const generateSlug = (name) => {
+  return name.toLowerCase().trim().replace(/\s+/g, '-');
+};
 
 // ✅ Fetch All Products (Admin)
 export const getAllProducts = async (req, res) => {
@@ -73,31 +81,49 @@ export const updateAdminProfile = async (req, res) => {
   }
 };
 // ✅ Add New Product
+// Helper function to generate a slug from the product name
+
+
 export const addProduct = async (req, res) => {
   try {
-    const { name, price, stock, description, image_url } = req.body;
+    const { name, price, slug, stock, description } = req.body;
+    
+    // Create the product in Stripe
+    const stripeProduct = await stripe.products.create({ name });
+    const stripeProductId = stripeProduct.id;
 
-    if (!name || !price || !stock) {
-      return res.status(400).json({ error: "Name, price, and stock are required." });
-    }
+    // Create the price in Stripe for this product (price in cents)
+    const stripePrice = await stripe.prices.create({
+      unit_amount: Math.round(price * 100), // converting dollars to cents
+      currency: "usd",
+      product: stripeProductId
+    });
+    const stripePriceId = stripePrice.id;
 
-    const slug = slugify(name, { lower: true, strict: true }); // ✅ Generate slug
-    console.log("LOOK: ", name, price, stock, description, image_url);
+    // Helper function to generate a slug from the product name
+    const generateSlug = (name) => {
+      return name.toLowerCase().trim().replace(/\s+/g, '-');
+    };
 
-    const newProduct = await pool.query(
-      `INSERT INTO products (name, slug, price, stock, description, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *;`,
-      [name, slug, price, stock, description, image_url]
-    );
-
-    console.log("✅ Product added:", newProduct.rows[0]);
-    res.json(newProduct.rows[0]);
+    // Use the provided slug or generate one if not provided
+    const finalSlug = slug || generateSlug(name);
+    
+    // Insert the new product into the DB, now including valid stripe_product_id and stripe_price_id
+    const result = await pool.query(`
+      INSERT INTO products(name, slug, price, stock, stripe_product_id, stripe_price_id, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *;
+    `, [name, finalSlug, price, stock, stripeProductId, stripePriceId, description]);
+    
+    res.status(201).json(result.rows[0]);
+    
   } catch (error) {
     console.error("❌ Error adding product:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: "Failed to add product" });
   }
 };
+
+
 export const getProductById = async (req, res) => {
   try {
     const { product_id } = req.params;

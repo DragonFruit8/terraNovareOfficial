@@ -42,41 +42,49 @@ const Shop = () => {
   }, [userData]);
 
   const handleProductRequest = async (product) => {
+    if (!product?.product_id) {
+        console.error("❌ Missing product ID:", product);
+        toast.error("Invalid product data.");
+        return;
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
-      toast.error("Session expired. Please log in again.");
-      return;
+        toast.error("Session expired. Please log in again.");
+        return;
     }
-  
-    if (!product?.product_id || !userData?.email) {
-      console.error("❌ Missing product or user email:", { product, userEmail: userData?.email });
-      toast.error("You must be logged in to request this product.");
-      return;
-    }
-  
-    const requestData = {
-      product_id: product.product_id,
-      userEmail: userData.email.toLowerCase(),
-    };
-  
+
     try {
-      console.log("📩 Sending Request Data:", requestData);
-  
-      const response = await axiosInstance.post("/products/request", requestData);
-  
-      if (response.status === 200) {
-        toast.success(response.data.message);
-        setRequestedProducts((prevRequested) => 
-          prevRequested.includes(product.product_id) ? prevRequested : [...prevRequested, product.product_id]
-        ); // ✅ Avoid duplicate state updates
-      } else {
-        toast.error(response.data.message || "Product request failed.");
-      }
+        console.log("📩 Sending Request Data:", { product_id: product.product_id });
+
+        const response = await axiosInstance.post(
+            "/products/request",
+            { product_id: product.product_id }, // ✅ No need for userEmail
+            { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (response.status === 201) {
+            toast.success(response.data.message);
+            setRequestedProducts((prevRequested) => 
+              [...new Set([...prevRequested, product.product_id])] // ✅ Converts Set back to an Array
+          );
+          
+        } else {
+            throw new Error(response.data.message || "Product request failed.");
+        }
     } catch (error) {
-      console.error("❌ Request Error:", error.response?.data || error.message);
-      toast.error(error.response?.data?.error || "Failed to request product.");
+        console.error("❌ Request Error:", error.response?.data || error.message);
+
+        if (error.response?.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            localStorage.removeItem("token");  // 🔒 Ensure token is cleared if invalid
+            window.location.reload();  // Force login
+        } else {
+            toast.error(error.response?.data?.error || "Failed to request product.");
+        }
     }
-  };  
+};
+
 
   return (
     <div className="container mt-5 min-vh-100">

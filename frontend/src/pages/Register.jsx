@@ -64,7 +64,7 @@ const Register = () => {
       const response = await axiosInstance.post("/auth/signup", userData);
   
       console.log("Response from Backend:", response.data);
-      toast.error("Signup successful!");
+      toast.success("Signup successful!");
       
       navigate("/login"); // ✅ Redirect to login
     } catch (error) {

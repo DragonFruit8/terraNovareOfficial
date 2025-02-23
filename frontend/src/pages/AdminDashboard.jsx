@@ -41,6 +41,7 @@ const AdminDashboard = () => {
       navigate("/");
     } else {
       fetchAdminProfile();
+      fetchProducts();
     }
   }, [userData, loading, navigate]);
 
@@ -381,6 +382,14 @@ const AdminDashboard = () => {
                     name="stock"
                     placeholder="Stock"
                     value={newProduct.stock}
+                    onChange={(e) => handleInputChange(e, setNewProduct)}
+                    className="form-control mb-2"
+                  />
+                  <textarea
+                    type="text"
+                    name="description"
+                    placeholder="Description"
+                    value={newProduct.description}
                     onChange={(e) => handleInputChange(e, setNewProduct)}
                     className="form-control mb-2"
                   />

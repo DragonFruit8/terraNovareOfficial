@@ -19,7 +19,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/login", formData);
+      const response = await axios.post("http://localhost:9000/api/auth/login", formData);
 
       const { token, user } = response.data;
 
@@ -28,7 +28,12 @@ const Login = () => {
       localStorage.setItem("user", JSON.stringify(user));
 
       toast.success("Login successful!");
-      navigate("/");
+      if (!userData?.fullname || !userData?.address || !userData?.city) {
+        toast.info("Please complete your profile to access this section.");
+        navigate("/complete-profile");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       console.error("❌ Login Error:", error.response?.data || error.message);
       toast.error(error.response?.data?.error || "Login failed");

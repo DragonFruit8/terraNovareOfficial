@@ -17,11 +17,11 @@ const transporter = nodemailer.createTransport({
 // ✅ Signup Controller - Add Default Role
 export const signup = async (req, res) => {
   try {
-    let { username, fullname, email, password, role } = req.body;
+    let { username, fullname, email, password, roles } = req.body;
     email = email.toLowerCase();
 
     const validRoles = ['user','admin','moderator'];
-   const userRole = valideRoles.includes(roles) ? roles : 'user';
+   const userRole = validRoles.includes(roles) ? roles : 'user';
 
     if (!username || !fullname || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
@@ -35,7 +35,7 @@ export const signup = async (req, res) => {
       `INSERT INTO users (username, fullname, email, password, roles)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING user_id, username, fullname, email, roles`,
-      [username, fullname, email, hashedPassword, userRole]
+      [username, fullname, email, hashedPassword, ['user']]
     );
 
     res.json({
@@ -54,11 +54,12 @@ export const login = async (req, res) => {
     const email = req.body.email?.toLowerCase();
     const { password } = req.body;
     const user = await pool.query(
-      `SELECT user_id, username, roles, password
+      `SELECT user_id, username, roles, email, password
        FROM users
        WHERE email = $1`,
       [email]
     );
+    
 
     if (user.rows.length === 0) {
       return res.status(401).json({ error: "Invalid email or password" });
@@ -81,11 +82,13 @@ export const login = async (req, res) => {
       {
         user_id: user.rows[0].user_id,
         username: user.rows[0].username,
+        email: user.rows[0].email,  // ✅ Now includes email
         roles: user.rows[0].roles,
       },
       process.env.JWT_SECRET,
       { expiresIn: "12h" }
     );
+    
 
     res.json({ token, user: user.rows[0] });
   } catch (error) {

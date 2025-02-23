@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import axiosInstance from "../api/axios.config";
@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 const CompleteProfile = () => {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
-  
-  // Form state
+
+  // Initialize form state
   const [profileData, setProfileData] = useState({
     address: userData?.address || "",
     city: userData?.city || "",
@@ -16,19 +16,40 @@ const CompleteProfile = () => {
     country: userData?.country || "",
   });
 
-  // Handle input changes
+  // Synchronize local state when userData changes
+  useEffect(() => {
+    if (userData) {
+      setProfileData({
+        address: userData.address || "",
+        city: userData.city || "",
+        state: userData.state || "",
+        country: userData.country || "",
+      });
+    }
+  }, [userData]);
+
+  // Handle input change events
   const handleChange = (e) => {
-    setProfileData({ ...profileData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setProfileData((prevData) => ({ ...prevData, [name]: value }));
   };
 
-  // Submit form
+  // Submit the form to update the profile
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.put("/user/update-profile", profileData);
-      setUserData(response.data); // Update context
+      // Await the API call to ensure response is received before proceeding
+      const response = await axiosInstance.put("/user/update-profile", {
+        username: userData.username,
+        fullname: userData.fullname,
+        address: profileData.address,
+        city: profileData.city,
+        state: profileData.state,
+        country: profileData.country,
+      });
+      setUserData(response.data); // Update user context with the new data
       toast.success("Profile updated successfully!");
-      navigate("/profile"); // Redirect to profile page
+      navigate("/profile"); // Redirect to the profile page
     } catch (error) {
       console.error("Error updating profile:", error);
       toast.error("Failed to update profile. Please try again.");
@@ -41,7 +62,7 @@ const CompleteProfile = () => {
       <form onSubmit={handleSubmit} className="mt-4">
         <div className="mb-3">
           <label className="form-label">Address</label>
-          <input 
+          <input
             type="text"
             className="form-control"
             name="address"
@@ -53,7 +74,7 @@ const CompleteProfile = () => {
 
         <div className="mb-3">
           <label className="form-label">City</label>
-          <input 
+          <input
             type="text"
             className="form-control"
             name="city"
@@ -65,7 +86,7 @@ const CompleteProfile = () => {
 
         <div className="mb-3">
           <label className="form-label">State</label>
-          <input 
+          <input
             type="text"
             className="form-control"
             name="state"
@@ -77,7 +98,7 @@ const CompleteProfile = () => {
 
         <div className="mb-3">
           <label className="form-label">Country</label>
-          <input 
+          <input
             type="text"
             className="form-control"
             name="country"
@@ -87,7 +108,9 @@ const CompleteProfile = () => {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary w-100">Save Profile</button>
+        <button type="submit" className="btn btn-primary w-100">
+          Save Profile
+        </button>
       </form>
     </div>
   );

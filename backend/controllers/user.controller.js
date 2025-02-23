@@ -74,26 +74,42 @@ export const sendProductRequestEmail = async (to, productName) => {
 // ✅ Update User Profile
 export const updateUserProfile = async (req, res) => {
   try {
-    const userId = req.user.user_id;
-    const { username, fullname, address, city, state, country } = req.body;
+    // Ensure the authenticated user exists (set by authentication middleware)
+    if (!req.user || !req.user.user_id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    console.log("Update profile request body:", req.body, req.user.user_id, );
 
-    if (!username || !fullname) {
-      return res.status(400).json({ error: "Username and full name are required." });
+    const userId = req.user.user_id;
+    const { username, address, city, state, country } = req.body;
+
+    // Validate required fields: username and fullname are mandatory
+    if (!username) {
+      return res.status(400).json({ error: "Username is required." });
     }
 
-    const updatedUser = await pool.query(
-      `UPDATE users
-       SET username = $1, fullname = $2, address = $3, city = $4, state = $5, country = $6
-       WHERE user_id = $7
-       RETURNING user_id, username, fullname, email, address, city, state, country;`,
-      [username, fullname, address, city, state, country, userId]
+    // Update the user profile in the database with the provided fields
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET username = $1,
+          address = $2,
+          city = $3,
+          state = $4,
+          country = $5
+      WHERE user_id = $6
+      RETURNING user_id, username, email, address, city, state, country;
+      `,
+      [username, address, city, state, country, userId]
     );
 
-    if (updatedUser.rows.length === 0) {
+    // If no rows were returned, the user wasn't found
+    if (result.rows.length === 0) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    res.json(updatedUser.rows[0]);
+    // Return the updated user profile
+    res.json(result.rows[0]);
   } catch (error) {
     console.error("❌ Error updating profile:", error);
     res.status(500).json({ error: "Internal Server Error" });
