@@ -1,4 +1,4 @@
-import pool from "../db.js"; // Neon database connection
+import pool from "../config/db.js"; // Neon database connection
 import jwt from "jsonwebtoken";
 
 export const getCart = async (req, res) => {

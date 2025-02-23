@@ -1,6 +1,8 @@
 {
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "nodemon": "^3.1.9"
   },
   "name": "terranovareofficial",
   "version": "1.0.0",
@@ -31,10 +33,19 @@
     "yargs": "^17.7.2",
     "yargs-parser": "^21.1.1"
   },
- "scripts": {
-  "dev": "concurrently \"npm run server\" \"npm run client\"",
-  "server": "cd backend && node server.js",
-  "client": "cd frontend && npm start"
+  "scripts": {
+    "dev": "concurrently \"yarn server\" \"yarn client\"",
+    "server": "cd backend && yarn dev",
+    "client": "cd frontend && yarn dev",
+    "server:prod": "cd backend && yarn start",
+    "client:prod": "cd frontend && yarn start",
+    "clean": "concurrently \"yarn clean:server\" \"yarn clean:client\"",
+    "clean:server": "cd backend && yarn clean",
+    "clean:client": "cd frontend && yarn clean",
+    "clean:win": "concurrently \"yarn clean:server:win\" \"yarn clean:client:win\"",
+    "clean:server:win": "cd backend && yarn clean:win",
+    "clean:client:win": "cd frontend && yarn clean:win",
+    "finishHim": "yarn clean && yarn start:prod && echo '✅ Final Production Deployment Complete!'"
   },
   "repository": {
     "type": "git",

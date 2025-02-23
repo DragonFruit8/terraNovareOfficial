@@ -1,5 +1,5 @@
 import express from "express";
-import pool from "../db.js";
+import pool from "../config/db.js";
 import { updateUserProfile, updateUserPassword } from "../controllers/user.controller.js";
 import {authenticateUser} from "../middleware/auth.middleware.js";
 import { getUserProfile } from "../controllers/auth.controller.js";

@@ -1,7 +1,7 @@
 import express from "express";
 import { getProducts, addProduct, requestProduct } from "../controllers/product.controller.js";
 import {sendProductRequestEmail} from "../controllers/user.controller.js";
-import pool from "../db.js"; // ✅ Import your database connection
+import pool from "../config/db.js"; // ✅ Import your database connection
 
 
 const router = express.Router();

@@ -1,0 +1,11 @@
+TO DO
+1 Connect stripe //GOOD
+
+2 Create Order history ?? GOOD
+
+3 Create Order Details page
+
+4 Create user profile page
+
+5 Initiate Git for repository upload
+

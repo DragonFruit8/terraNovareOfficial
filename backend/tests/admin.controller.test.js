@@ -1,9 +1,9 @@
 import { addProduct } from './admin.controller';
-import pool from '../db.js';
+import pool from '../config/db.js';
 import stripe from '../stripe.js';
 
 // Mock the database pool and Stripe methods
-jest.mock('../db.js');
+jest.mock('../config/db.js');
 jest.mock('../stripe.js');
 
 describe("addProduct Controller", () => {

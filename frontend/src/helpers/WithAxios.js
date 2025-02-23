@@ -1,8 +1,7 @@
 import { useMemo } from "react";
 // import axiosInstance from "../api/axios.config";
 import { useUser } from "../context/UserContext";
-import history from "../helpers/history";
-import axios from "axios";
+import axiosInstance from "../api/axios.config";
 
 const WithAxios = ({ children }) => {
   const { setIsLoggedIn, setUserData, setAuthData, isLoggedIn } = useUser();
@@ -28,7 +27,7 @@ const WithAxios = ({ children }) => {
           if (error.response.status === 401 && !originalRequest._retry) {
             try {
               originalRequest._retry = true;
-              const res = await axios.post("/auth/refresh-token");
+              const res = await axiosInstance.post("/auth/refresh-token");
               localStorage.setItem("token", JSON.stringify(res.data.token));
               return axios(originalRequest);
             } catch (error) {

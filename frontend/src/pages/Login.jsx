@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext"; 
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom"; // ✅ Ensure Link is imported for navigation
+import axiosInstance from "../api/axios.config";
 
 const Login = () => {
   const { setUserData, userData, loading } = useUser();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [formData, setFormData] = useState({ 
+    email: "", 
+    password: "" });
 
   // ✅ Handle input changes
   const handleChange = (e) => {
@@ -19,7 +21,8 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("/api/auth/login", formData);
+      console.log("🔍 Login Request Payload:", { email, password });
+      const response = await axiosInstance.post("/api/auth/login", formData);
 
       const { token, user } = response.data;
 

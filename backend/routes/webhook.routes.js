@@ -2,7 +2,7 @@
 import express from "express";
 import Stripe from "stripe";
 import dotenv from "dotenv";
-import pool from "../db.js";
+import pool from "../config/db.js";
 
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

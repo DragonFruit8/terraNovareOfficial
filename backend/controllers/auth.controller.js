@@ -1,9 +1,8 @@
 import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import pool from "../db.js";
+import pool from "../config/db.js";
 import dotenv from "dotenv";
-
 dotenv.config();
 
 // ✅ Email Transporter Setup
@@ -49,50 +48,66 @@ export const signup = async (req, res) => {
   }
 };
 // ✅ Login Controller - Ensure Token Includes Roles
+
 export const login = async (req, res) => {
   try {
-    const email = req.body.email?.toLowerCase();
-    const { password } = req.body;
-    const user = await pool.query(
+    console.log("🔍 Incoming Login Request Body:", req.body);
+
+    // ✅ Validate input early
+    if (!req.body.email || !req.body.password) {
+      return res.status(400).json({ error: "Email and password are required" });
+    }
+
+    const { email, password } = req.body;
+
+
+    // ✅ Query DB for user
+    const { rows } = await pool.query(
       `SELECT user_id, username, roles, email, password
        FROM users
        WHERE email = $1`,
       [email]
     );
-    
-
-    if (user.rows.length === 0) {
+    if (rows.length === 0) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // ✅ Compare password
-    const isValidPassword = await bcrypt.compare(password, user.rows[0].password);
+    const user = rows[0];
+
+    // ✅ Secure password comparison
+    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-
-    // ✅ Ensure roles exist
-    if (!user.rows[0].roles || user.rows[0].roles.length === 0) {
-      console.error("❌ Error: User has no roles assigned!");
+    // ✅ Ensure user has roles assigned
+    if (!user.roles || user.roles.length === 0) {
+      console.error("❌ Error: User has no roles assigned!", { user_id: user.user_id, email: user.email });
       return res.status(500).json({ error: "User roles missing" });
     }
-
-    // ✅ Generate Token with Roles
+    // ✅ Generate JWT token
     const token = jwt.sign(
       {
-        user_id: user.rows[0].user_id,
-        username: user.rows[0].username,
-        email: user.rows[0].email,  // ✅ Now includes email
-        roles: user.rows[0].roles,
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        roles: user.roles,
       },
       process.env.JWT_SECRET,
       { expiresIn: "12h" }
     );
-    
 
-    res.json({ token, user: user.rows[0] });
+    // ✅ Return token & user data (excluding password)
+    res.json({
+      token,
+      user: {
+        user_id: user.user_id,
+        username: user.username,
+        email: user.email,
+        roles: user.roles,
+      },
+    });
   } catch (error) {
-    console.error("❌ Login Error:", error.message);
+    console.error("❌ Login Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

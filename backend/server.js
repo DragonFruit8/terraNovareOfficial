@@ -17,10 +17,15 @@ import { authenticateUser, isAdmin } from "./middleware/auth.middleware.js";
 import { syncAllProducts } from "./services/stripe.service.js";
 import checkoutRoutes from "./routes/checkout.routes.js";
 import "./config/passport.js";
-dotenv.config();
+dotenv.config({path: "./.env"});
 
 
 const app = express();
+
+const isProduction = process.env.NODE_ENV === "production";
+const homePageOrigin = isProduction
+  ? process.env.REACT_APP_CLIENT_URL_DEV 
+  : process.env.REACT_APP_CLIENT_URL_PROD;
 
 const storage = multer.diskStorage({
   destination: './uploads',
@@ -46,7 +51,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 //  Change to "https://terranovare.tech"
-app.use(cors({ origin: "https://terranovare.tech", credentials: true }));
+app.use(cors({ origin: homePageOrigin, credentials: true }));
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing

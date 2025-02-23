@@ -1,4 +1,4 @@
-import pool from "../db.js";
+import pool from "../config/db.js";
 import slugify from "slugify";
 import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);

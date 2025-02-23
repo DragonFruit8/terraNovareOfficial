@@ -1,4 +1,4 @@
-import pool from "../db.js"; // Adjust based on your DB connection
+import pool from "../config/db.js"; // Adjust based on your DB connection
 
 export const getUserOrders = async (req, res) => {
   try {

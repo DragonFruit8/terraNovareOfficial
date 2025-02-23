@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import axios from "axios";
+import axiosInstance from "../api/axios.config";
 
 const UploadComponent = () => {
   const [files, setFiles] = useState([]);
@@ -34,7 +34,7 @@ const UploadComponent = () => {
     files.forEach((file) => formData.append("files", file));
 
     try {
-      const response = await axios.post("/upload", formData, {
+      const response = await axiosInstance.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("Upload successful:", response.data);

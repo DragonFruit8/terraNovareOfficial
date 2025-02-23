@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 
-import pool from "../db.js";
+import pool from "../config/db.js";
 
 const generateSlug = (name) => {
   return name.toLowerCase().trim().replace(/\s+/g, '-');
