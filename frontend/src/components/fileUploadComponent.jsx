@@ -34,7 +34,7 @@ const UploadComponent = () => {
     files.forEach((file) => formData.append("files", file));
 
     try {
-      const response = await axios.post("http://localhost:9000/upload", formData, {
+      const response = await axios.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("Upload successful:", response.data);
