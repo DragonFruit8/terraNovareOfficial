@@ -34,18 +34,8 @@ const AdminDashboard = () => {
   });
 
   // ✅ Redirect non-admin users
-  // ✅ Redirect if user is not an admin
-  useEffect(() => {
-    if (!userData?.roles?.includes("admin")) {
-      toast.error("Unauthorized Access! Redirecting...");
-      navigate("/");
-    } else {
-      fetchAdminProfile();
-      fetchProducts();
-    }
-  }, [userData, loading, navigate]);
 
-  // ✅ Fetch Products
+// ✅ Fetch Products
   const fetchProducts = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/admin/products", {
@@ -58,7 +48,7 @@ const AdminDashboard = () => {
     }
   }, []);
   // ✅ Fetch Admin Profile
-  const fetchAdminProfile = async () => {
+  const fetchAdminProfile = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/user/me", {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -68,11 +58,23 @@ const AdminDashboard = () => {
       console.error("❌ Error fetching admin profile:", error);
       toast.error("Failed to fetch profile!");
     }
-  };
+  }, []);
+
+  // ✅ Redirect if user is not an admin
+  useEffect(() => {
+    if (!userData?.roles?.includes("admin")) {
+      toast.error("Unauthorized Access! Redirecting...");
+      navigate("/");
+    } else {
+      fetchAdminProfile();
+      fetchProducts();
+    }
+  }, [userData, loading, navigate, fetchProducts, fetchAdminProfile]);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchAdminProfile();
+  }, [fetchProducts, fetchAdminProfile]);
 
   // ✅ Handle Profile Update
   const handleUpdateProfile = async (e) => {

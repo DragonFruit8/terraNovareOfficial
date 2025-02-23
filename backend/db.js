@@ -9,7 +9,11 @@ const pool = new Pool({
   host: process.env.POSTGRES_HOST,
   database: process.env.POSTGRES_DB,
   password: process.env.POSTGRES_PASSWORD,
-  port: 5434, // Default PostgreSQL port
+  port: process.env.PORT,
+  max: 20, // Increase max connections
+  idleTimeoutMillis: 60000, // Keep idle connections for 60s
+  connectionTimeoutMillis: 5000, // Wait 5s before timeout
+  allowExitOnIdle: true, // Prevents app from hanging on shutdown
 });
 
 // const sql = postgres(process.env.DATABASE_URL, {

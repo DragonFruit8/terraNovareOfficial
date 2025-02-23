@@ -46,7 +46,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 //  Change to "https://terranovare.tech"
-app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(cors({ origin: "https://terranovare.tech", credentials: true }));
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing
