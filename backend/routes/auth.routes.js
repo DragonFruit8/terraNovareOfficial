@@ -10,6 +10,7 @@ import {
   resetPassword
   // requestEmailVerification,
 } from "../controllers/auth.controller.js";
+import { verifyPassword } from "../controllers/verify.controller.js";
 import {authenticateUser} from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -22,6 +23,9 @@ router.put("/update-password", authenticateUser, updatePassword);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 // router.post("/request-email-verification", authenticateUser, requestEmailVerification);
+
+// 🔐 POST Route to Verify the Password
+router.post("/verify-password", verifyPassword);
 
 // 🔹 Google OAuth Authentication Route
 router.get(

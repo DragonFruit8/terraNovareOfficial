@@ -1,10 +1,137 @@
+/* Color Scheme */
+:root {
+    --primary-color: #2C6B3F;
+    /* Earthy Green */
+    --secondary-color: #F5B300;
+    /* Warm Gold */
+    --accent-color: #4A90E2;
+    /* Soft Blue */
+    --neutral-light: #F5F5F5;
+    /* Off-White */
+    --neutral-dark: #333333;
+    /* Charcoal Gray */
 
-/* File Uploader Component */
+    --primary-bg-light: #ffffff;
+    /* Light Mode Background */
+    --primary-bg-dark: #121212;
+    /* Dark Mode Background */
+    --text-light: #f5f5f5;
+    --text-dark: #333333;
+}
+
+/* Light Mode */
+[data-theme="light"] {
+    --primary-bg: var(--primary-bg-light);
+    --text-color: var(--text-light);
+    --button-bg: var(--button-bg-light);
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+    --primary-bg: var(--primary-bg-dark);
+    --text-color: var(--text-dark);
+    --button-bg: var(--button-bg-dark);
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Ensure it fills the full viewport height */
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 85.55vh;
+    /* Ensures full height of the viewport */
+    /* overflow-x: hidden; */
+}
+
+.content {
+    flex: 1;
+    /* Makes sure the main content expands */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--primary-bg-light);
+    color: var(--text-dark);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Navbar */
+nav.navbar {
+    background-color: var(--neutral-light) !important;
+}
+
+.dark-mode nav.navbar {
+    background-color: var(--primary-bg-dark) !important;
+}
+
+.dark-mode .navbar-toggler svg {
+    color: white !important;
+    /* Ensures white color in dark mode */
+}
+
+.navbar-nav a .nav-link,
+div.navbar-title {
+    color: var(--text-color) !important;
+}
+
+a.navbar-brand,
+div.navbar-title {
+    color: var(--primary-bg-dark) !important;
+}
+
+.dark-mode a.navbar-brand,
+.dark-mode a .nav-link,
+.dark-mode div.navbar-title,
+.dark-mode span.navbar-toggler-icon {
+    color: var(--text-color) !important;
+}
+
+.nav-link:hover,
+a.nav-link:hover {
+    color: var(--secondary-color);
+}
+
+.dark-mode a.nav-link {
+    color: var(--text-dark);
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--secondary-color) !important;
+}
+
+/* Buttons */
+.btn .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* File Uploader Styles */
 .upload-container {
     width: 400px;
     margin: 20px auto;
     padding: 20px;
-    border: 2px dashed #007bff;
+    border: 2px dashed var(--accent-color);
     border-radius: 10px;
     text-align: center;
 }
@@ -12,7 +139,7 @@
 .dropzone {
     cursor: pointer;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: var(--neutral-light);
     transition: 0.3s;
 }
 
@@ -27,7 +154,7 @@
 .file-item {
     display: flex;
     justify-content: space-between;
-    background: #fff;
+    background: var(--primary-bg-light);
     padding: 10px;
     margin: 5px 0;
     border-radius: 5px;
@@ -37,7 +164,7 @@
 .upload-btn {
     margin-top: 10px;
     padding: 10px 20px;
-    background-color: #007bff;
+    background-color: var(--accent-color);
     color: white;
     border: none;
     border-radius: 5px;
@@ -46,4 +173,65 @@
 
 .upload-btn:hover {
     background-color: #0056b3;
+}
+
+/* Dark Mode Styles */
+.dark-mode {
+    background-color: var(--primary-bg-dark);
+    color: var(--text-light);
+}
+
+.dark-mode .navbar {
+    background-color: var(--primary-color);
+}
+
+.dark-mode .navbar-nav .nav-link {
+    color: var(--text-light) !important;
+}
+
+.dark-mode .navbar-nav,
+a.nav-link:hover {
+    color: var(--secondary-color) !important;
+}
+
+.dark-mode .file-item {
+    background: var(--primary-bg-dark);
+    color: var(--text-light);
+}
+
+.dark-mode .dropzone {
+    background-color: var(--primary-bg-dark);
+}
+
+.dark-mode .upload-btn {
+    background-color: var(--accent-color);
+}
+
+/* Toggle Button */
+.toggle-button {
+    position: fixed;
+    bottom: 50px;
+    right: 5px;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    transition: all 0.6s ease-in-out;
+}
+
+.dark-mode .toggle-button {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    font-weight: 600;
+    transition: all 1s ease-in-out;
+}
+
+.toggle-button:hover {
+    background-color: var(--secondary-color);
+    transition: all 1s ease-in-out;
+    color: var(--text-dark);
+    font-weight: 700;
 }

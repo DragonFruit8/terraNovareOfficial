@@ -11,6 +11,7 @@ import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 import Footer from "./components/Footer";
 import HomePage from "./pages/Homepage";
+import DarkLightToggle from "./components/DarkLightToggle";
 import Login from "./pages/Login";
 import Mission from "./pages/Mission";
 import Nav from "./components/Nav";
@@ -30,6 +31,8 @@ import { ToastContainer } from "react-toastify";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import './App.css'
+// import UnderConstruction from "./components/UnderConstruction";
 
 const App = () => {
   const { userData } = useUser();
@@ -38,41 +41,46 @@ const App = () => {
     <>
       <ToastContainer position="top-center" autoClose={2000} />
       <ThemeProvider>
-        <Nav />
-        <Sidebar />
-        <Routes>
-          <Route indexs path="/" element={<HomePage />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/complete-profile" element={<CompleteProfile />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/orders/:id" element={<OrderDetails />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/mission" element={<Mission />} />
-          <Route path="/next" element={<Next />} />
-          <Route path="/brand" element={<Brand />} />
-          <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/reset" element={<ResetPassword />} />
+  <Nav />
+  <Sidebar />
+  
+  <div className="app-container">
+    <div className="content">
+      <Routes>
+        <Route index path="/" element={<HomePage />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/complete-profile" element={<CompleteProfile />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders/:id" element={<OrderDetails />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/mission" element={<Mission />} />
+        <Route path="/next" element={<Next />} />
+        <Route path="/brand" element={<Brand />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/reset" element={<ResetPassword />} />
 
-          {/* ✅ Only show Admin Dashboard if user is an admin */}
-          <Route
-            path="/admin"
-            element={
-              userData?.roles?.includes("admin") ? (
-                <AdminDashboard />
-              ) : (
-                <Navigate to="/" replace />
-              )
-            }
-          />
+        <Route
+          path="/admin"
+          element={
+            userData?.roles?.includes("admin") ? (
+              <AdminDashboard />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </div>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Footer />
-      </ThemeProvider>
+    <DarkLightToggle />
+    <Footer />
+  </div>
+</ThemeProvider>
     </>
   );
 };

@@ -29,7 +29,7 @@ html {
 }
 
 /* Apply Theme */
-body, #root {
+/* body, #root {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -38,7 +38,7 @@ body, #root {
   user-select: none;
   display: flexbox;
   
-}
+} */
 
 #offcanvasDarkNavbar {
   color: var(--text-color);
@@ -51,27 +51,27 @@ body, #root {
   color: var(--text-color)!important;
 }
 
-.navbar {
+/* .navbar {
   background-color: var(--nav-bg);
   color: var(--text-color);
-}
-#heroNav, #heroNav:not(a){
+} */
+/* #heroNav, #heroNav:not(a){
   filter: invert(1);
   background-color: var(--nav-bg);
-}
+} */
 
 #close {
   filter: invert(1);
   color: var(--btn-text);
 }
 
-button{
+/* button{
   background-color: var(--btn-bg);
   color: var(--btn-text);
   border: none;
   padding: 10px 15px;
   cursor: pointer;
-}
+} */
 .offcanvas-header {
   cursor: default;
 }
@@ -130,7 +130,7 @@ button:hover {
 }
 
 /* Navbar */
-.navbar {
+/* .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -154,5 +154,5 @@ button:hover {
   display: flex;
   align-items: center;
   gap: 5px;
-}
+} */
 

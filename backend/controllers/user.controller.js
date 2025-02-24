@@ -78,13 +78,20 @@ export const updateUserProfile = async (req, res) => {
     if (!req.user || !req.user.user_id) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    console.log("Update profile request body:", req.body, req.user.user_id, );
+    // console.log("Update profile request body:", req.body, req.user.user_id, );
 
     const userId = req.user.user_id;
     const { username, address, city, state, country } = req.body;
 
-    // Validate required fields: username and fullname are mandatory
-    if (!username) {
+    // Trim inputs to avoid unintended spaces
+    const trimmedUsername = username ? username.trim() : "";
+    const trimmedAddress = address ? address.trim() : address;
+    const trimmedCity = city ? city.trim() : city;
+    const trimmedState = state ? state.trim() : state;
+    const trimmedCountry = country ? country.trim() : country;
+
+    // Validate required fields: username is mandatory
+    if (!trimmedUsername) {
       return res.status(400).json({ error: "Username is required." });
     }
 
@@ -100,7 +107,7 @@ export const updateUserProfile = async (req, res) => {
       WHERE user_id = $6
       RETURNING user_id, username, email, address, city, state, country;
       `,
-      [username, address, city, state, country, userId]
+      [trimmedUsername, trimmedAddress, trimmedCity, trimmedState, trimmedCountry, userId]
     );
 
     // If no rows were returned, the user wasn't found
@@ -111,10 +118,11 @@ export const updateUserProfile = async (req, res) => {
     // Return the updated user profile
     res.json(result.rows[0]);
   } catch (error) {
-    console.error("❌ Error updating profile:", error);
+    console.error("❌ Error updating profile:", error.stack || error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 export const updateUserPassword = async (req, res) => {
   try {
     const userId = req.user.id;

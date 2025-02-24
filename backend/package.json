@@ -4,10 +4,10 @@
   "description": "",
   "main": "server.js",
   "type": "module",
- "scripts": {
-  "dev": "cross-env NODE_ENV=development PGPORT_DEV=5434 nodemon server.js",
-  "start": "cross-env NODE_ENV=production PGPORT_PROD=5432 node server.js"
-},
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development PGPORT_DEV=5434 nodemon server.js",
+    "start": "cross-env NODE_ENV=production PGPORT_PROD=5432 node server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "bcryptjs": "^3.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-session": "^1.18.1",

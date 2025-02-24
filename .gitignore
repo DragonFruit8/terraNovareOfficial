@@ -6,6 +6,7 @@ frontend/node_modules/
 # Build files
 frontend/build/
 backend/dist/
+backend/encrypt.js
 backend/.env
 frontend/.env
 

@@ -20,7 +20,7 @@ export const signup = async (req, res) => {
     email = email.toLowerCase();
 
     const validRoles = ['user','admin','moderator'];
-   const userRole = validRoles.includes(roles) ? roles : 'user';
+    const userRole = validRoles.includes(roles) ? roles : 'user';
 
     if (!username || !fullname || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
@@ -51,7 +51,6 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    console.log("🔍 Incoming Login Request Body:", req.body);
 
     // ✅ Validate input early
     if (!req.body.email || !req.body.password) {
@@ -59,15 +58,16 @@ export const login = async (req, res) => {
     }
 
     const { email, password } = req.body;
-
+    const loginEmail = email.trim().toLowerCase(); // ✅ Fixed variable name
 
     // ✅ Query DB for user
     const { rows } = await pool.query(
-      `SELECT user_id, username, roles, email, password
+      `SELECT user_id, username, email, password, roles
        FROM users
        WHERE email = $1`,
-      [email]
+      [loginEmail]
     );
+
     if (rows.length === 0) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
@@ -79,18 +79,24 @@ export const login = async (req, res) => {
     if (!isValidPassword) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
-    // ✅ Ensure user has roles assigned
-    if (!user.roles || user.roles.length === 0) {
-      console.error("❌ Error: User has no roles assigned!", { user_id: user.user_id, email: user.email });
+
+    // ✅ Ensure roles are properly formatted
+    const roles = Array.isArray(user.roles)
+      ? user.roles
+      : user.roles ? user.roles.split(",") : [];
+
+    if (roles.length === 0) {
+      console.error("❌ Error: User has no roles assigned!", { user_id: user.user_id, loginEmail: user.email });
       return res.status(500).json({ error: "User roles missing" });
     }
+
     // ✅ Generate JWT token
     const token = jwt.sign(
       {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        roles: user.roles,
+        roles: roles,
       },
       process.env.JWT_SECRET,
       { expiresIn: "12h" }
@@ -103,7 +109,7 @@ export const login = async (req, res) => {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        roles: user.roles,
+        roles: roles,
       },
     });
   } catch (error) {
@@ -111,6 +117,7 @@ export const login = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 // ✅ Fetch User Profile
 export const getUserProfile = async (req, res) => {
   try {

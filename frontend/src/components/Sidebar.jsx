@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FaHome, FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaTimes } from "react-icons/fa";
 import "../Sidebar.css";
 
 const Sidebar = () => {
@@ -33,11 +33,11 @@ const Sidebar = () => {
   return (
     <>
       {/* Navigation Bar */}
-      <nav className="navbar px-3">
+      <nav className="navbar px-3 ps-2">
         <div className="navbar-title" onClick={toggleSidebar}>
           {isOpen ? <FaTimes /> : <FaBars />} Menu
         </div>
-        <Link to="/" className="home-btn"><FaHome /> Home</Link>
+        {/* <Link to="/" className="home-btn"><FaHome /> Home</Link> */}
       </nav>
 
       {/* Sidebar Drawer */}

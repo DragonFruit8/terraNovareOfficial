@@ -33,7 +33,7 @@ const Register = () => {
 
   // ✅ Add `handleChange` function
   if (userData) {
-    console.log("User is already logged in:", userData);
+    // Console.log("User is already logged in:", userData);
   }
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,13 +60,13 @@ const Register = () => {
   
     setIsLoading(true);
     try {
-      console.log("Sending Data to Backend:", JSON.stringify(userData)); // ✅ Debugging
-      const response = await axiosInstance.post("/auth/signup", userData);
-  
-      console.log("Response from Backend:", response.data);
+      // Console.log("Sending Data to Backend:", JSON.stringify(userData)); // ✅ Debugging
+      await axiosInstance.post("/auth/signup", userData);
+      
+      // Console.log("Response from Backend:", response.data);
       toast.success("Signup successful!");
       
-      navigate("/login"); // ✅ Redirect to login
+      navigate("/"); // ✅ Redirect to Homepage
     } catch (error) {
       console.error("Signup error:", error.response?.data || error.message);
       toast.error(error.response?.data?.error || "Signup failed. Please try again.");

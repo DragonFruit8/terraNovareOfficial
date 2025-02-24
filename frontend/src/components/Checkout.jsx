@@ -84,7 +84,7 @@ const Checkout = () => {
           <CardElement className="form-control p-2" />
         </div>
 
-        <button type="submit" className="btn btn-primary w-100" disabled={!stripe || isProcessing}>
+        <button type="submit" className="btn   w-100" disabled={!stripe || isProcessing}>
           {isProcessing ? "Processing..." : "Pay Now"}
         </button>
       </form>

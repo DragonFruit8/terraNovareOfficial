@@ -36,7 +36,6 @@ const styles = {
         alignItems: "center",
         padding: "5px",
         overflow: "hidden",
-        background: "#fff5",
         zIndex: 1000,
     },
     button: {

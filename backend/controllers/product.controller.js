@@ -111,7 +111,7 @@ export const requestProduct = async (req, res) => {
 
   try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      console.log("🔑 Decoded Token:", decoded);
+     // Console.log("🔑 Decoded Token:", decoded);
 
       const user_id = decoded.user_id;  
       const user_email = decoded.email; 

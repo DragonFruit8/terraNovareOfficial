@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+
 export default function Homepage() {
+
   return (
     <div>
       <div id="myCarousel" className="carousel slide" data-bs-ride="carousel">

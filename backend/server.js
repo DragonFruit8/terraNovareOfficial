@@ -24,8 +24,8 @@ const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
 const homePageOrigin = isProduction
-  ? process.env.REACT_APP_CLIENT_URL_DEV 
-  : process.env.REACT_APP_CLIENT_URL_PROD;
+  ? "https:///terranovare.tech" 
+  : "http://localhost:3000";
 
 const storage = multer.diskStorage({
   destination: './uploads',
@@ -61,6 +61,7 @@ app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhoo
 // ✅ Secure Admin Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/", authRoutes)
 
 // ✅ User Routes
 app.use("/api/products", productRoutes);
@@ -69,7 +70,6 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
-
 const upload = multer({ storage });
 
 // File upload endpoint
