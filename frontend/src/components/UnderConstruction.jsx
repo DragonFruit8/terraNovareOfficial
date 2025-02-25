@@ -19,7 +19,7 @@ const UnderConstruction = () => {
     e.preventDefault();
     setErrorMessage(""); // Reset error message
 
-    fetch("http://localhost:9000/api/verify-password", {
+    fetch("https://terranovare.tech/api/verify-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: inputPassword }),
