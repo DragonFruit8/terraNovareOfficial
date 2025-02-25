@@ -3,13 +3,19 @@ import bcrypt from 'bcryptjs';
 import pool from "../config/db.js";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_SECURE === "true",
+  host: "smtp.gmail.com",
+  port: 465, // ✅ Use 465 for SSL (more stable)
+  secure: true, // ✅ Set to true when using port 465
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
   },
+  tls: {
+      rejectUnauthorized: true, // ✅ Enable strict SSL checking
+  },
+  connectionTimeout: 10000, // ✅ Increase timeout (10 seconds)
+  debug: true, // ✅ Enable debugging logs
+  logger: true, // ✅ Log SMTP activity
 });
 export const getUserProfile = async (req, res) => {
   try {
@@ -60,19 +66,20 @@ export const requestEmailVerification = async (req, res) => {
 };
 export const sendProductRequestEmail = async (to, productName) => {
   const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject: "Product Request Confirmation",
-    text: `Thank you for requesting ${productName}. We will notify you once it's available!`,
+      from: process.env.EMAIL_USER,
+      to,
+      subject: "Product Request Confirmation",
+      text: `Thank you for requesting ${productName}. We will notify you once it's available!`,
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Confirmation email sent:", info.response);
-    return info; // Returning the response for further handling
+      console.log("📨 Sending email to:", to);
+      const info = await transporter.sendMail(mailOptions);
+      console.log("✅ Email sent successfully:", info.response);
+      return info;
   } catch (error) {
-    console.error("Error sending email:", error);
-    throw new Error("Failed to send email"); // Optionally rethrow error
+      console.error("❌ Error sending email:", error);
+      throw new Error("Failed to send email");
   }
 };
 // ✅ Update User Profile
@@ -126,7 +133,6 @@ export const updateUserProfile = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 export const updateUserPassword = async (req, res) => {
   try {
     const userId = req.user.id;

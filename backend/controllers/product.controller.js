@@ -1,9 +1,8 @@
 import pool from "../config/db.js";
-import slugify from "slugify";
 import Stripe from 'stripe';
+import { sendProductRequestEmail } from "../controllers/user.controller.js"; // ✅ Ensure correct import
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-import jwt from "jsonwebtoken"
 // import { sendProductRequestEmail } from "../utils/email.js"; // ✅ For confirmation emails
 
 // ✅ Get all products
@@ -21,7 +20,6 @@ export const getProducts = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // ✅ Update product
 export const updateProduct = async (req, res) => {
   try {
@@ -55,7 +53,6 @@ export const updateProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // DUPLICATE CODE
 // ✅ Add New Product
 export const addProduct = async (req, res) => {
@@ -96,64 +93,83 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ error: "Failed to add product" });
   }
 };
-
-
-
-
 // ✅ Request a product (Users can request a product)
 export const requestProduct = async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
+    try {
+        const { user_id, email: user_email } = req.user;
+        const { product_id } = req.body;
 
-  if (!token) {
-      console.error("❌ No authentication token provided.");
-      return res.status(401).json({ error: "Unauthorized: No token provided" });
-  }
+        if (!user_id || !user_email) {
+            console.error("❌ Missing user ID or email.");
+            return res.status(400).json({ error: "User ID and email are required." });
+        }
 
+        if (!product_id) {
+            console.error("❌ Missing required field: product_id");
+            return res.status(400).json({ error: "Product ID is required." });
+        }
+
+        console.log("📩 Processing request for product:", product_id, "by user:", user_id, user_email);
+
+        // ✅ Check if product exists
+        const productQuery = await pool.query(
+            "SELECT name FROM products WHERE product_id = $1",
+            [product_id]
+        );
+
+        if (productQuery.rows.length === 0) {
+            return res.status(404).json({ error: "Product not found." });
+        }
+
+        const product_name = productQuery.rows[0].name;
+
+        // ✅ Check if the user has already requested this product
+        const existingRequest = await pool.query(
+            "SELECT * FROM product_requests WHERE product_id = $1 AND user_id = $2",
+            [product_id, user_id]
+        );
+
+        if (existingRequest.rows.length > 0) {
+            return res.status(409).json({ error: "Product already requested." });
+        }
+
+        // ✅ Insert the product request
+        const newRequest = await pool.query(
+            `INSERT INTO product_requests (product_id, user_id, user_email, product, requested_at) 
+             VALUES ($1, $2, $3, $4, NOW())
+             RETURNING *;`,
+            [product_id, user_id, user_email, product_name]
+        );
+
+        console.log("✅ Product request saved:", newRequest.rows[0]);
+
+        // ✅ Send confirmation email
+        console.log("📨 Sending confirmation email to:", user_email);
+        await sendProductRequestEmail(user_email, product_name);
+
+        res.status(201).json({ message: "Product request submitted successfully!", request: newRequest.rows[0] });
+
+    } catch (error) {
+        console.error("❌ Error processing product request:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const deleteAllProductRequests = async (req, res) => {
   try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-     // Console.log("🔑 Decoded Token:", decoded);
-
-      const user_id = decoded.user_id;  
-      const user_email = decoded.email; 
-
-      if (!user_id || !user_email) {
-          console.error("❌ Missing user ID or email:", decoded);
-          return res.status(400).json({ error: "User ID and email are required." });
+      // ✅ Ensure only admins can delete all product requests
+      if (req.user.role !== "admin") {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
       }
 
-      const { product_id } = req.body;
-      if (!product_id) {
-          console.error("❌ Missing required field: product_id");
-          return res.status(400).json({ error: "Product ID is required." });
-      }
+      // ✅ Delete all product requests
+      await pool.query("DELETE FROM product_requests");
 
-      console.log("📩 Processing request for product:", product_id, "by user:", user_id, user_email);
-
-      // ✅ Fetch product name before inserting
-      const productQuery = await pool.query(
-          "SELECT name FROM products WHERE product_id = $1",
-          [product_id]
-      );
-
-      if (productQuery.rows.length === 0) {
-          return res.status(404).json({ error: "Product not found." });
-      }
-
-      const product_name = productQuery.rows[0].name;
-
-      // ✅ Insert `product` (product name) in the request
-      const newRequest = await pool.query(
-          `INSERT INTO product_requests (product_id, user_id, user_email, product, requested_at) 
-           VALUES ($1, $2, $3, $4, NOW())
-           RETURNING *;`,
-          [product_id, user_id, user_email, product_name]
-      );
-
-      console.log("✅ Product request saved:", newRequest.rows[0]);
-      res.status(201).json({ message: "Product request submitted successfully!", request: newRequest.rows[0] });
+      console.log("✅ All product requests deleted.");
+      res.status(200).json({ message: "All product requests have been deleted." });
 
   } catch (error) {
-      console.error("❌ Error processing product request:", error);
+      console.error("❌ Error deleting product requests:", error);
       res.status(500).json({ error: "Internal Server Error" });
   }
 };

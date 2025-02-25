@@ -35,7 +35,7 @@ const AdminDashboard = () => {
 
   // ✅ Redirect non-admin users
 
-// ✅ Fetch Products
+  // ✅ Fetch Products
   const fetchProducts = useCallback(async () => {
     try {
       const response = await axiosInstance.get("/admin/products", {
@@ -93,7 +93,7 @@ const AdminDashboard = () => {
       setAdminProfile(response.data); // ✅ Update context state
       toast.success("Profile updated successfully!");
       navigate("/admin");
-      setEditingAdminProfile(null)
+      setEditingAdminProfile(null);
     } catch (error) {
       console.error("❌ Error updating profile:", error);
       toast.error("Failed to update profile.");
@@ -125,17 +125,17 @@ const AdminDashboard = () => {
         return;
       }
 
-      
-
       const { product_id, ...updatedData } = {
         ...editingProduct,
         slug: editingProduct.slug || "",
         is_presale: Boolean(editingProduct.is_presale),
-        release_date: editingProduct.release_date ? new Date(editingProduct.release_date).toISOString() : null, // ✅ Ensure proper format
+        release_date: editingProduct.release_date
+          ? new Date(editingProduct.release_date).toISOString()
+          : null, // ✅ Ensure proper format
         stripe_product_id: editingProduct.stripe_product_id || "",
-        stripe_price_id: editingProduct.stripe_price_id || ""
+        stripe_price_id: editingProduct.stripe_price_id || "",
       };
-  
+
       console.log("Updating product with ID:", editingProduct.product_id);
 
       await axiosInstance.put(`/admin/products/${product_id}`, updatedData, {
@@ -218,6 +218,37 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteAllRequests = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Unauthorized: Please log in as an admin.");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.delete(
+        "/products/requests/delete-all",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success("All product requests have been deleted.");
+      } else {
+        throw new Error(
+          response.data.error || "Failed to delete product requests."
+        );
+      }
+    } catch (error) {
+      console.error("❌ Deletion Error:", error);
+      toast.error(
+        error.response?.data?.error || "Failed to delete product requests."
+      );
+    }
+  };
+
   // ✅ Handle Form Changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -227,6 +258,17 @@ const AdminDashboard = () => {
     <div className="container mt-5">
       <h2>Admin Dashboard</h2>
       <div className="row">
+        <button
+          onClick={handleDeleteAllRequests}
+          style={{
+            backgroundColor: "red",
+            color: "white",
+            padding: "10px",
+            borderRadius: "5px",
+          }}
+        >
+          ❌ Delete All Product Requests
+        </button>
         <div className="container col">
           {/* ✅ Admin Profile Section */}
           {editingAdminProfile && userData?.roles?.includes("admin") ? (
@@ -321,24 +363,32 @@ const AdminDashboard = () => {
               <h2>Admin Profile</h2>
               <div className="card mb-2">
                 <div className="card-body">
-                  <h4 className="card-title">{adminProfile?.fullname || userData?.fullname}</h4>
+                  <h4 className="card-title">
+                    {adminProfile?.fullname || userData?.fullname}
+                  </h4>
                   <p className="card-text">
-                    <strong>Username:</strong> {adminProfile?.username || userData?.username}
+                    <strong>Username:</strong>{" "}
+                    {adminProfile?.username || userData?.username}
                   </p>
                   <p className="card-text">
-                    <strong>Email:</strong> {adminProfile?.email || userData?.email}
+                    <strong>Email:</strong>{" "}
+                    {adminProfile?.email || userData?.email}
                   </p>
                   <p className="card-text">
-                    <strong>Address:</strong> {adminProfile?.address || userData?.address}
+                    <strong>Address:</strong>{" "}
+                    {adminProfile?.address || userData?.address}
                   </p>
                   <p className="card-text">
-                    <strong>City:</strong> {adminProfile?.city || userData?.city}
+                    <strong>City:</strong>{" "}
+                    {adminProfile?.city || userData?.city}
                   </p>
                   <p className="card-text">
-                    <strong>State:</strong> {adminProfile?.state || userData?.state}
+                    <strong>State:</strong>{" "}
+                    {adminProfile?.state || userData?.state}
                   </p>
                   <p className="card-text">
-                    <strong>Country:</strong> {adminProfile?.country || userData?.country}
+                    <strong>Country:</strong>{" "}
+                    {adminProfile?.country || userData?.country}
                   </p>
                   <p className="card-text">
                     <strong>Role:</strong>{" "}
@@ -433,12 +483,23 @@ const AdminDashboard = () => {
                     <td>{product.stock}</td>
                     <td>{product.description}</td>
                     <td>
-                      <span className={`badge ${product.is_presale ? "bg-success" : "bg-secondary"}`}>
+                      <span
+                        className={`badge ${
+                          product.is_presale ? "bg-success" : "bg-secondary"
+                        }`}
+                      >
                         {product.is_presale ? "Presale" : "Regular"}
                       </span>
                     </td>
 
-                    <td>{product.release_date ? new Date(product.release_date).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "N/A"}</td>
+                    <td>
+                      {product.release_date
+                        ? new Date(product.release_date).toLocaleDateString(
+                            "en-US",
+                            { year: "numeric", month: "short", day: "numeric" }
+                          )
+                        : "N/A"}
+                    </td>
                     <td>
                       <button
                         className="btn btn-warning btn-sm me-2"
@@ -467,8 +528,13 @@ const AdminDashboard = () => {
             <div className="modal-dialog">
               <div className="modal-content">
                 <div className="modal-header">
-                  <h5 className="modal-title">Edit Product - {editingProduct.name}</h5>
-                  <button className="btn-close" onClick={() => setEditingProduct(null)}></button>
+                  <h5 className="modal-title">
+                    Edit Product - {editingProduct.name}
+                  </h5>
+                  <button
+                    className="btn-close"
+                    onClick={() => setEditingProduct(null)}
+                  ></button>
                 </div>
                 <div className="modal-body">
                   <form>
@@ -477,8 +543,10 @@ const AdminDashboard = () => {
                       <input
                         type="text"
                         name="name"
-                        value={editingProduct.name || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.name || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       />
                     </div>
@@ -487,8 +555,10 @@ const AdminDashboard = () => {
                       <input
                         type="text"
                         name="slug"
-                        value={editingProduct.slug || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.slug || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       />
                     </div>
@@ -497,8 +567,10 @@ const AdminDashboard = () => {
                       <input
                         type="number"
                         name="price"
-                        value={editingProduct.price || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.price || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       />
                     </div>
@@ -507,8 +579,10 @@ const AdminDashboard = () => {
                       <input
                         type="number"
                         name="stock"
-                        value={editingProduct.stock || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.stock || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       />
                     </div>
@@ -517,7 +591,9 @@ const AdminDashboard = () => {
                       <select
                         name="is_presale"
                         value={editingProduct.is_presale || false}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       >
                         <option value={true}>Yes</option>
@@ -528,7 +604,13 @@ const AdminDashboard = () => {
                     <input
                       type="date"
                       name="release_date"
-                      value={editingProduct.release_date ? new Date(editingProduct.release_date).toISOString().split("T")[0] : ""}
+                      value={
+                        editingProduct.release_date
+                          ? new Date(editingProduct.release_date)
+                              .toISOString()
+                              .split("T")[0]
+                          : ""
+                      }
                       onChange={(e) => handleInputChange(e, setEditingProduct)}
                       className="form-control"
                     />
@@ -536,8 +618,10 @@ const AdminDashboard = () => {
                       <label className="form-label">Description</label>
                       <textarea
                         name="description"
-                        value={editingProduct.description || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.description || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                         rows="3"
                       ></textarea>
@@ -547,8 +631,10 @@ const AdminDashboard = () => {
                       <input
                         type="text"
                         name="stripe_product_id"
-                        value={editingProduct.stripe_product_id || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.stripe_product_id || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       />
                     </div>
@@ -557,16 +643,28 @@ const AdminDashboard = () => {
                       <input
                         type="text"
                         name="stripe_price_id"
-                        value={editingProduct.stripe_price_id || ''}
-                        onChange={(e) => handleInputChange(e, setEditingProduct)}
+                        value={editingProduct.stripe_price_id || ""}
+                        onChange={(e) =>
+                          handleInputChange(e, setEditingProduct)
+                        }
                         className="form-control"
                       />
                     </div>
                   </form>
                 </div>
                 <div className="modal-footer">
-                  <button className="btn btn-secondary" onClick={() => setEditingProduct(null)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={handleUpdateProduct}>Save</button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setEditingProduct(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleUpdateProduct}
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
             </div>

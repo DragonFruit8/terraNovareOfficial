@@ -59,16 +59,15 @@ const Shop = () => {
 
         const response = await axiosInstance.post(
             "/products/request",
-            { product_id: product.product_id }, // ✅ No need for userEmail
+            { product_id: product.product_id }, // ❌ Removed email from body
             { headers: { Authorization: `Bearer ${token}` } }
         );
 
         if (response.status === 201) {
             toast.success(response.data.message);
             setRequestedProducts((prevRequested) => 
-              [...new Set([...prevRequested, product.product_id])] // ✅ Converts Set back to an Array
+              [...new Set([...prevRequested, product.product_id])]
           );
-          
         } else {
             throw new Error(response.data.message || "Product request failed.");
         }
@@ -77,13 +76,15 @@ const Shop = () => {
 
         if (error.response?.status === 401) {
             toast.error("Session expired. Please log in again.");
-            localStorage.removeItem("token");  // 🔒 Ensure token is cleared if invalid
-            window.location.reload();  // Force login
+            localStorage.removeItem("token"); 
+            window.location.reload();
         } else {
             toast.error(error.response?.data?.error || "Failed to request product.");
         }
     }
 };
+
+
 
 
   return (

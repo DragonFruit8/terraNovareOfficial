@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import pool from "../config/db.js";
+
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -8,19 +8,21 @@ dotenv.config();
 export const authenticateUser = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Unauthorized: No token provided" });
+      return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    // Console.log("✅ Decoded Token:", decoded);
-    return next();
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded; // ✅ Ensure `email` and `user_id` are included
+      if (!req.user.email || !req.user.user_id) {
+          throw new Error("Invalid token payload");
+      }
+      next();
   } catch (error) {
-    console.error("❌ Token Verification Error:", error.message);
-    return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
+      console.error("❌ Invalid token:", error);
+      return res.status(403).json({ error: "Unauthorized: Invalid token" });
   }
 };
 
