@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { FaSun, FaMoon } from "react-icons/fa6"
 import '../App.css'
 
 // Toggle Button Component
@@ -7,7 +8,7 @@ const DarkLightToggle = () => {
 
   // Load the mode from localStorage (so it persists on page reload)
   useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode');
+    const savedMode = localStorage.getItem('theme');
     if (savedMode === 'true') {
       setIsDarkMode(true);
       document.body.classList.add('dark-mode');
@@ -23,10 +24,10 @@ const DarkLightToggle = () => {
       const newMode = !prevMode;
       if (newMode) {
         document.body.classList.add('dark-mode');
-        localStorage.setItem('darkMode', 'true'); // Save the mode to localStorage
+        localStorage.setItem('theme', 'dark'); // Save the mode to localStorage
       } else {
         document.body.classList.remove('dark-mode');
-        localStorage.setItem('darkMode', 'false');
+        localStorage.setItem('theme', 'light');
       }
       return newMode;
     });
@@ -34,7 +35,7 @@ const DarkLightToggle = () => {
 
   return (
     <button className="toggle-button" onClick={toggleMode}>
-      {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+      {isDarkMode ? <FaSun /> : <FaMoon />}
     </button>
   );
 };

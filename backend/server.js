@@ -23,9 +23,7 @@ dotenv.config({path: "./.env"});
 const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
-const homePageOrigin = isProduction
-  ? "https:///terranovare.tech" 
-  : "http://localhost:3000";
+const homePageOrigin = ["http://localhost:3000", "https:///terranovare.tech"];
 
 const storage = multer.diskStorage({
   destination: './uploads',

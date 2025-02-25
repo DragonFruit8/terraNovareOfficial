@@ -47,7 +47,8 @@ const Footer = () => {
 
         {/* Copyright */}
         <div className="mt-3">
-          <p className="mb-0">&copy; {new Date().getFullYear()} Terra'Novare. All Rights Reserved.</p>
+         <p className="mb-0">&copy; {new Date().getFullYear()} Terra'Novare. All Rights Reserved.</p> 
+         <Link to="/terms">Terms & Conditions</Link> | <Link to="/privacy">Privacy Policy</Link>
         </div>
       </div>
     </footer>

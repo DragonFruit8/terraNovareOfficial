@@ -146,8 +146,8 @@ const Nav = () => {
                           </Link>
                         </>
                       )}
-                      <div className="dropdown-item">
-                        <button className="btn btn-danger" onClick={handleLogout}>
+                      <div className="dropdown-item p-2">
+                        <button className="btn btn-danger m-0" onClick={handleLogout}>
                           <LogOut /> Logout
                         </button>
                       </div>

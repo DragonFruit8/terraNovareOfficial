@@ -1,11 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Meta from "../components/Meta"
+import '../App.css'
 
 
 export default function Homepage() {
 
   return (
     <div>
+      <Meta
+        title="Terra'Novare"
+        description="Default site description for SEO."
+        keywords="your, business, keywords"
+        url="https://terranovare.tech"
+        image="https://terranovare.tech/default-image.jpg"
+      />
       <div id="myCarousel" className="carousel slide" data-bs-ride="carousel">
         <div className="carousel-indicators">
           <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" className="active" aria-label="Slide 1" aria-current="true"></button>
@@ -14,7 +23,12 @@ export default function Homepage() {
         </div>
         <div className="carousel-inner mb-5">
           <div className="carousel-item active">
-            <svg className="bd-placeholder-img" width="100%" height="50vh" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"></rect></svg>
+          <img 
+        src={"images/TerraNovareImage.jpg"} 
+        alt="TerraNovare" 
+        style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
+      />
+          <div className="dark-overlay"></div>
 
             <div className="container">
               <div className="carousel-caption text-start">
@@ -26,8 +40,12 @@ export default function Homepage() {
             </div>
           </div>
           <div className="carousel-item">
-            <svg className="bd-placeholder-img" width="100%" height="50vh" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"></rect></svg>
-
+          <img 
+        src={"images/EfinityImage.jpg"} 
+        alt="TerraNovare" 
+        style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
+      />
+          <div className="dark-overlay"></div>
             <div className="container">
               <div className="carousel-caption">
                 <h1>A Brand made with the <br/> Human Experience in mind</h1>
@@ -37,7 +55,12 @@ export default function Homepage() {
             </div>
           </div>
           <div className="carousel-item">
-            <svg className="bd-placeholder-img" width="100%" height="50vh" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"></rect></svg>
+          <img 
+        src={"images/SupportiveBrands.jpg"} 
+        alt="TerraNovare" 
+        style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
+      />
+          <div className="dark-overlay"></div>
 
             <div className="container">
               <div className="carousel-caption text-end">
@@ -58,33 +81,7 @@ export default function Homepage() {
         </button>
       </div>
 
-      <div className="container justify-items-center">
-
-        <div className="row">
-          <div className="col-lg-4">
-            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
-
-            <h2>Heading</h2>
-            <p>Some representative placeholder content for the three columns of text below the carousel. This is the first column.</p>
-            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
-          </div>
-          <div className="col-lg-4">
-            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
-
-            <h2>Heading</h2>
-            <p>Another exciting bit of representative placeholder content. This time, we've moved on to the second column.</p>
-            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
-          </div>
-          <div className="col-lg-4">
-            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
-
-            <h2>Heading</h2>
-            <p>And lastly this, the third column of representative placeholder content.</p>
-            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
-          </div>
-        </div>
-
-        <hr className="featurette-divider" />
+      <div className="container justify-items-center mt-5">
 
         <div id='#mission' className="row featurette">
           <div className="col-md-7">
@@ -119,6 +116,33 @@ export default function Homepage() {
           <div className="col-md-5">
             <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
 
+          </div>
+        </div>
+
+        <hr className="featurette-divider" />
+
+        
+        <div className="row">
+          <div className="col-lg-4">
+            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
+
+            <h2>Heading</h2>
+            <p>Some representative placeholder content for the three columns of text below the carousel. This is the first column.</p>
+            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
+          </div>
+          <div className="col-lg-4">
+            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
+
+            <h2>Heading</h2>
+            <p>Another exciting bit of representative placeholder content. This time, we've moved on to the second column.</p>
+            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
+          </div>
+          <div className="col-lg-4">
+            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
+
+            <h2>Heading</h2>
+            <p>And lastly this, the third column of representative placeholder content.</p>
+            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
           </div>
         </div>
       </div>

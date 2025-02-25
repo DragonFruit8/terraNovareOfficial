@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.4.5",
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
     "@stripe/react-stripe-js": "^3.1.1",
     "@stripe/stripe-js": "^5.6.0",
     "@testing-library/dom": "^10.4.0",
@@ -32,6 +36,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.3.5",
     "react-feather": "^2.0.10",
+    "react-ga4": "^2.1.0",
     "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.5.2",
@@ -43,9 +48,13 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "stripe": "^17.6.0",
+    "styled-components": "^6.1.15",
     "url": "^0.11.4",
     "util": "^0.12.5",
     "web-vitals": "^2.1.4"
+  },
+  "resolutions": {
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   },
   "scripts": {
     "dev": "react-app-rewired start",
