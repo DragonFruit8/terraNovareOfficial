@@ -1,14 +1,14 @@
 import dotenv from "dotenv";
 import pkg from 'pg';
 const { Pool } = pkg;
-dotenv.config({path: "./.env"});
+dotenv.config();
 
 const isProduction = process.env.NODE_ENV === "production";
 
 // Use different ports based on the environment
-const port = isProduction
-  ? Number(process.env.PGPORT_PROD) || 5432  // Default to 5432 for production
-  : Number(process.env.PGPORT_DEV) || 5434;  // Default to 5433 for development
+//const port = isProduction
+//  ? 5432  // Default to 5432 for production
+//  : 5434;  // Default to 5433 for development
 
 
 const pool = new Pool({
