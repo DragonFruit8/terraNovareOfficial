@@ -67,10 +67,12 @@ export const sendProductRequestEmail = async (to, productName) => {
   };
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log("Confirmation email sent to:", to);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("Confirmation email sent:", info.response);
+    return info; // Returning the response for further handling
   } catch (error) {
     console.error("Error sending email:", error);
+    throw new Error("Failed to send email"); // Optionally rethrow error
   }
 };
 // ✅ Update User Profile
