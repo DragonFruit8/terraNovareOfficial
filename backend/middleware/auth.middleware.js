@@ -6,25 +6,25 @@ dotenv.config();
 
 // ✅ Authenticate User Middleware
 export const authenticateUser = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+      console.error("❌ No token provided.");
       return res.status(401).json({ error: "Unauthorized: No token provided" });
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = decoded; // ✅ Ensure `email` and `user_id` are included
-      if (!req.user.email || !req.user.user_id) {
-          throw new Error("Invalid token payload");
-      }
+      console.log("🔑 Decoded User:", decoded); // Debugging log
+
+      req.user = decoded;
       next();
   } catch (error) {
       console.error("❌ Invalid token:", error);
       return res.status(403).json({ error: "Unauthorized: Invalid token" });
   }
 };
+
 
 // ✅ Admin Check Middleware
 export const isAdmin = async (req, res, next) => {

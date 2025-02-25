@@ -1,6 +1,5 @@
 import express from "express";
-import pool from "../config/db.js";
-import { updateUserProfile, updateUserPassword } from "../controllers/user.controller.js";
+import { updateUserProfile, updateUserPassword, getAllUsers } from "../controllers/user.controller.js";
 import {authenticateUser} from "../middleware/auth.middleware.js";
 import { getUserProfile } from "../controllers/auth.controller.js";
 
@@ -8,6 +7,7 @@ import { getUserProfile } from "../controllers/auth.controller.js";
 const router = express.Router();
 
 // ✅ Fix: Change `POST` to `GET`
+router.get("/all", authenticateUser, getAllUsers);
 router.get("/me", authenticateUser, getUserProfile);
 router.get("/profile", authenticateUser, getUserProfile);
 router.put("/update", authenticateUser, updateUserProfile);

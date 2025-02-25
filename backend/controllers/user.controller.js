@@ -40,6 +40,25 @@ export const getUserProfile = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const getAllUsers = async (req, res) => {
+  try {
+      console.log("🔍 Checking user roles:", req.user);
+
+      if (!req.user?.roles || !req.user.roles.includes("admin")) {
+          console.error("❌ Unauthorized: User is not an admin.");
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
+
+      console.log("✅ Fetching users from database...");
+      const users = await pool.query("SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC");
+
+      console.log("✅ Users fetched:", users.rows);
+      res.status(200).json(users.rows);
+  } catch (error) {
+      console.error("❌ Error fetching users:", error);
+      res.status(500).json({ error: "Internal Server Error", details: error.message });
+  }
+};
 export const requestEmailVerification = async (req, res) => {
   try {
     const { newEmail } = req.body;

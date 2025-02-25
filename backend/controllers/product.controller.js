@@ -23,34 +23,125 @@ export const getProducts = async (req, res) => {
 // ✅ Update product
 export const updateProduct = async (req, res) => {
   try {
-    const { product_id } = req.params;
-    const { name, price, stock } = req.body;
+      const { product_id } = req.params;
+      const { name, price, stock, description, is_presale, release_date, stripe_product_id, stripe_price_id } = req.body;
 
-    if (!name || !price || stock === undefined) {
-      return res.status(400).json({ error: "Name, price, and stock are required" });
-    }
+      // ✅ Ensure only admins can update products
+      if (!req.user.roles.includes("admin")) {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
 
-    // ✅ Force PostgreSQL to refresh the query plan
-    await pool.query(`SET plan_cache_mode = force_generic_plan;`);
+      const updatedProduct = await pool.query(
+          `UPDATE products 
+           SET name = $1, price = $2, stock = $3, description = $4, is_presale = $5, release_date = $6, stripe_product_id = $7, stripe_price_id = $8
+           WHERE product_id = $9 RETURNING *`,
+          [name, price, stock, description, is_presale, release_date, stripe_product_id, stripe_price_id, product_id]
+      );
 
-    // ✅ Update product details
-    const updatedProduct = await pool.query(
-      `UPDATE products
-       SET name = $1, price = $2, stock = $3
-       WHERE product_id = $4
-       RETURNING product_id, name, price, stock;`,
-      [name, price, stock, product_id]
-    );
+      if (updatedProduct.rowCount === 0) {
+          return res.status(404).json({ error: "Product not found." });
+      }
 
-    if (updatedProduct.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found" });
-    }
-
-    console.log("✅ Product updated:", updatedProduct.rows[0]);
-    res.json(updatedProduct.rows[0]);
+      res.status(200).json({ message: "Product updated successfully!", product: updatedProduct.rows[0] });
   } catch (error) {
-    console.error("❌ Error updating product:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+      console.error("❌ Error updating product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const getAllProducts = async (req, res) => {
+  try {
+      // ✅ Ensure only admins can access
+      if (!req.user.roles.includes("admin")) {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
+
+      const products = await pool.query("SELECT * FROM products ORDER BY created_at DESC");
+      res.status(200).json(products.rows);
+  } catch (error) {
+      console.error("❌ Error fetching products:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const updateProductRequest = async (req, res) => {
+  try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      // ✅ Ensure only admins can update request status
+      if (!req.user.roles.includes("admin")) {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
+
+      const updatedRequest = await pool.query(
+          `UPDATE product_requests 
+           SET status = $1 
+           WHERE id = $2 RETURNING *`,
+          [status, id]
+      );
+
+      if (updatedRequest.rowCount === 0) {
+          return res.status(404).json({ error: "Product request not found." });
+      }
+
+      res.status(200).json({ message: "Product request updated successfully!", request: updatedRequest.rows[0] });
+  } catch (error) {
+      console.error("❌ Error updating product request:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const updateRequestQuantity = async (req, res) => {
+  try {
+      const { id } = req.params;
+      const { quantity } = req.body;
+
+      // ✅ Ensure only admins can update request quantity
+      if (!req.user.roles.includes("admin")) {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
+
+      if (quantity < 1) {
+          return res.status(400).json({ error: "Quantity must be at least 1." });
+      }
+
+      const updatedRequest = await pool.query(
+          `UPDATE product_requests 
+           SET quantity = $1 
+           WHERE id = $2 RETURNING *`,
+          [quantity, id]
+      );
+
+      if (updatedRequest.rowCount === 0) {
+          return res.status(404).json({ error: "Product request not found." });
+      }
+
+      res.status(200).json({ message: "Quantity updated successfully!", request: updatedRequest.rows[0] });
+  } catch (error) {
+      console.error("❌ Error updating product request quantity:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const deleteProduct = async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      // ✅ Ensure only admins can delete products
+      if (!req.user.roles.includes("admin")) {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
+
+      const deletedProduct = await pool.query(
+          "DELETE FROM products WHERE product_id = $1 RETURNING *",
+          [id]
+      );
+
+      if (deletedProduct.rowCount === 0) {
+          return res.status(404).json({ error: "Product not found." });
+      }
+
+      res.status(200).json({ message: "Product deleted successfully!" });
+  } catch (error) {
+      console.error("❌ Error deleting product:", error);
+      res.status(500).json({ error: "Internal Server Error" });
   }
 };
 // DUPLICATE CODE
@@ -95,81 +186,72 @@ export const addProduct = async (req, res) => {
 };
 // ✅ Request a product (Users can request a product)
 export const requestProduct = async (req, res) => {
-    try {
-        const { user_id, email: user_email } = req.user;
-        const { product_id } = req.body;
+  try {
+      const { user_id } = req.user;
+      const { product_id } = req.body;
 
-        if (!user_id || !user_email) {
-            console.error("❌ Missing user ID or email.");
-            return res.status(400).json({ error: "User ID and email are required." });
-        }
+      if (!user_id || !product_id) {
+          return res.status(400).json({ error: "User ID and Product ID are required." });
+      }
 
-        if (!product_id) {
-            console.error("❌ Missing required field: product_id");
-            return res.status(400).json({ error: "Product ID is required." });
-        }
+      console.log("📩 Processing request for product:", product_id, "by user:", user_id);
 
-        console.log("📩 Processing request for product:", product_id, "by user:", user_id, user_email);
+      // ✅ Check if the user has already requested this product (Prevent duplicates)
+      const existingRequest = await pool.query(
+          "SELECT * FROM product_requests WHERE product_id = $1 AND user_id = $2",
+          [product_id, user_id]
+      );
 
-        // ✅ Check if product exists
-        const productQuery = await pool.query(
-            "SELECT name FROM products WHERE product_id = $1",
-            [product_id]
-        );
+      if (existingRequest.rows.length > 0) {
+          return res.status(409).json({ error: "Product has already been requested." }); // ✅ Return a meaningful error
+      }
 
-        if (productQuery.rows.length === 0) {
-            return res.status(404).json({ error: "Product not found." });
-        }
+      // ✅ Insert the product request
+      const newRequest = await pool.query(
+          `INSERT INTO product_requests (product_id, user_id, requested_at) 
+           VALUES ($1, $2, NOW()) RETURNING *;`,
+          [product_id, user_id]
+      );
 
-        const product_name = productQuery.rows[0].name;
+      console.log("✅ Product request saved:", newRequest.rows[0]);
+      res.status(201).json({ message: "Product request submitted successfully!", request: newRequest.rows[0] });
 
-        // ✅ Check if the user has already requested this product
-        const existingRequest = await pool.query(
-            "SELECT * FROM product_requests WHERE product_id = $1 AND user_id = $2",
-            [product_id, user_id]
-        );
-
-        if (existingRequest.rows.length > 0) {
-            return res.status(409).json({ error: "Product already requested." });
-        }
-
-        // ✅ Insert the product request
-        const newRequest = await pool.query(
-            `INSERT INTO product_requests (product_id, user_id, user_email, product, requested_at) 
-             VALUES ($1, $2, $3, $4, NOW())
-             RETURNING *;`,
-            [product_id, user_id, user_email, product_name]
-        );
-
-        console.log("✅ Product request saved:", newRequest.rows[0]);
-
-        // ✅ Send confirmation email
-        console.log("📨 Sending confirmation email to:", user_email);
-        await sendProductRequestEmail(user_email, product_name);
-
-        res.status(201).json({ message: "Product request submitted successfully!", request: newRequest.rows[0] });
-
-    } catch (error) {
-        console.error("❌ Error processing product request:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+  } catch (error) {
+      console.error("❌ Error processing product request:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 export const deleteAllProductRequests = async (req, res) => {
   try {
-      // ✅ Ensure only admins can delete all product requests
-      if (req.user.role !== "admin") {
+      console.log("🔍 Checking user roles:", req.user); // Debugging log
+
+      // ✅ Ensure only admins can delete requests
+      if (!req.user?.roles || !req.user.roles.includes("admin")) {
+          console.error("❌ Unauthorized: User is not an admin.");
           return res.status(403).json({ error: "Unauthorized: Admin access required" });
       }
 
-      // ✅ Delete all product requests
       await pool.query("DELETE FROM product_requests");
 
       console.log("✅ All product requests deleted.");
-      res.status(200).json({ message: "All product requests have been deleted." });
-
+      res.status(200).json({ message: "All product requests deleted." });
   } catch (error) {
       console.error("❌ Error deleting product requests:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const getAllProductRequests = async (req, res) => {
+  try {
+      // ✅ Ensure only admins can access
+      if (!req.user.roles.includes("admin")) {
+          return res.status(403).json({ error: "Unauthorized: Admin access required" });
+      }
+
+      const requests = await pool.query("SELECT * FROM product_requests ORDER BY requested_at DESC");
+      res.status(200).json(requests.rows);
+  } catch (error) {
+      console.error("❌ Error fetching product requests:", error);
       res.status(500).json({ error: "Internal Server Error" });
   }
 };

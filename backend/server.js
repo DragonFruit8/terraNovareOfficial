@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import session from "express-session";
 import passport from "./config/passport.js";
-import productRoutes from "./routes/product.routes.js";
+import printRoutes from "./utils/printRoutes.js"; // ✅ Import the route printer
 import cartRoutes from "./routes/cart.routes.js";
 import webhookRouter from "./routes/webhook.routes.js";
 import orderRoutes from "./routes/orders.routes.js";
@@ -13,6 +13,7 @@ import stripeRoutes from "./routes/stripe.routes.js"
 import adminRoutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
+import productRoutes from "./routes/product.routes.js"
 import { authenticateUser, isAdmin } from "./middleware/auth.middleware.js"; 
 import { syncAllProducts } from "./services/stripe.service.js";
 import checkoutRoutes from "./routes/checkout.routes.js";
@@ -41,6 +42,8 @@ app.use((req, res, next) => {
   }
 });
 
+// ✅ Print all routes when server starts
+
 app.use(session({
   secret: process.env.SESSION_SECRET || "your_secret_key",
   resave: false,
@@ -48,6 +51,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
 //  Change to "https://terranovare.tech"
 app.use(cors({ origin: homePageOrigin, credentials: true }));
 app.use(cookieParser());
@@ -80,8 +84,11 @@ app.get('/api/health', (req, res) =>{
 	res.status(200).json({status: 'Server is running!!'})
 });
 
+printRoutes(app);
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   syncAllProducts();
 })
+
+export default app; 
