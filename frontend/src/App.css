@@ -1,0 +1,487 @@
+/* Color Scheme */
+:root {
+    --primary-color: #2C6B3F;
+    /* Earthy Green */
+    --secondary-color: #F5B300;
+    /* Warm Gold */
+    --accent-color: #4A90E2;
+    /* Soft Blue */
+    --neutral-light: #F5F5F5;
+    /* Off-White */
+    --neutral-dark: #333333;
+    /* Charcoal Gray */
+    --neutral-blue: #002f5c;
+    /* Ice Blue */
+
+    --primary-bg-light: #ffffff;
+    /* Light Mode Background */
+    --primary-bg-dark: #121212;
+    /* Dark Mode Background */
+    --text-light: #f5f5f5;
+    --text-dark: #333333;
+    --text-brown: #5c4f37;
+}
+
+/* Light Mode */
+[data-theme="light"] {
+    --primary-bg: var(--primary-bg-light);
+    --text-color: var(--text-dark);
+    --button-bg: var(--accent-color);
+}
+
+/* Dark Mode */
+[data-theme="dark"] {
+    --primary-bg: var(--primary-bg-dark);
+    --text-color: var(--text-light);
+    --button-bg: var(--primary-color);
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Ensure it fills the full viewport height */
+}
+
+.app-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 85.55vh;
+    /* Ensures full height of the viewport */
+    /* overflow-x: hidden; */
+}
+
+.content {
+    flex: 1;
+    /* Makes sure the main content expands */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Global Styles */
+body {
+    background-color: var(--primary-bg-light);
+    color: var(--text-dark);
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    transition: background-color 1s ease, color 1s ease;
+}
+
+h1, 
+h2,
+h3,
+h4,
+h5 {
+    color: var(--text-color);
+}
+
+/* Navbar */
+nav.navbar {
+    background-color: var(--neutral-light) !important;
+    transition: background-color 1s ease, color 0.3s ease;
+}
+.dark-mode {
+    transition: background-color 1s ease, color 0.3s ease;
+}
+
+.dark-mode nav.navbar,
+.dark-mode table .table {
+    background-color: var(--primary-bg-dark) !important;
+    color: var(--text-color);
+}
+#menuText {
+    color: black;
+}
+
+.dark-mode .navbar-toggler svg,
+.dark-mode #menuText {
+    color: white !important;
+    /* Ensures white color in dark mode */
+}
+
+.navbar-nav a .nav-link, a .nav-link {
+    color: var(--text-color) !important;
+}
+div#menuText.navbar {
+    color: var(--text-color);
+}
+
+
+.dark-mode div.navbar-title,
+.dark-mode nav .navbar-title svg,
+.dark-mode .navbar-title {
+    color: white !important;
+}
+
+.dark-mode a.navbar-brand,
+.dark-mode a .nav-link,
+.dark-mode div.navbar-title,
+.dark-mode span.navbar-toggler-icon,
+.dark-mode p.card-text,
+.dark-mode .card h1,
+.dark-mode .card h2,
+.dark-mode .card h3,
+.dark-mode .card h4,
+.dark-mode h5,
+.dark-mode div.card  {
+    color: var(--text-color);
+    transition: background-color 1s ease, color 0.3s ease;
+}
+.dark-mode button.navbar-toggler {
+    border: var(--text-brown) 1px solid !important;
+}
+button.navbar-toggler {
+    border: var(--text-dark) 1px solid !important;
+    padding-bottom: 5px;
+}
+
+.nav-link:hover,
+a.nav-link:hover {
+    color: var(--secondary-color);
+}
+
+.dark-mode a.nav-link,
+.dark-mode footer p {
+    color: var(--text-color);
+}
+.dark-mode footer {
+    background-color: var(--neutral-blue) !important;
+    transition: background-color 1s ease, color 0.3s ease;
+
+} 
+.navbar-nav .nav-link:hover {
+    color: var(--secondary-color) !important;
+    transition: color 1s ease, color 0.3s ease;
+}
+
+footer a.nav-link {
+    color: white;
+}
+span.text-muted {
+    color: var(--text-brown) !important; /* Subtle gray */
+    /* font-size: 0.9rem; */
+    opacity: 0.75; /* Makes it less prominent */
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Buttons */
+.btn .btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+/* File Uploader Styles */
+.upload-container {
+    width: 400px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px dashed var(--accent-color);
+    border-radius: 10px;
+    text-align: center;
+}
+
+.dropzone {
+    cursor: pointer;
+    padding: 20px;
+    background-color: var(--neutral-light);
+    transition: 0.3s;
+}
+
+.dropzone:hover {
+    background-color: #e3f2fd;
+}
+
+.file-list {
+    margin-top: 15px;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    background: var(--primary-bg-light);
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.upload-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upload-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Dark Mode Styles */
+.dark-mode {
+    background-color: var(--primary-bg-dark);
+    color: var(--text-light);
+}
+
+.dark-mode .navbar {
+    background-color: var(--primary-color);
+    transition: background-color 1s ease, color 0.3s ease;
+}
+
+.dark-mode .navbar-nav .nav-link {
+    color: var(--text-light) !important;
+}
+
+.dark-mode .navbar-nav,
+a.nav-link:hover {
+    color: var(--secondary-color) !important;
+}
+
+.dark-mode .file-item {
+    background: var(--primary-bg-dark);
+    color: var(--text-light);
+}
+
+.dark-mode .dropzone {
+    background-color: var(--primary-bg-dark);
+}
+
+.dark-mode .upload-btn {
+    background-color: var(--accent-color);
+}
+
+/* Toggle Button */
+.toggle-button {
+    position: fixed;
+    bottom: 50px;
+    right: 5px;
+    background-color: green;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    font-size: 16px;
+    transition: all 0.6s ease-in-out;
+}
+
+.dark-mode .toggle-button {
+    background-color: orange;
+    color: var(--text-color);
+    font-weight: 600;
+    transition: all 1s ease-in-out;
+}
+
+.toggle-button:hover {
+    background-color: white !important;
+    transition: all 1s ease-in-out;
+    color: red;
+    font-weight: 700;
+}
+
+
+/* ✅ Dropdown Button */
+.btn-secondary.dropdown-toggle {
+    background-color: var(--neutral-blue); /* Default button color */
+    color: white !important;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-secondary.dropdown-toggle:hover {
+    background-color: var(--neutral-blue); /* Change on hover */
+    color: white !important;
+}
+
+/* ✅ SVG Icon Styling */
+.btn-secondary.dropdown-toggle svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--text-light); /* Matches text color */
+}
+
+/* ✅ Adjust Text */
+.btn-secondary.dropdown-toggle span {
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.6s ease-in-out;
+}
+
+
+
+.btn .btn-secondary .dropdown-toggle {
+    background-color: var(--neutral-blue) !important;
+}
+
+.dark-mode .btn-secondary.dropdown-toggle {
+    background-color: var(--primary-color); /* Dark background */
+    color: var(--text-light);
+}
+
+.dark-mode .btn-secondary.dropdown-toggle:hover {
+    background-color: var(--accent-color);
+    color: white !important;
+}
+
+.dark-mode .btn-secondary.dropdown-toggle svg {
+    stroke: var(--text-light);
+}
+
+/* Overlay */
+.dark-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay with 50% transparency */
+    z-index: 0; /* Ensures the overlay is on top of the image but behind the text */
+  }
+
+  .dark-mode .modal-header .btn-close {
+    color: white !important;
+  }
+
+  /* ✅ Table CSS */
+.table-responsive {
+    overflow-x: auto;
+    max-width: 100%;
+    display: block;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* ✅ Improves scrollbar visibility */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background-color: var(--accent-color);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: var(--neutral-dark);
+}
+
+.dark-mode thead th {
+    background-color: var(--primary-bg);
+    color: var(--text-color);
+}
+
+.dark-mode tbody td,
+.dark-mode .card .card-body,
+.dark-mode .modal-content,
+.dark-mode .card{
+    background-color: var(--neutral-blue);
+    color: var(--text-color);
+    border-color: #121212;
+    box-shadow: white 5px 5px 15px;
+}
+
+/* Modal */
+/* Modal Header */
+.dark-mode .modal-header {
+    color: white !important; /* Light text */
+    padding: 15px;
+    border-bottom: 2px solid var(--secondary-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.dark-mode #close {
+    color: var(--neutral-light);
+}
+/* Modal Title */
+.modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+/* Close Button */
+.dark-mode .btn-close {
+    color: white !important;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.btn-close:hover {
+    color: var(--text-color);
+}
+
+/* BRANDS Section */
+
+/* ✅ Brands We Support Section */
+.brands-support-section {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+/* ✅ Section Title */
+.brands-support-section h2 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin: 20px 0;
+}
+
+/* ✅ Brands Container */
+.brands-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px 0;
+}
+
+/* ✅ Individual Brand Item */
+.brand-item {
+    width: 120px; /* Fixed width */
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ✅ Brand Logos */
+.brand-item img {
+    max-width: 100%;
+    height: auto;
+    filter: grayscale(50%); /* Makes them slightly muted */
+    transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+/* ✅ Hover Effect */
+.brand-item img:hover {
+    filter: grayscale(0%);
+    transform: scale(1.1);
+}
+
+/* ✅ Dark Mode */
+.dark-mode .brands-support-section {
+    background-color: var(--primary-bg-dark);
+    color: var(--text-light);
+}

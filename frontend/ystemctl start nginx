@@ -1,0 +1,22 @@
+[0;1;32m●[0m nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (]8;;file://srv723678/usr/lib/systemd/system/nginx.service/usr/lib/systemd/system/nginx.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Sat 2025-02-22 17:48:41 UTC; 5min ago
+       Docs: ]8;;man:nginx(8)man:nginx(8)]8;;
+   Main PID: 814 (nginx)
+      Tasks: 2 (limit: 4654)
+     Memory: 4.4M (peak: 5.1M)
+        CPU: 46ms
+     CGroup: /system.slice/nginx.service
+             ├─[0;38;5;245m814 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"[0m
+             └─[0;38;5;245m816 "nginx: worker process"[0m
+
+Feb 22 17:48:41 srv723678 systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...
+Feb 22 17:48:41 srv723678 nginx[752]: 2025/02/22 17:48:41 [warn] 752#752: conflicting server name "terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[752]: 2025/02/22 17:48:41 [warn] 752#752: conflicting server name "www.terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[752]: 2025/02/22 17:48:41 [warn] 752#752: conflicting server name "terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[752]: 2025/02/22 17:48:41 [warn] 752#752: conflicting server name "www.terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[781]: 2025/02/22 17:48:41 [warn] 781#781: conflicting server name "terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[781]: 2025/02/22 17:48:41 [warn] 781#781: conflicting server name "www.terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[781]: 2025/02/22 17:48:41 [warn] 781#781: conflicting server name "terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 nginx[781]: 2025/02/22 17:48:41 [warn] 781#781: conflicting server name "www.terranovare.tech" on 0.0.0.0:80, ignored
+Feb 22 17:48:41 srv723678 systemd[1]: Started nginx.service - A high performance web server and a reverse proxy server.
