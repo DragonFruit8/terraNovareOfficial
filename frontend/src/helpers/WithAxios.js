@@ -28,10 +28,10 @@ const WithAxios = ({ children }) => {
             try {
               originalRequest._retry = true;
               const res = await axiosInstance.post("/auth/refresh-token");
-              localStorage.setItem("token", JSON.stringify(res.data.token));
+              sessionStorage.setItem("token", JSON.stringify(res.data.token));
               return axios(originalRequest);
             } catch (error) {
-              localStorage.removeItem("token");
+              sessionStorage.removeItem("token");
               setIsLoggedIn(false);
               setAuthData(null);
               setUserData(null);

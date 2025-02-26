@@ -6,7 +6,7 @@ import axiosInstance from "../api/axios.config";
 
 const Navbar = () => {
   const navigate = useNavigate();
-    const { setUserData, userData, loading, setLoading } = useUser();
+    const { setUserData, userData, loading, setLoading, theme } = useUser();
 
     // ✅ Fetch User Data on Mount
     useEffect(() => {

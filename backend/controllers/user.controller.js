@@ -1,33 +1,21 @@
-import nodemailer from "nodemailer";
+import { transporter } from "../services/email.service.js"; // ✅ Reuse global transporter
 import bcrypt from 'bcryptjs';
 import pool from "../config/db.js";
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465, // ✅ Use 465 for SSL (more stable)
-  secure: true, // ✅ Set to true when using port 465
-  auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-      rejectUnauthorized: true, // ✅ Enable strict SSL checking
-  },
-  connectionTimeout: 10000, // ✅ Increase timeout (10 seconds)
-  debug: true, // ✅ Enable debugging logs
-  logger: true, // ✅ Log SMTP activity
-});
 export const getUserProfile = async (req, res) => {
   try {
-	
-  console.log("🔍 Incoming Request: ", req.user);  
-  const userId = req.user.user_id;
+    if (!req.user || !req.user.user_id) {
+      console.error("🔍 Incoming User ID: Undefined (Invalid Token)");
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    }
+
+    console.log("🔍 Incoming User ID:", req.user.user_id);
 
     const user = await pool.query(
       `SELECT user_id, username, fullname, email, roles, address, city, state, country
        FROM users
        WHERE user_id = $1`,
-      [userId]
+      [req.user.user_id]
     );
 
     if (user.rows.length === 0) {

@@ -1,20 +1,20 @@
 import pool from "../config/db.js";
+import { sendProductRequestEmail } from "../services/email.service.js"; 
 import Stripe from "stripe";
-import { sendProductRequestEmail } from "../controllers/user.controller.js"; // ✅ Ensure correct import
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// import { sendProductRequestEmail } from "../utils/email.js"; // ✅ For confirmation emails
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ✅ Get all products
 export const getProducts = async (req, res) => {
   try {
-    await pool.query(`SET plan_cache_mode = force_generic_plan;`); // Force query replanning
+    const result = await pool.query(`
+      SELECT product_id, name, description, image_url, is_presale
+      FROM products
+      ORDER BY created_at DESC
+    `);
+    
+    res.status(200).json(result.rows); // ✅ Send all products, including presale ones
 
-    const products = await pool.query(
-      `SELECT product_id, image_url, name, price, stock FROM products`
-    );
-
-    res.json(products.rows);
   } catch (error) {
     console.error("❌ Error fetching products:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -126,6 +126,36 @@ export const updateProductRequest = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const getProductRequests = async (req, res) => {
+  const { email } = req.query; // ✅ Check if email is provided
+
+  try {
+    let query, params;
+
+    if (email) {
+      // ✅ Fetch user-specific product requests
+      query = `SELECT product_id FROM product_requests WHERE user_email = $1`;
+      params = [email];
+    } else {
+      // ✅ Fetch all product requests (admin)
+      query = `
+        SELECT pr.id, pr.user_email, pr.product, pr.quantity, pr.status, pr.requested_at,
+               u.address, u.city, u.state, u.country
+        FROM product_requests pr
+        JOIN users u ON pr.user_id = u.user_id
+        ORDER BY pr.requested_at DESC;
+      `;
+      params = []; // No parameters for fetching all
+    }
+
+    const result = await pool.query(query, params);
+    res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error("❌ Error fetching product requests:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 export const deleteProductRequest = async (req, res) => {
   try {
     const { id } = req.params;
@@ -215,6 +245,25 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+// export const sendProductRequestEmail = async (to, productName) => {
+//   const mailOptions = {
+//       from: process.env.EMAIL_USER,
+//       to,
+//       subject: "Product Request Confirmation",
+//       text: `Thank you for requesting ${productName}. We will notify you once it's available!`,
+//   };
+
+//   try {
+//       console.log("📧 Preparing to send email to:", to);
+//       const info = await transporter.sendMail(mailOptions);
+//       console.log("✅ Email sent successfully:", info.response);
+//       return info;
+//   } catch (error) {
+//       console.error("❌ Error sending email:", error);
+//       throw new Error("Failed to send email");
+//   }
+// };
+
 // DUPLICATE CODE
 // ✅ Add New Product
 export const addProduct = async (req, res) => {
@@ -277,98 +326,57 @@ export const addProduct = async (req, res) => {
 };
 // ✅ Request a product (Users can request a product)
 export const requestProduct = async (req, res) => {
+  const { user_email, user_id, product_id } = req.body;
+
   try {
-    const { product_id } = req.body;
+      console.log("📩 Incoming product request from:", user_email, "for product:", product_id);
 
-    if (!req.user || !req.user.email) {
-      return res.status(400).json({ error: "User email is required." });
-    }
+      // ✅ Fetch product name
+      const productQuery = await pool.query(
+          "SELECT name FROM products WHERE product_id = $1",
+          [product_id]
+      );
 
-    const user_email = req.user.email;
-    const user_id = req.user.user_id;
+      if (productQuery.rowCount === 0) {
+          console.error("❌ Product not found:", product_id);
+          return res.status(404).json({ error: "Product not found" });
+      }
 
-    if (!product_id) {
-      return res.status(400).json({ error: "Product ID is required." });
-    }
+      const productName = productQuery.rows[0].name;
+      console.log("✅ Product found:", productName);
 
-    console.log(
-      "📩 Processing request for product:",
-      product_id,
-      "by user:",
-      user_id,
-      user_email
-    );
+      // ✅ Check if product is already requested
+      const existingRequest = await pool.query(
+          "SELECT * FROM product_requests WHERE user_email = $1 AND product_id = $2",
+          [user_email, product_id]
+      );
 
-    // ✅ Fetch the user's full address from the users table
-    const userQuery = await pool.query(
-      `SELECT address, city, state, country FROM users WHERE user_id = $1`,
-      [user_id]
-    );
+      if (existingRequest.rowCount > 0) {
+          console.log("⚠️ Product already requested by this user. Sending confirmation email anyway...");
 
-    console.log("🔍 User Address Data:", userQuery.rows); // ✅ DEBUGGING LOG
+          // ✅ Send email confirmation even if already requested
+          await sendProductRequestEmail(user_email, productName);
+          return res.status(200).json({ message: "Product already requested. Email sent again." });
+      }
 
-    if (userQuery.rows.length === 0) {
-      return res.status(404).json({ error: "User not found." });
-    }
+      // ✅ Insert new request
+      console.log("📝 Inserting request into database...");
+      await pool.query(
+          "INSERT INTO product_requests (user_id, user_email, product_id, product, requested_at, status) VALUES ($1, $2, $3, $4, NOW(), 'pending')",
+          [user_id, user_email, product_id, productName]
+      );
+      console.log("✅ Request inserted successfully.");
 
-    const { address, city, state, country } = userQuery.rows[0];
+      // ✅ Send confirmation email
+      console.log("📧 Attempting to send email to:", user_email);
+      await sendProductRequestEmail(user_email, productName);
+      console.log("✅ Email successfully sent!");
 
-    console.log("✅ Retrieved Address:", { address, city, state, country }); // ✅ DEBUGGING LOG
+      res.status(201).json({ message: "Product requested successfully and email sent." });
 
-    if (!address || !city || !state || !country) {
-      return res.status(400).json({ error: "User address is incomplete." });
-    }
-
-    // ✅ Check if the product exists
-    const productQuery = await pool.query(
-      "SELECT name FROM products WHERE product_id = $1",
-      [product_id]
-    );
-
-    if (productQuery.rows.length === 0) {
-      return res.status(404).json({ error: "Product not found." });
-    }
-
-    const product_name = productQuery.rows[0].name;
-
-    // ✅ Check if the user has already requested this product
-    const existingRequest = await pool.query(
-      "SELECT * FROM product_requests WHERE product_id = $1 AND user_id = $2",
-      [product_id, user_id]
-    );
-
-    if (existingRequest.rows.length > 0) {
-      return res.status(409).json({ error: "Product already requested." });
-    }
-
-    // ✅ Insert the product request with the user's address
-    const newRequest = await pool.query(
-      `INSERT INTO product_requests (product_id, user_id, user_email, product, address, city, state, country, requested_at, quantity, status) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), $9, 'pending') 
-       RETURNING *;`,
-      [
-        product_id,
-        user_id,
-        user_email,
-        product_name,
-        address,
-        city,
-        state,
-        country,
-        1,
-      ] // Default quantity = 1
-    );
-
-    console.log("✅ Product request saved:", newRequest.rows[0]);
-    res
-      .status(201)
-      .json({
-        message: "Product request submitted successfully!",
-        request: newRequest.rows[0],
-      });
   } catch (error) {
-    console.error("❌ Error processing product request:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+      console.error("❌ Error processing product request:", error);
+      res.status(500).json({ error: "Server error while requesting product." });
   }
 };
 export const deleteAllProductRequests = async (req, res) => {
@@ -393,19 +401,32 @@ export const deleteAllProductRequests = async (req, res) => {
   }
 };
 export const getAllProductRequests = async (req, res) => {
-  try {
-    const requests = await pool.query(`
-      SELECT pr.id, pr.user_email, pr.product, pr.quantity, pr.status, pr.requested_at,
-             u.address, u.city, u.state, u.country
-      FROM product_requests pr
-      JOIN users u ON pr.user_id = u.user_id
-      ORDER BY pr.requested_at DESC;
-    `);
+  const { email } = req.query; // ✅ Check if a specific email is provided
 
-    res.status(200).json(requests.rows);
+  try {
+    let query, params;
+
+    if (email) {
+      // ✅ Fetch only requested products for a specific user
+      query = `SELECT product_id FROM product_requests WHERE user_email = $1`;
+      params = [email];
+    } else {
+      // ✅ Fetch all product requests (admin view)
+      query = `
+        SELECT pr.id, pr.user_email, pr.product, pr.quantity, pr.status, pr.requested_at,
+               u.address, u.city, u.state, u.country
+        FROM product_requests pr
+        JOIN users u ON pr.user_id = u.user_id
+        ORDER BY pr.requested_at DESC;
+      `;
+      params = []; // No params needed for all requests
+    }
+
+    const result = await pool.query(query, params);
+    res.status(200).json(result.rows);
+
   } catch (error) {
     console.error("❌ Error fetching product requests:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-

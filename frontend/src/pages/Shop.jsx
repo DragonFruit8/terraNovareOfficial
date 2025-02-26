@@ -4,19 +4,21 @@ import { useUser } from "../context/UserContext";
 import { toast } from "react-toastify";
 
 const Shop = () => {
-  const { userData } = useUser(); 
+  const { userData } = useUser();
   const [products, setProducts] = useState([]); // ✅ Store products
   const [requestedProducts, setRequestedProducts] = useState([]); // ✅ Store requested products
 
   useEffect(() => {
-    // ✅ Fetch all products
     const fetchProducts = async () => {
       try {
-        const { data } = await axiosInstance.get("/products");
-        console.log(data) // See SAID DATA!
-        setProducts(data); // ✅ Use setProducts
+        const response = await axiosInstance.get("/products"); // ✅ Fetches all products
+        setProducts(response.data);
+        console.log("✅ Products fetched:", response.data);
       } catch (error) {
-        console.error("❌ Error fetching products:", error);
+        console.error(
+          "❌ Error fetching products:",
+          error.response?.data || error.message
+        );
       }
     };
 
@@ -24,92 +26,112 @@ const Shop = () => {
   }, []);
 
   useEffect(() => {
-    // ✅ Fetch previously requested products
+    const fetchRequestedProducts = async () => {
+      if (!userData?.email) return;
+  
+      try {
+        console.log("🔍 Fetching requested products for:", userData.email);
+  
+        const { data } = await axiosInstance.get(
+          `/products/requested?email=${encodeURIComponent(userData.email)}`
+        );
+        setRequestedProducts(data.map((req) => req.product_id)); // ✅ Store requested product IDs
+      } catch (error) {
+        console.error(
+          "❌ Error fetching requested products:",
+          error.response?.data || error.message
+        );
+      }
+    };
+  
+    fetchRequestedProducts();
+  }, [userData]); // ✅ Ensures fetching happens only once when `userData` is available
+  
+
+  useEffect(() => {
     const fetchRequestedProducts = async () => {
       if (!userData?.email) return;
 
       try {
         console.log("🔍 Fetching requested products for:", userData.email);
 
-        const { data } = await axiosInstance.get(`/products/requested?email=${encodeURIComponent(userData.email)}`);
+        const { data } = await axiosInstance.get(
+          `/products/requested?email=${encodeURIComponent(userData.email)}`
+        );
         setRequestedProducts(data.map((req) => req.product_id)); // ✅ Store requested product IDs
       } catch (error) {
-        console.error("❌ Error fetching requested products:", error.response?.data || error.message);
+        console.error(
+          "❌ Error fetching requested products:",
+          error.response?.data || error.message
+        );
       }
     };
 
     fetchRequestedProducts();
   }, [userData]);
 
+  const handleProductRequest = async (product) => {
+    if (requestedProducts.includes(product.product_id)) {
+      toast.warning("This product has already been requested!");
+      return;
+    }
   
-  useEffect(() => {
-    const fetchRequestedProducts = async () => {
-        if (!userData?.email) return;
-
-        try {
-            console.log("🔍 Fetching requested products for:", userData.email);
-
-            const { data } = await axiosInstance.get(`/products/requested?email=${encodeURIComponent(userData.email)}`);
-            setRequestedProducts(data.map((req) => req.product_id)); // ✅ Store requested product IDs
-        } catch (error) {
-            console.error("❌ Error fetching requested products:", error.response?.data || error.message);
-        }
-    };
-
-    fetchRequestedProducts();
-}, [userData]);
-
-
-
-
-const handleProductRequest = async (product) => {
-  if (!product?.product_id) {
-      console.error("❌ Missing product ID:", product);
-      toast.error("Invalid product data.");
-      return;
-  }
-
-  const token = localStorage.getItem("token");
-  if (!token) {
-      toast.error("Session expired. Please log in again.");
-      return;
-  }
-
-  try {
-      // ✅ Retrieve user email from the token or context
-      const userEmail = userData?.email;
-      if (!userEmail) {
-          toast.error("User email not found. Please log in again.");
-          return;
+    try {
+      console.log("📩 Requesting product:", product.product_id);
+  
+      const response = await axiosInstance.post("/products/request", {
+        user_email: userData.email,
+        user_id: userData.user_id,
+        product_id: product.product_id,
+      });
+  
+      if (response.status === 200 || response.status === 201) {
+        toast.success("✅ Product request submitted!");
+        setRequestedProducts((prev) => [...prev, product.product_id]);
       }
-
-      console.log("📩 Sending Request Data:", { product_id: product.product_id, email: userEmail });
-
-      const response = await axiosInstance.post(
-          "/products/request",
-          { product_id: product.product_id, email: userEmail }, // ✅ Now including email
-          { headers: { Authorization: `Bearer ${token}` } }
+    } catch (error) {
+      console.error(
+        "❌ Error requesting product:",
+        error.response?.data || error.message
       );
+      toast.error("❌ Failed to request product. Please try again.");
+    }
+  };
+  
 
-      if (response.status === 201) {
-          toast.success(response.data.message);
-          setRequestedProducts((prevRequested) => [...new Set([...prevRequested, product.product_id])]);
-      } else {
-          throw new Error(response.data.message || "Product request failed.");
-      }
-  } catch (error) {
-      console.error("❌ Request Error:", error.response?.data || error.message);
-
-      if (error.response?.status === 401) {
-          toast.error("Session expired. Please log in again.");
-          localStorage.removeItem("token"); 
-          window.location.reload();
-      } else {
-          toast.error(error.response?.data?.error || "Failed to request product.");
-      }
-  }
-};
-
+  const renderProductCard = (product, isPresale = false) => {
+    const isRequested = requestedProducts.includes(product.product_id);
+  
+    return (
+      <div key={product.product_id} className="col-md-4 mb-4">
+        <div className={`card p-3 ${isPresale ? "border-warning" : ""}`}>
+          <h5 className={isPresale ? "text-warning" : ""}>
+            {product.name} {isPresale ? "(Presale) 🔥" : ""}
+          </h5>
+          <p>{product.description}</p>
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="img-fluid"
+          />
+  
+          {userData ? (
+            <button
+              className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`}
+              onClick={() => handleProductRequest(product)}
+              disabled={isRequested}
+            >
+              {isRequested ? "Already Requested ✅" : isPresale ? "Request Presale Product" : "Request Product"}
+            </button>
+          ) : (
+            <p className="text-muted mt-2">🔒 Login to request this product</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
+  
 
   return (
     <div className="container mt-5 min-vh-100">
@@ -122,32 +144,8 @@ const handleProductRequest = async (product) => {
         <p>No presale products available.</p>
       ) : (
         products
-          .filter((product) => product.is_presale) // ✅ Only show presale products
-          .map((product) => {
-            const isRequested = requestedProducts.includes(product.product_id);
-
-            return (
-              <div key={product.product_id} className="col-md-4 mb-4">
-                <div className="card p-3 border-warning">
-                  <h5 className="text-warning">{product.name} (Presale) 🔥</h5>
-                  <p>{product.description}</p>
-                  <img src={product.image_url} alt={product.name} className="img-fluid" />
-
-                  {userData ? (
-                    <button
-                      className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`}
-                      onClick={() => handleProductRequest(product)}
-                      disabled={isRequested}
-                    >
-                      {isRequested ? "Already Requested ✅" : "Request Presale Product"}
-                    </button>
-                  ) : (
-                    <p className="text-muted mt-2">🔒 Login to request this product</p>
-                  )}
-                </div>
-              </div>
-            );
-          })
+          .filter((product) => product.is_presale)
+          .map((product) => renderProductCard(product, true))
       )}
     </div>
 
@@ -157,36 +155,10 @@ const handleProductRequest = async (product) => {
       {products.length === 0 ? (
         <p>No products available.</p>
       ) : (
-        products
-          .map((product) => {
-            const isRequested = requestedProducts.includes(product.product_id);
-
-            return (
-              <div key={product.product_id} className="col-md-4 mb-4">
-                <div className="card p-3">
-                  <h5>{product.name}</h5>
-                  <p>{product.description}</p>
-                  <img src={product.image_url} alt={product.name} className="img-fluid" />
-
-                  {userData ? (
-                    <button
-                      className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`}
-                      onClick={() => handleProductRequest(product)}
-                      disabled={isRequested}
-                    >
-                      {isRequested ? "Already Requested ✅" : "Request Product"}
-                    </button>
-                  ) : (
-                    <p className="text-muted mt-2">🔒 Login to request this product</p>
-                  )}
-                </div>
-              </div>
-            );
-          })
+        products.map((product) => renderProductCard(product))
       )}
     </div>
   </div>
-  
   );
 };
 

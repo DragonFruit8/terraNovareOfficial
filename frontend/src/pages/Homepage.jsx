@@ -85,7 +85,7 @@ export default function Homepage() {
 
       <div className="container justify-items-center mt-5">
 
-        <div id='#mission' className="row featurette">
+        <div id='mission' className="row featurette">
           <div className="col-md-7 p-3">
             <h2 className="featurette-heading">First featurette heading. <span className="text-muted">It’ll blow your mind.</span></h2>
             <p className="lead">Some great placeholder content for the first featurette here. Imagine some exciting prose here.</p>

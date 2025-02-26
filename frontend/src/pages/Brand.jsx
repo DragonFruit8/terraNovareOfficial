@@ -117,19 +117,19 @@ export default function Brand() {
           </div>
         </div>
 
-        <section class="brands-support-section">
+        <section className="brands-support-section">
           <h2>Brands We Support</h2>
-          <div class="brands-container">
-            <div class="brand-item">
+          <div className="brands-container">
+            <div className="brand-item">
               <img src="brand1-logo.png" alt="Brand 1" />
             </div>
-            <div class="brand-item">
+            <div className="brand-item">
               <img src="brand2-logo.png" alt="Brand 2" />
             </div>
-            <div class="brand-item">
+            <div className="brand-item">
               <img src="brand3-logo.png" alt="Brand 3" />
             </div>
-            <div class="brand-item">
+            <div className="brand-item">
               <img src="brand4-logo.png" alt="Brand 4" />
             </div>
           </div>

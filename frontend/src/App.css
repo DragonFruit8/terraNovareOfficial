@@ -74,12 +74,12 @@ body {
     transition: background-color 1s ease, color 1s ease;
 }
 
-h1, 
-h2,
-h3,
-h4,
-h5 {
-    color: var(--text-color);
+.dark-mode h1, 
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5 {
+    color: white !important;
 }
 
 /* Navbar */
@@ -116,12 +116,13 @@ div#menuText.navbar {
 
 .dark-mode div.navbar-title,
 .dark-mode nav .navbar-title svg,
-.dark-mode .navbar-title {
+.dark-mode .navbar-title,
+.dark-mode a.navbar-brand,
+.dark-mode a .nav-link {
     color: white !important;
 }
 
-.dark-mode a.navbar-brand,
-.dark-mode a .nav-link,
+
 .dark-mode div.navbar-title,
 .dark-mode span.navbar-toggler-icon,
 .dark-mode p.card-text,
@@ -147,8 +148,7 @@ a.nav-link:hover {
     color: var(--secondary-color);
 }
 
-.dark-mode a.nav-link,
-.dark-mode footer p {
+.dark-mode a.nav-link{
     color: var(--text-color);
 }
 .dark-mode footer {
@@ -161,7 +161,8 @@ a.nav-link:hover {
     transition: color 1s ease, color 0.3s ease;
 }
 
-footer a.nav-link {
+.dark-mode footer a.nav-link,
+.dark-mode footer p  {
     color: white;
 }
 span.text-muted {
@@ -169,6 +170,9 @@ span.text-muted {
     /* font-size: 0.9rem; */
     opacity: 0.75; /* Makes it less prominent */
     transition: color 0.3s ease, opacity 0.3s ease;
+}
+.dark-mode .text-muted {
+    color: var(--text-brown) !important;
 }
 
 /* Buttons */

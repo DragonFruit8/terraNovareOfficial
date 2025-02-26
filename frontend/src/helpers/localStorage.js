@@ -1,11 +1,11 @@
 class LocalCart {
   isExist = (id) => !!this.getItem(id);
 
-  getItems = () => JSON.parse(localStorage.getItem("__cart")) || [];
+  getItems = () => JSON.parse(sessionStorage.getItem("__cart")) || [];
 
   getItem = (id) => this.getItems().find((product) => product.product_id === id);
 
-  saveItems = (data) => localStorage.setItem("__cart", JSON.stringify(data));
+  saveItems = (data) => sessionStorage.setItem("__cart", JSON.stringify(data));
 
   removeItem = (id) =>
     this.saveItems(this.getItems().filter((product) => product.product_id !== id));
@@ -52,7 +52,7 @@ class LocalCart {
       this.saveItems([...this.getItems(), product]);
     }
   };
-  clearCart = () => localStorage.removeItem("__cart");
+  clearCart = () => sessionStorage.removeItem("__cart");
 }
 
 const localCart = new LocalCart();

@@ -1,6 +1,6 @@
 import API from "../api/axios.config";
 
-const user_id = JSON.parse(localStorage.getItem("user"))?.user_id;
+const user_id = JSON.parse(sessionStorage.getItem("user"))?.user_id;
 
 class ReviewService {
   getReviews(product_id) {

@@ -1,13 +1,14 @@
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "react-feather";
+import { toast } from "react-toastify";
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import Collapse from "bootstrap/js/dist/collapse";
 import { FaBars } from "react-icons/fa";
 
 const Nav = () => {
-  const { userData, logout } = useUser();
+  const { userData, setUserData, logout } = useUser();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -38,9 +39,11 @@ const Nav = () => {
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    navigate("/");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
+    setUserData(null);
+    navigate("/login");
+    toast.success("✅ Logged out successfully.");
   };
 
   // Toggle Bootstrap Navbar Collapse

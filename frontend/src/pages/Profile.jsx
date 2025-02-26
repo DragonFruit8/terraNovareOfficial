@@ -15,7 +15,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         if (!token) {
           toast.error("Unauthorized: Please log in again.");
           return;
@@ -46,7 +46,7 @@ const Profile = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         toast.error("Unauthorized: Please log in again.");
         return;
@@ -76,16 +76,31 @@ const Profile = () => {
         <div className="card">
           <div className="card-body">
             <h4 className="card-title">{userData?.fullname}</h4>
-            <p className="card-text"><strong>Username:</strong> {userData?.username}</p>
-            <p className="card-text"><strong>Email:</strong> {userData?.email}</p>
-            <p className="card-text"><strong>Address:</strong> {userData?.address}</p>
-            <p className="card-text"><strong>City:</strong> {userData?.city}</p>
-            <p className="card-text"><strong>State:</strong> {userData?.state}</p>
-            <p className="card-text"><strong>Country:</strong> {userData?.country}</p>
-            <p className="card-text"><strong>Role:</strong> {userData?.roles.join(", ") || "user"}</p>
-
-            {/* ✅ Edit Button */}
-            <button onClick={() => setEditMode(true)} className="btn btn-warning mt-3">
+            <p className="card-text">
+              <strong>Username:</strong> {userData?.username}
+            </p>
+            <p className="card-text">
+              <strong>Email:</strong> {userData?.email}
+            </p>
+            <p className="card-text">
+              <strong>Address:</strong> {userData?.address}
+            </p>
+            <p className="card-text">
+              <strong>City:</strong> {userData?.city}
+            </p>
+            <p className="card-text">
+              <strong>State:</strong> {userData?.state}
+            </p>
+            <p className="card-text">
+              <strong>Country:</strong> {userData?.country}
+            </p>
+            <p className="card-text">
+              <strong>Role:</strong> {Array.isArray(userData?.roles) ? userData.roles.join(", ") : "user"}
+            </p>
+            <button
+              onClick={() => setEditMode(true)}
+              className="btn btn-warning mt-3"
+            >
               Edit Profile
             </button>
           </div>
@@ -174,7 +189,11 @@ const Profile = () => {
           <button type="submit" className="btn btn-primary me-2">
             Save Changes
           </button>
-          <button type="button" className="btn btn-secondary" onClick={() => setEditMode(false)}>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setEditMode(false)}
+          >
             Cancel
           </button>
         </form>

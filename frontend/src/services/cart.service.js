@@ -1,11 +1,11 @@
 import axiosInstance from "../api/axios.config";
 // import { useUser } from "../context/UserContext";
-// import localCart from "../helpers/localStorage";
+// import localCart from "../helpers/sessionStorage";
 
 class CartService {
   async getCart(user_id) {
     try {
-      const token = localStorage.getItem("token"); // ✅ Get token from localStorage
+      const token = sessionStorage.getItem("token"); // ✅ Get token from sessionStorage
       if (!token) {
         console.error("❌ No authentication token found");
         return { error: "User authentication required" };
@@ -23,7 +23,7 @@ class CartService {
 
   async addToCart(product_id, quantity) {
     try {
-      const token = localStorage.getItem("token"); // ✅ Get token from localStorage
+      const token = sessionStorage.getItem("token"); // ✅ Get token from sessionStorage
       if (!token) {
         console.error("❌ No authentication token found");
         return { error: "User is not authenticated" };
@@ -44,7 +44,7 @@ class CartService {
 
   async removeFromCart(product_id) {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) {
         console.error("❌ No authentication token found");
         throw new Error("User authentication required");
@@ -62,7 +62,7 @@ class CartService {
 
   async increment(user_id, product_id) {
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) throw new Error("No authentication token provided");
 
       return await axiosInstance.put(
@@ -80,7 +80,7 @@ class CartService {
     try {
       if (!product_id) throw new Error("Product ID is required");
 
-      const token = localStorage.getItem("token"); // Ensure token is sent
+      const token = sessionStorage.getItem("token"); // Ensure token is sent
       const response = await axiosInstance.put("/cart/decrement", 
         { product_id },
         { headers: { Authorization: `Bearer ${token}` } }

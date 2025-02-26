@@ -63,7 +63,7 @@ app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhoo
 // ✅ Secure Admin Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/", authRoutes)
+app.use("/api/", authRoutes);
 
 // ✅ User Routes
 app.use("/api/products", productRoutes);

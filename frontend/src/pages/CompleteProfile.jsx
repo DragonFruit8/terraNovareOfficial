@@ -8,15 +8,18 @@ const CompleteProfile = () => {
   const { userData, setUserData } = useUser();
   const navigate = useNavigate();
 
-  // Initialize form state
-  const [profileData, setProfileData] = useState({
+  // ✅ Lazy Initialization of Form State
+  const initialProfileData = {
     address: userData?.address || "",
     city: userData?.city || "",
     state: userData?.state || "",
     country: userData?.country || "",
-  });
+  };
 
-  // Synchronize local state when userData changes
+  const [profileData, setProfileData] = useState(initialProfileData);
+  const [loading, setLoading] = useState(false);
+
+  // ✅ Sync state only if userData changes
   useEffect(() => {
     if (userData) {
       setProfileData({
@@ -28,31 +31,35 @@ const CompleteProfile = () => {
     }
   }, [userData]);
 
-  // Handle input change events
+  // ✅ Handle Input Changes Efficiently
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prevData) => ({ ...prevData, [name]: value }));
+    setProfileData((prevData) => ({
+      ...prevData,
+      [e.target.name]: e.target.value,
+    }));
   };
 
-  // Submit the form to update the profile
+  // ✅ Handle Profile Update
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = sessionStorage.getItem("token"); // ✅ Get token from sessionStorage
+  
+    if (!token) {
+      toast.error("Session expired. Please log in again.");
+      return navigate("/login");
+    }
+  
     try {
-      // Await the API call to ensure response is received before proceeding
-      const response = await axiosInstance.put("/user/update-profile", {
-        username: userData.username,
-        fullname: userData.fullname,
-        address: profileData.address,
-        city: profileData.city,
-        state: profileData.state,
-        country: profileData.country,
+      const response = await axiosInstance.put("/user/update-profile", profileData, {
+        headers: { Authorization: `Bearer ${token}` }, // ✅ Send token
       });
-      setUserData(response.data); // Update user context with the new data
+      setLoading(true)
+      setUserData(response.data);
       toast.success("Profile updated successfully!");
-      navigate("/profile"); // Redirect to the profile page
+      navigate("/profile");
     } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile. Please try again.");
+      console.error("❌ Error updating profile:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Failed to update profile.");
     }
   };
 
@@ -60,56 +67,22 @@ const CompleteProfile = () => {
     <div className="container mt-5">
       <h2>Complete Your Profile</h2>
       <form onSubmit={handleSubmit} className="mt-4">
-        <div className="mb-3">
-          <label className="form-label">Address</label>
-          <input
-            type="text"
-            className="form-control"
-            name="address"
-            value={profileData.address}
-            onChange={handleChange}
-            required
-          />
-        </div>
+        {["address", "city", "state", "country"].map((field) => (
+          <div className="mb-3" key={field}>
+            <label className="form-label">{field.charAt(0).toUpperCase() + field.slice(1)}</label>
+            <input
+              type="text"
+              className="form-control"
+              name={field}
+              value={profileData[field]}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        ))}
 
-        <div className="mb-3">
-          <label className="form-label">City</label>
-          <input
-            type="text"
-            className="form-control"
-            name="city"
-            value={profileData.city}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">State</label>
-          <input
-            type="text"
-            className="form-control"
-            name="state"
-            value={profileData.state}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <div className="mb-3">
-          <label className="form-label">Country</label>
-          <input
-            type="text"
-            className="form-control"
-            name="country"
-            value={profileData.country}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <button type="submit" className="btn btn-primary w-100">
-          Save Profile
+        <button type="submit" className="btn btn-primary w-100" disabled={loading}>
+          {loading ? "Saving..." : "Save Profile"}
         </button>
       </form>
     </div>

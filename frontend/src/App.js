@@ -1,7 +1,7 @@
 import { HelmetProvider } from "react-helmet-async";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
-import { useEffect } from "react"
+import { useEffect } from "react";
 import { ToastContainer } from "react-toastify";
 import { useUser } from "./context/UserContext";
 // import ProtectedRoute from "./protected/ProtectedRoutes";
@@ -10,12 +10,12 @@ import Cart from "./pages/Cart";
 import Checkout from "./components/Checkout";
 import CompleteProfile from "./pages/CompleteProfile";
 import Brand from "./pages/Brand";
+import DarkLightToggle from "./components/DarkLightToggle";
 // import Dashboard from "./pages/Dashboard";
-import ForgotPassword from "./pages/ForgotPassword"
-import ResetPassword from "./pages/ResetPassword"
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Footer from "./components/Footer";
 import HomePage from "./pages/Homepage";
-import DarkLightToggle from "./components/DarkLightToggle";
 // import Layout from "./layout/Layout";
 import Login from "./pages/Login";
 import Mission from "./pages/Mission";
@@ -28,7 +28,7 @@ import PrivacyNotice from "./components/PrivacyNotice";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 // import ProductDetails from "./pages/ProductDetails";
 import Profile from "./pages/Profile";
-import ReactGA from 'react-ga4';
+import ReactGA from "react-ga4";
 import Register from "./pages/Register";
 import Shop from "./pages/Shop";
 import Sidebar from "./components/Sidebar";
@@ -43,7 +43,11 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 const TRACKING_ID = "G-2GV3JM9TGV";
 
 const App = () => {
-  const { userData } = useUser();
+  const { userData, theme } = useUser();
+
+  useEffect(() => {
+    document.body.className = theme; // ✅ Apply theme to body
+  }, [theme]);
 
   const location = useLocation();
 
@@ -55,7 +59,6 @@ const App = () => {
       ReactGA.send({ hitType: "pageview", page: location.pathname });
     }
   }, [location]);
-
 
   return (
     <>
@@ -95,19 +98,20 @@ const App = () => {
                 <Route path="/reset" element={<ResetPassword />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/terms" element={<Terms />} />
-                <Route path="/terms-and-conditions" element={<TermConditions />} />
+                <Route
+                  path="/terms-and-conditions"
+                  element={<TermConditions />}
+                />
 
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <PrivacyNotice />
-              <DarkLightToggle />
             </div>
             <Footer />
-
+            <DarkLightToggle />
           </div>
         </ThemeProvider>
       </HelmetProvider>
-
     </>
   );
 };

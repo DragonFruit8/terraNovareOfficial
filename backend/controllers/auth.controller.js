@@ -48,7 +48,6 @@ export const signup = async (req, res) => {
   }
 };
 // ✅ Login Controller - Ensure Token Includes Roles
-
 export const login = async (req, res) => {
   try {
 
@@ -117,10 +116,16 @@ export const login = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // ✅ Fetch User Profile
 export const getUserProfile = async (req, res) => {
   try {
+    console.log("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
+
+    if (!req.user || !req.user.user_id) {
+      console.error("🚫 Missing user ID in request!");
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    }
+
     const userId = req.user.user_id;
     const user = await pool.query(
       `SELECT user_id, username, fullname, email, roles, address, city, state, country
@@ -133,10 +138,28 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
+    console.log("✅ User fetched successfully:", user.rows[0]);
     res.json(user.rows[0]);
   } catch (error) {
     console.error("❌ Error fetching user data:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+export const getCurrentUser = async (req, res) => {
+  try {
+    console.log("🔍 Incoming User ID:", req.user?.id); // ✅ Debug log
+
+    if (!req.user?.id) {
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    }
+
+    const user = await User.findById(req.user.id).select("-password"); // ✅ Exclude password
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json(user);
+  } catch (error) {
+    console.error("❌ Error fetching user:", error.message);
+    res.status(500).json({ message: "Server error" });
   }
 };
 // ✅ Update User Profile

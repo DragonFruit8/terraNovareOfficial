@@ -19,16 +19,14 @@ const axiosInstance = axios.create({
   },
 });
 
-// ✅ Attach token to every request
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// ✅ Automatically attach token to every request
+axiosInstance.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem("token"); // Ensure token is fetched
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`; // ✅ Proper format
+  }
+  return config;
+});
+
 
 export default axiosInstance;

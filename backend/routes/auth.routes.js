@@ -11,11 +11,13 @@ import {
   resetPassword
   // requestEmailVerification,
 } from "../controllers/auth.controller.js";
+import { getCurrentUser } from "../controllers/auth.controller.js";
 import { verifyPassword } from "../controllers/verify.controller.js";
 import {authenticateUser} from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+router.get("/me", authenticateUser, getCurrentUser);
 router.post("/signup", signup);
 router.post("/login", login);
 router.get("/profile", authenticateUser, getUserProfile);

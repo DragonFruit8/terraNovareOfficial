@@ -7,8 +7,10 @@ import autoTable from "jspdf-autotable";
 import { useUser } from "../context/UserContext";
 
 const AdminDashboard = () => {
+  /** ✅ State Management */
   const { userData, loading } = useUser();
   const navigate = useNavigate();
+
   const [users, setUsers] = useState([]);
   const [products, setProducts] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -19,6 +21,15 @@ const AdminDashboard = () => {
     email: "",
     password: "",
   });
+  const [profileData, setProfileData] = useState({
+    fullname: "",
+    email: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+  });
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -31,243 +42,248 @@ const AdminDashboard = () => {
     stripe_price_id: "",
   });
 
-  /** ✅ Add Admin Role */
-  const handleMakeAdmin = async (id, email) => {
-    if (!id || !email) {
-      console.error("❌ Invalid user details:", { id, email });
-      toast.error("Invalid user selection.");
+  useEffect(() => {
+    if (adminProfile) {
+      setProfileData({
+        fullname: adminProfile.fullname || "",
+        email: adminProfile.email || "",
+        address: adminProfile.address || "",
+        city: adminProfile.city || "",
+        state: adminProfile.state || "",
+        country: adminProfile.country || "",
+      });
+    }
+  }, [adminProfile]);
+
+  const token =
+    sessionStorage.getItem("token") || localStorage.getItem("token");
+
+  const fetchAdminProfile = useCallback(async () => {
+    const token =
+      sessionStorage.getItem("token") || localStorage.getItem("token");
+
+    if (!token) {
+      console.warn("🚫 No token found, redirecting...");
+      navigate("/login");
       return;
     }
-    const confirmDelete = window.confirm(`Make user ${email} ???`);
-    if (!confirmDelete) return; // ⛔ Exit if the user cancels
 
-    if (!id) {
-      console.error("❌ Error: Missing user ID");
-      toast.error("User ID is required.");
+    console.log("📡 Fetching admin profile with token:", token); // ✅ Log token before request
+
+    try {
+      const response = await axiosInstance.get("/user/me", {
+        headers: { Authorization: `Bearer ${token}` }, // ✅ Attach token
+      });
+
+      console.log("✅ Response received:", response.data); // ✅ Log response
+
+      if (!response.data.roles.includes("admin")) {
+        console.warn("🚫 User is not an admin, redirecting...");
+        navigate("/");
+        return;
+      }
+
+      setAdminProfile(response.data);
+    } catch (error) {
+      console.error(
+        "❌ Error fetching admin profile:",
+        error.response?.data || error.message
+      );
+      if (error.response?.status === 401) {
+        console.warn("🚫 Unauthorized! Clearing token and redirecting...");
+        sessionStorage.removeItem("token");
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    }
+  }, [navigate, setAdminProfile]);
+
+  /** ✅ Fetch Data Functions */
+  const fetchUsers = useCallback(async () => {
+    if (!token) {
+      toast.error("⚠️ Unauthorized! Please log in.");
+      navigate("/login");
       return;
     }
 
     try {
-      console.log(`🔍 Sending request to promote user_id: ${id}`);
+      const response = await axiosInstance.get("/user/all", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      await axiosInstance.put(
-        `/admin/users/make-admin/${id}`, // ✅ Using `id`
-        {},
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+      setUsers(response.data);
+    } catch (error) {
+      console.error(
+        "❌ Error fetching users:",
+        error.response?.data || error.message
       );
+      toast.error("❌ Failed to fetch users. Unauthorized!");
+    }
+  }, [token, navigate, setUsers]); // ✅ `setUsers` included as dependency
 
+  useEffect(() => {
+    if (!token) {
+      console.warn("🚫 No token found, redirecting to login...");
+      navigate("/login");
+      return;
+    }
+    fetchAdminProfile();
+  }, [token, fetchAdminProfile, navigate]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]); // ✅ Fetch users when needed
+
+  const fetchProducts = useCallback(async () => {
+    if (!token) {
+      toast.error("⚠️ Unauthorized! Please log in.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get("/admin/products", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setProducts(response.data);
+    } catch (error) {
+      console.error("❌ Error fetching products:", error);
+      toast.error("Failed to fetch products. Unauthorized!");
+    }
+  }, [token, navigate]);
+
+  const fetchProductRequests = useCallback(async () => {
+    if (!token) {
+      toast.error("⚠️ Unauthorized! Please log in.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.get("/products/requests", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setRequests(response.data);
+    } catch (error) {
+      console.error("❌ Error fetching requests:", error);
+      toast.error("Failed to fetch requests. Unauthorized!");
+    }
+  }, [token, navigate]);
+
+  /** ✅ UseEffect: Load Data */
+  useEffect(() => {
+    if (!loading && !userData) {
+      toast.error("⚠️ Please log in to access this page.");
+      navigate("/login");
+    }
+  }, [userData, loading, navigate]);
+
+  useEffect(() => {
+    if (!loading) {
+      if (!userData?.roles?.includes("admin")) {
+        toast.error("Unauthorized Access! Redirecting...");
+        navigate("/login");
+      } else {
+        fetchUsers();
+        fetchProducts();
+        fetchProductRequests();
+        fetchAdminProfile();
+      }
+    }
+  }, [
+    userData,
+    fetchUsers,
+    fetchProducts,
+    fetchProductRequests,
+    fetchAdminProfile,
+    navigate,
+    loading,
+    token,
+  ]);
+
+  /** ✅ Handle User Role Changes */
+  const handleMakeAdmin = async (id, email) => {
+    if (!id || !email) return toast.error("Invalid user selection.");
+    if (!window.confirm(`Make ${email} an admin?`)) return;
+
+    try {
+      await axiosInstance.put(`/admin/users/make-admin/${id}`);
       toast.success("User promoted to admin!");
-      fetchUsers(); // Refresh user list
+      fetchUsers();
     } catch (error) {
       console.error("❌ Error updating user role:", error);
       toast.error("Failed to update user role.");
     }
   };
 
-  /** ✅ Remove Admin Role */
-  const handleRemoveAdmin = async (user_id, email) => {
-    if (!user_id || !email) {
-      console.error("❌ Invalid user details:", { user_id, email });
-      toast.error("Invalid user selection.");
-      return;
-    }
-    const confirmDelete = window.confirm(`Remove ${email} from ADMIN??`);
-    if (!confirmDelete) return; // ⛔ Exit if the user cancels
+  const handleRemoveAdmin = async (id, email) => {
+    if (!id || !email) return toast.error("Invalid user selection.");
+    if (!window.confirm(`Remove ${email} from admin?`)) return;
+
     try {
-      await axiosInstance.put(
-        `/admin/users/remove-admin/${user_id}`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
+      await axiosInstance.put(`/admin/users/remove-admin/${id}`);
       toast.success("Admin role removed!");
-      fetchUsers(); // Refresh user list
+      fetchUsers();
     } catch (error) {
       console.error("❌ Error removing admin role:", error);
       toast.error("Failed to remove admin role.");
     }
   };
 
-  /** ✅ Fetch Products */
-  const fetchProducts = useCallback(async () => {
+  /** ✅ Handle Admin Profile Management */
+  const handleEditAdmin = () => setEditingAdmin(true);
+
+  const handleAdminInputChange = (e) => {
+    setAdminProfile({ ...adminProfile, [e.target.name]: e.target.value });
+  };
+
+  const handleSaveAdminProfile = async () => {
     try {
-      const response = await axiosInstance.get("/admin/products", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      const token = sessionStorage.getItem("token"); // ✅ Ensure token exists
+      if (!token) {
+        toast.error("Authorization error. Please log in again.");
+        return;
+      }
+
+      console.log("📡 Updating admin profile...", profileData);
+
+      const response = await axiosInstance.put("/admin/update", profileData, {
+        headers: { Authorization: `Bearer ${token}` }, // ✅ Attach token
       });
-      setProducts(response.data);
+
+      console.log("✅ Profile updated successfully:", response.data);
+      setAdminProfile(response.data); // ✅ Save updated profile
+      setEditingAdmin(false); // ✅ Exit editing mode
+      toast.success("Profile updated successfully!");
     } catch (error) {
-      console.error("❌ Error fetching products:", error);
-      toast.error("Failed to fetch products.");
-    }
-  }, []);
-
-  /** ✅ Fetch Users */
-  const fetchUsers = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get("/user/all", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-
-      console.log("🔍 Debug: Users fetched from API:", response.data); // ✅ Debug output
-      setUsers(response.data);
-    } catch (error) {
-      console.error("❌ Error fetching users:", error);
-      toast.error("Failed to fetch users.");
-    }
-  }, []);
-
-  /** ✅ Fetch Admin Profile */
-  const fetchAdminProfile = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get("/user/me", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setAdminProfile(response.data);
-    } catch (error) {
-      console.error("❌ Error fetching admin profile:", error);
-      toast.error("Failed to fetch profile.");
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  /** ✅ Fetch Product Requests */
-  const fetchProductRequests = useCallback(async () => {
-    try {
-      const response = await axiosInstance.get("/products/requests/all", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      setRequests(response.data);
-    } catch (error) {
-      console.error("❌ Error fetching requests:", error);
-      toast.error("Failed to fetch product requests.");
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!userData?.roles?.includes("admin")) {
-      toast.error("Unauthorized Access! Redirecting...");
-      navigate("/");
-    } else {
-      fetchUsers();
-      fetchProducts();
-      fetchProductRequests(); // ✅ Ensures product requests are fetched
-    }
-  }, [
-    userData,
-    loading,
-    fetchUsers,
-    fetchProducts,
-    fetchProductRequests,
-    navigate,
-  ]);
-
-  /** ✅ Handle Updating Product Request Status */
-  const handleUpdateRequestStatus = async (requestId, newStatus) => {
-    try {
-      await axiosInstance.put(
-        `/products/requests/update/${requestId}`,
-        { status: newStatus },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+      console.error(
+        "❌ Error updating profile:",
+        error.response?.data || error.message
       );
-      toast.success("✅ Request status updated successfully!");
-      fetchProductRequests();
-    } catch (error) {
-      console.error("❌ Error updating request:", error);
-      toast.error(
-        error.response?.data?.error || "Failed to update request status."
-      );
+      toast.error("Failed to update profile. Try again.");
     }
   };
 
-  /** ✅ Handle Deleting a Product Request */
-  const handleDeleteRequest = async (requestId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product request?"
-    );
-    if (!confirmDelete) return; // ⛔ Exit if the user cancels
-    try {
-      await axiosInstance.delete(`/products/requests/${requestId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      toast.success("✅ Product request deleted.");
-      setRequests(requests.filter((request) => request.id !== requestId));
-    } catch (error) {
-      console.error("❌ Error deleting request:", error);
-      toast.error("Failed to delete product request.");
-    }
-  };
+  /** ✅ Handle Product Management */
+  const handleEditProduct = (product) => setEditingProduct({ ...product });
 
-  /** ✅ Handle Deleting All Product Requests */
-  const handleDeleteAllRequests = async () => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete ALL product requests?"
-    );
-    if (!confirmDelete) return; // ⛔ Exit if the user cancels
-    try {
-      await axiosInstance.delete("/products/requests/delete-all", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      toast.success("✅ All product requests deleted.");
-      setRequests([]);
-    } catch (error) {
-      console.error("❌ Error deleting all requests:", error);
-      toast.error("Failed to delete all product requests.");
-    }
-  };
-
-  useEffect(() => {
-    if (!userData?.roles?.includes("admin")) {
-      toast.error("Unauthorized Access! Redirecting...");
-      navigate("/");
-    } else {
-      fetchUsers();
-      fetchProducts();
-      fetchAdminProfile();
-    }
-  }, [
-    userData,
-    loading,
-    fetchUsers,
-    fetchProducts,
-    fetchAdminProfile,
-    navigate,
-  ]);
-  /** ✅ Handle Editing Admin Profile */
-  const handleEditAdmin = () => {
-    setEditingAdmin(true);
-  };
-  /** ✅ Handle Saving Edited Product */
   const handleSaveProduct = async () => {
-    if (!editingProduct) return;
-
-    // ✅ Basic Validation
     if (
-      !editingProduct.name.trim() ||
-      !editingProduct.price ||
-      !editingProduct.stock
+      !editingProduct?.name?.trim() ||
+      !editingProduct?.price ||
+      !editingProduct?.stock
     ) {
-      toast.error("Product name, price, and stock are required!");
-      return;
+      return toast.error("Product name, price, and stock are required!");
     }
 
     try {
       await axiosInstance.put(
         `/admin/products/${editingProduct.product_id}`,
-        editingProduct,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
+        editingProduct
       );
-
-      toast.success("✅ Product updated successfully!");
+      toast.success("Product updated successfully!");
       fetchProducts();
       setEditingProduct(null);
     } catch (error) {
@@ -276,75 +292,26 @@ const AdminDashboard = () => {
     }
   };
 
-  /** ✅ Handle Editing Products */
-  const handleEditProduct = (product) => {
-    setEditingProduct({ ...product });
-  };
-
-  const handleInputChange = (e) => {
-    setEditingProduct({ ...editingProduct, [e.target.name]: e.target.value });
-  };
-
-  const handleSaveAdminProfile = async () => {
-    try {
-      await axiosInstance.put("/user/update", adminProfile, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      toast.success("Profile updated successfully!");
-      fetchAdminProfile();
-      setEditingAdmin(false);
-    } catch (error) {
-      console.error("❌ Error updating profile:", error);
-      toast.error("Failed to update profile.");
-    }
-  };
-
-  const handleAdminInputChange = (e) => {
-    setAdminProfile({ ...adminProfile, [e.target.name]: e.target.value });
-  };
-
-  /** ✅ Handle Updating Product Request Quantity */
-  const handleUpdateRequestQuantity = async (requestId, newQuantity) => {
-    try {
-      await axiosInstance.put(
-        `/products/requests/update-quantity/${requestId}`,
-        { quantity: newQuantity },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      );
-
-      toast.success("✅ Request quantity updated successfully!");
-      fetchProductRequests();
-    } catch (error) {
-      console.error("❌ Error updating request quantity:", error);
-      toast.error(error.response?.data?.error || "Failed to update quantity.");
-    }
-  };
-
-  /** ✅ Handle Deleting a Product */
   const handleDeleteProduct = async (productId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
-    );
-    if (!confirmDelete) return;
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
 
     try {
-      await axiosInstance.delete(`/admin/products/${productId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-
-      toast.success("✅ Product deleted successfully!");
-      setProducts((prevProducts) =>
-        prevProducts.filter((product) => product.product_id !== productId)
-      );
+      await axiosInstance.delete(`/admin/products/${productId}`);
+      toast.success("Product deleted successfully!");
+      fetchProducts();
     } catch (error) {
       console.error("❌ Error deleting product:", error);
       toast.error("Failed to delete product.");
     }
   };
 
-  /** Add New Product **/
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  /** ✅ Handle New Product Creation */
   const handleNewProductChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNewProduct((prev) => ({
@@ -355,228 +322,208 @@ const AdminDashboard = () => {
 
   const handleCreateProduct = async () => {
     try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            toast.error("Unauthorized: Please log in again.");
-            return;
-        }
-
-        const response = await axiosInstance.post("/admin/product", newProduct, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.status === 201) {
-            toast.success("✅ Product added successfully!");
-            fetchProducts(); // Refresh product list
-            setNewProduct({
-                name: "",
-                price: "",
-                stock: "",
-                description: "",
-                image_url: "",
-                is_presale: false,
-                release_date: "",
-                stripe_product_id: "",
-                stripe_price_id: "",
-            });
-        } else {
-            throw new Error(response.data.message || "Failed to add product.");
-        }
+      await axiosInstance.post("/admin/product", newProduct);
+      toast.success("Product added successfully!");
+      fetchProducts();
+      setNewProduct({
+        name: "",
+        price: "",
+        stock: "",
+        description: "",
+        image_url: "",
+        is_presale: false,
+        release_date: "",
+        stripe_product_id: "",
+        stripe_price_id: "",
+      });
     } catch (error) {
-        console.error("❌ Error adding product:", error);
-        toast.error(error.response?.data?.error || "Failed to add product.");
+      console.error("❌ Error adding product:", error);
+      toast.error("Failed to add product.");
     }
-};
+  };
 
+  /** ✅ Handle Product Request Management */
+  const handleUpdateRequestStatus = async (requestId, newStatus) => {
+    if (!window.confirm("Confirm Product Request Status???")) return;
 
-  // Product Request Download
+    try {
+      await axiosInstance.put(`/products/requests/update/${requestId}`, {
+        status: newStatus,
+      });
+      toast.success(`Request ${newStatus} successfully!`);
+      fetchProductRequests();
+    } catch (error) {
+      console.error("❌ Error updating request:", error);
+      toast.error("Failed to update request.");
+    }
+  };
 
+  const handleDeleteAllRequests = async () => {
+    if (
+      !window.confirm("Are you sure you want to delete ALL product requests?")
+    )
+      return;
+
+    try {
+      await axiosInstance.delete("/products/requests/delete-all");
+      toast.success("✅ All product requests deleted.");
+      setRequests([]); // ✅ Clear the state after deletion
+    } catch (error) {
+      console.error("❌ Error deleting all requests:", error);
+      toast.error("Failed to delete all product requests.");
+    }
+  };
+
+  /** ✅ Handle Downloading Product Requests */
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
-
-    // ✅ Add a title
     doc.text("Product Requests", 14, 15);
 
-    // ✅ Define table headers (now including address details)
-    const headers = [
-      [
-        "ID",
-        "User Email",
-        "Product",
-        "Quantity",
-        "Status",
-        "Address",
-        "City",
-        "State",
-        "Country",
-        "Requested At",
-      ],
-    ];
-
-    // ✅ Define table data with address info
-    const data = requests.map((request) => [
-      request.id,
-      request.user_email,
-      request.product,
-      request.quantity || "N/A",
-      request.status,
-      request.address || "N/A",
-      request.city || "N/A",
-      request.state || "N/A",
-      request.country || "N/A",
-      new Date(request.requested_at).toLocaleString(),
-    ]);
-
-    // ✅ Call autoTable to generate the table
     autoTable(doc, {
-      head: headers,
-      body: data,
+      head: [
+        [
+          "ID",
+          "User Email",
+          "Product",
+          "Quantity",
+          "Status",
+          "Address",
+          "City",
+          "State",
+          "Country",
+          "Requested At",
+        ],
+      ],
+      body: requests.map((request) => [
+        request.id,
+        request.user_email,
+        request.product,
+        request.quantity || "N/A",
+        request.status,
+        request.address || "N/A",
+        request.city || "N/A",
+        request.state || "N/A",
+        request.country || "N/A",
+        new Date(request.requested_at).toLocaleString(),
+      ]),
       startY: 20,
       theme: "grid",
     });
 
-    // ✅ Save the PDF file
     doc.save("product_requests.pdf");
   };
 
   return (
     <div className="container mt-5">
       <h2>Admin Dashboard</h2>
-
-      {/* ✅ Admin Profile Section */}
-      <h3>Admin Profile</h3>
       <div className="card mb-3">
+        <h3>Admin Profile</h3>
         <div className="card-body">
-          <h5 className="card-title">{adminProfile.fullname}</h5>
-          <p className="card-text">
-            <strong>Username:</strong> {adminProfile.username}
-          </p>
-          <p className="card-text">
-            <strong>Email:</strong> {adminProfile.email}
-          </p>
-          <p className="card-text">
-            <strong>Address:</strong> {adminProfile.address || "Not Provided"}
-          </p>
-          <p className="card-text">
-            <strong>City:</strong> {adminProfile.city || "Not Provided"}
-          </p>
-          <p className="card-text">
-            <strong>State:</strong> {adminProfile.state || "Not Provided"}
-          </p>
-          <p className="card-text">
-            <strong>Country:</strong> {adminProfile.country || "Not Provided"}
-          </p>
-          <button className="btn btn-primary" onClick={handleEditAdmin}>
-            Edit Profile
-          </button>
-        </div>
-      </div>
-
-      {/* ✅ Edit Admin Profile Modal */}
-      {editingAdmin && (
-        <div className="modal show d-block">
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Edit Profile</h5>
-                <button
-                  id="close"
-                  className="btn-close"
-                  onClick={() => setEditingAdmin(false)}
-                ></button>
-              </div>
-              <div className="modal-body">
-                {/* ✅ Disabled Username */}
-                <label className="form-label">Username</label>
+          {editingAdmin ? (
+            <>
+              <div className="mb-3">
+                <label className="form-label">Full Name</label>
                 <input
                   type="text"
-                  name="username"
-                  value={adminProfile.username}
                   className="form-control"
-                  disabled
+                  name="fullname"
+                  value={profileData.fullname}
+                  onChange={handleAdminInputChange}
                 />
-
-                {/* ✅ Disabled Email */}
-                <label className="form-label mt-2">Email</label>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Email</label>
                 <input
                   type="email"
+                  className="form-control"
                   name="email"
-                  value={adminProfile.email}
-                  className="form-control"
-                  disabled
-                />
-
-                {/* ✅ Editable Full Name */}
-                <label className="form-label mt-2">Full Name</label>
-                <input
-                  type="text"
-                  name="fullname"
-                  value={adminProfile.fullname}
+                  value={profileData.email}
                   onChange={handleAdminInputChange}
-                  className="form-control"
-                  required
                 />
-
-                {/* ✅ Editable Address */}
-                <label className="form-label mt-2">Address</label>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Address</label>
                 <input
                   type="text"
+                  className="form-control"
                   name="address"
-                  value={adminProfile.address || ""}
+                  value={profileData.address}
                   onChange={handleAdminInputChange}
-                  className="form-control"
                 />
-
-                {/* ✅ Editable City */}
-                <label className="form-label mt-2">City</label>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">City</label>
                 <input
                   type="text"
+                  className="form-control"
                   name="city"
-                  value={adminProfile.city || ""}
+                  value={profileData.city}
                   onChange={handleAdminInputChange}
-                  className="form-control"
                 />
-
-                {/* ✅ Editable State */}
-                <label className="form-label mt-2">State</label>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">State</label>
                 <input
                   type="text"
+                  className="form-control"
                   name="state"
-                  value={adminProfile.state || ""}
+                  value={profileData.state}
                   onChange={handleAdminInputChange}
-                  className="form-control"
                 />
-
-                {/* ✅ Editable Country */}
-                <label className="form-label mt-2">Country</label>
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Country</label>
                 <input
                   type="text"
-                  name="country"
-                  value={adminProfile.country || ""}
-                  onChange={handleAdminInputChange}
                   className="form-control"
+                  name="country"
+                  value={profileData.country}
+                  onChange={handleAdminInputChange}
                 />
               </div>
-              <div className="modal-footer">
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => setEditingAdmin(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="btn btn-primary"
-                  onClick={handleSaveAdminProfile}
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
+              <button
+                className="btn btn-success me-2"
+                onClick={handleSaveAdminProfile}
+              >
+                Save Profile
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => setEditingAdmin(false)}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <>
+              <h5 className="card-title">{adminProfile.fullname}</h5>
+              <p className="card-text">
+                <strong>Username:</strong> {adminProfile.username}
+              </p>
+              <p className="card-text">
+                <strong>Email:</strong> {adminProfile.email}
+              </p>
+              <p className="card-text">
+                <strong>Address:</strong>{" "}
+                {adminProfile.address || "Not Provided"}
+              </p>
+              <p className="card-text">
+                <strong>City:</strong> {adminProfile.city || "Not Provided"}
+              </p>
+              <p className="card-text">
+                <strong>State:</strong> {adminProfile.state || "Not Provided"}
+              </p>
+              <p className="card-text">
+                <strong>Country:</strong>{" "}
+                {adminProfile.country || "Not Provided"}
+              </p>
+              <button className="btn btn-primary" onClick={handleEditAdmin}>
+                Edit Profile
+              </button>
+            </>
+          )}
         </div>
-      )}
-
-      {/* ✅ Manage Users */}
+      </div>
       <h3>Manage Users</h3>
       <div className="table-responsive">
         <table className="table table-bordered">
@@ -592,7 +539,6 @@ const AdminDashboard = () => {
             {users.map((user) => (
               <tr key={user.id}>
                 {" "}
-                {/* ✅ Changed from user.user_id to user.id */}
                 <td>{user.email}</td>
                 <td>{user.id}</td> {/* ✅ Display the correct user ID */}
                 <td>{user.roles.join(", ")}</td>
@@ -639,7 +585,6 @@ const AdminDashboard = () => {
                   <td>${product.price}</td>
                   <td>{product.stock}</td>
                   <td>
-                    {/* ✅ Edit Button */}
                     <button
                       className="btn btn-warning btn-sm me-2"
                       onClick={() => handleEditProduct(product)}
@@ -647,7 +592,6 @@ const AdminDashboard = () => {
                       ✏️ Edit
                     </button>
 
-                    {/* ✅ Delete Button */}
                     <button
                       className="btn btn-danger btn-sm"
                       onClick={() => handleDeleteProduct(product.product_id)}
@@ -665,9 +609,6 @@ const AdminDashboard = () => {
           </tbody>
         </table>
       </div>
-
-      {/* ✅ Edit Product Modal */}
-      {/* ✅ Edit Product Modal */}
       {editingProduct && (
         <div className="modal show d-block">
           <div className="modal-dialog">
@@ -680,7 +621,6 @@ const AdminDashboard = () => {
                 ></button>
               </div>
               <div className="modal-body">
-                {/* ✅ Name */}
                 <label className="form-label">Product Name</label>
                 <input
                   type="text"
@@ -691,7 +631,6 @@ const AdminDashboard = () => {
                   required
                 />
 
-                {/* ✅ Price */}
                 <label className="form-label mt-2">Price ($)</label>
                 <input
                   type="number"
@@ -704,7 +643,6 @@ const AdminDashboard = () => {
                   required
                 />
 
-                {/* ✅ Stock */}
                 <label className="form-label mt-2">Stock</label>
                 <input
                   type="number"
@@ -716,7 +654,6 @@ const AdminDashboard = () => {
                   required
                 />
 
-                {/* ✅ Description */}
                 <label className="form-label mt-2">Description</label>
                 <textarea
                   name="description"
@@ -727,7 +664,6 @@ const AdminDashboard = () => {
                   required
                 ></textarea>
 
-                {/* ✅ Stripe Product ID */}
                 <label className="form-label mt-2">Stripe Product ID</label>
                 <input
                   type="text"
@@ -737,7 +673,6 @@ const AdminDashboard = () => {
                   className="form-control"
                 />
 
-                {/* ✅ Stripe Price ID */}
                 <label className="form-label mt-2">Stripe Price ID</label>
                 <input
                   type="text"
@@ -746,8 +681,6 @@ const AdminDashboard = () => {
                   onChange={handleInputChange}
                   className="form-control"
                 />
-
-                {/* ✅ Is Presale */}
                 <label className="form-label mt-2">Is Presale?</label>
                 <select
                   name="is_presale"
@@ -760,7 +693,6 @@ const AdminDashboard = () => {
                   <option value={false}>No</option>
                 </select>
 
-                {/* ✅ Release Date */}
                 <label className="form-label mt-2">Release Date</label>
                 <input
                   type="date"
@@ -885,7 +817,6 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      {/* ✅ Product Requests Management */}
       <h3>Product Requests</h3>
       <div className="my-2">
         <button className="btn btn-success mb-3" onClick={handleDownloadPDF}>
@@ -904,8 +835,8 @@ const AdminDashboard = () => {
         <table className="table table-bordered">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>User Email</th>
+              <th>#</th>
+              <th>Email</th>
               <th>Product</th>
               <th>Quantity</th>
               <th>Status</th>
@@ -914,56 +845,41 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {requests.length > 0 ? (
-              requests.map((request) => (
+            {requests.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  No requests found.
+                </td>
+              </tr>
+            ) : (
+              requests.map((request, index) => (
                 <tr key={request.id}>
-                  <td>{request.id}</td>
+                  <td>{index + 1}</td>
                   <td>{request.user_email}</td>
                   <td>{request.product}</td>
-
-                  {/* ✅ Editable Quantity Field */}
-                  <td>
-                    <input
-                      type="number"
-                      value={request.quantity || 1}
-                      min="1"
-                      className="form-control"
-                      onChange={(e) =>
-                        handleUpdateRequestQuantity(request.id, e.target.value)
-                      }
-                    />
-                  </td>
-
-                  {/* ✅ Status Dropdown */}
-                  <td>
-                    <select
-                      value={request.status}
-                      onChange={(e) =>
-                        handleUpdateRequestStatus(request.id, e.target.value)
-                      }
-                      className="form-select"
-                    >
-                      <option value="pending">Pending</option>
-                      <option value="approved">Approved</option>
-                      <option value="rejected">Rejected</option>
-                    </select>
-                  </td>
-
-                  <td>{new Date(request.requested_at).toLocaleString()}</td>
+                  <td>{request.quantity}</td>
+                  <td>{request.status}</td>
+                  <td>{new Date(request.requested_at).toLocaleDateString()}</td>
                   <td>
                     <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleDeleteRequest(request.id)}
+                      className="btn btn-sm btn-success"
+                      onClick={() =>
+                        handleUpdateRequestStatus(request.id, "Approved")
+                      }
                     >
-                      Delete
+                      Approve
+                    </button>
+                    <button
+                      className="btn btn-sm btn-danger"
+                      onClick={() =>
+                        handleUpdateRequestStatus(request.id, "Rejected")
+                      }
+                    >
+                      Reject
                     </button>
                   </td>
                 </tr>
               ))
-            ) : (
-              <tr>
-                <td colSpan="7">No requests found.</td>
-              </tr>
             )}
           </tbody>
         </table>
