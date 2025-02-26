@@ -84,7 +84,7 @@ export default function Homepage() {
       <div className="container justify-items-center mt-5">
 
         <div id='#mission' className="row featurette">
-          <div className="col-md-7">
+          <div className="col-md-7 p-3">
             <h2 className="featurette-heading">First featurette heading. <span className="text-muted">It’ll blow your mind.</span></h2>
             <p className="lead">Some great placeholder content for the first featurette here. Imagine some exciting prose here.</p>
           </div>
@@ -97,7 +97,7 @@ export default function Homepage() {
         <hr className="featurette-divider" />
 
         <div className="row featurette">
-          <div className="col-md-7 order-md-2">
+          <div className="col-md-7 p-3 order-md-2">
             <h2 className="featurette-heading">Oh yeah, it’s that good. <span className="text-muted">See for yourself.</span></h2>
             <p className="lead">Another featurette? Of course. More placeholder content here to give you an idea of how this layout would work with some actual real-world content in place.</p>
           </div>
@@ -109,7 +109,7 @@ export default function Homepage() {
         <hr className="featurette-divider" />
 
         <div className="row featurette">
-          <div className="col-md-7">
+          <div className="col-md-7 p-3">
             <h2 className="featurette-heading">And lastly, this one. <span className="text-muted">Checkmate.</span></h2>
             <p className="lead">And yes, this is the last block of representative placeholder content. Again, not really intended to be actually read, simply here to give you a better view of what this would look like with some actual content. Your content.</p>
           </div>
@@ -123,24 +123,24 @@ export default function Homepage() {
 
         
         <div className="row">
-          <div className="col-lg-4">
+          <div className="col-lg-4 p-3">
             <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
 
-            <h2>Heading</h2>
+            <h2 className="my-4">Heading</h2>
             <p>Some representative placeholder content for the three columns of text below the carousel. This is the first column.</p>
             <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
           </div>
-          <div className="col-lg-4">
+          <div className="col-lg-4 p-3">
             <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
 
-            <h2>Heading</h2>
+            <h2 className="my-4">Heading</h2>
             <p>Another exciting bit of representative placeholder content. This time, we've moved on to the second column.</p>
             <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
           </div>
-          <div className="col-lg-4">
+          <div className="col-lg-4 p-3">
             <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
 
-            <h2>Heading</h2>
+            <h2 className="my-4">Heading</h2>
             <p>And lastly this, the third column of representative placeholder content.</p>
             <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
           </div>

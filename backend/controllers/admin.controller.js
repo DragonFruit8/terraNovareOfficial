@@ -82,8 +82,6 @@ export const updateAdminProfile = async (req, res) => {
 };
 // ✅ Add New Product
 // Helper function to generate a slug from the product name
-
-
 export const addProduct = async (req, res) => {
   try {
     const { name, price, slug, stock, description } = req.body;
@@ -122,8 +120,6 @@ export const addProduct = async (req, res) => {
     res.status(500).json({ error: "Failed to add product" });
   }
 };
-
-
 export const getProductById = async (req, res) => {
   try {
     const { product_id } = req.params;
@@ -214,6 +210,74 @@ export const deleteProduct = async (req, res) => {
 
   } catch (error) {
     console.error("❌ Error deleting product:", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// ✅ Make a user an admin
+export const makeAdmin = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    // ✅ Debugging: Log user_id before proceeding
+    console.log("🔍 Received user_id:", user_id);
+
+    if (!user_id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
+    // ✅ Ensure the requester is an admin
+    if (!req.user.roles.includes("admin")) {
+      return res.status(403).json({ error: "Unauthorized: Admin access required" });
+    }
+
+    // ✅ Convert user_id to an integer (ensure it's a valid number)
+    const parsedUserId = parseInt(user_id, 10);
+    if (isNaN(parsedUserId)) {
+      return res.status(400).json({ error: "Invalid user ID format" });
+    }
+
+    // ✅ Update user roles to include "admin"
+    const updateUser = await pool.query(
+      `UPDATE users SET roles = array_append(roles, 'admin') WHERE user_id = $1 RETURNING *`,
+      [parsedUserId]
+    );
+
+    if (updateUser.rowCount === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.status(200).json({ message: "User promoted to admin!", user: updateUser.rows[0] });
+  } catch (error) {
+    console.error("❌ Error promoting user:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
+// ✅ Remove admin role
+export const removeAdmin = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+
+    // ✅ Ensure only admins can remove the role
+    if (!req.user.roles.includes("admin")) {
+      return res.status(403).json({ error: "Unauthorized: Admin access required" });
+    }
+
+    // ✅ Update user roles to remove "admin"
+    const updateUser = await pool.query(
+      `UPDATE users SET roles = array_remove(roles, 'admin') WHERE user_id = $1 RETURNING *`,
+      [user_id]
+    );
+
+    if (updateUser.rowCount === 0) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    res.status(200).json({ message: "Admin role removed!", user: updateUser.rows[0] });
+  } catch (error) {
+    console.error("❌ Error removing admin role:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

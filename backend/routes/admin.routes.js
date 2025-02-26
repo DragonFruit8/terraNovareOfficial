@@ -5,7 +5,9 @@ import {
   addProduct,
   deleteProduct,
   updateUserProfileByAdmin, 
-  updateAdminProfile
+  updateAdminProfile,
+  makeAdmin,
+  removeAdmin
 } from "../controllers/admin.controller.js";
 import { authenticateUser, isAdmin } from "../middleware/auth.middleware.js";
 
@@ -18,7 +20,10 @@ router.get("/users", authenticateUser, isAdmin);
 
 // ✅ Admin update user profile
 router.put("/users/:user_id", authenticateUser, isAdmin, updateUserProfileByAdmin);
-
+// ✅ Promote User to Admin
+router.put("/users/make-admin/:user_id", authenticateUser, makeAdmin);
+// ✅ Remove Admin Role
+router.put("/users/remove-admin/:user_id", authenticateUser, removeAdmin);
 // ✅ Get all products
 router.get(
   "/products",

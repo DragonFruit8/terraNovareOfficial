@@ -1,7 +1,7 @@
 import React from "react";
 import { Helmet } from "react-helmet-async";
 
-const Meta = ({ title, description, keywords, url, image }) => {
+const Meta = ({ title = "Terra'Novare", description, keywords, url, image }) => {
   return (
     <Helmet>
       {/* General Meta Tags */}
@@ -25,12 +25,5 @@ const Meta = ({ title, description, keywords, url, image }) => {
   );
 };
 
-Meta.defaultProps = {
-  title: "Terra'Novare",
-  description: "Default site description for SEO.",
-  keywords: "your, business, keywords",
-  url: "https://terranovare.tech",
-  image: "https://terranovare.tech/default-image.jpg",
-};
 
 export default Meta;

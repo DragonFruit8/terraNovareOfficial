@@ -89,6 +89,31 @@ export const updateProductRequest = async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const deleteProductRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log("🛠 Deleting request with ID:", id);
+
+    if (!id) {
+      return res.status(400).json({ error: "Request ID is required" });
+    }
+
+    const deletedRequest = await pool.query(
+      `DELETE FROM product_requests WHERE id = $1 RETURNING *`,
+      [id]
+    );
+
+    if (deletedRequest.rowCount === 0) {
+      return res.status(404).json({ error: "Product request not found." });
+    }
+
+    res.status(200).json({ message: "Product request deleted successfully!" });
+  } catch (error) {
+    console.error("❌ Error deleting request:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 export const updateRequestQuantity = async (req, res) => {
   try {
       const { id } = req.params;
@@ -221,7 +246,6 @@ export const requestProduct = async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 export const deleteAllProductRequests = async (req, res) => {
   try {
       console.log("🔍 Checking user roles:", req.user); // Debugging log

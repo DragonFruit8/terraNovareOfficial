@@ -34,7 +34,7 @@ const Sidebar = () => {
     <>
       {/* Navigation Bar */}
       <nav className="navbar px-3 ps-2">
-        <div className="navbar-title" onClick={toggleSidebar}>
+        <div id="menuText" className="navbar-title" onClick={toggleSidebar}>
           {isOpen ? <FaTimes /> : <FaBars />} Menu
         </div>
         {/* <Link to="/" className="home-btn"><FaHome /> Home</Link> */}
@@ -46,10 +46,10 @@ const Sidebar = () => {
           <button id="sidebarClose" className="btn btn-close btn-close-white" onClick={()=> setIsOpen(false)}></button>
         </div>
         <ul>
-          <li><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
-          <li><Link to="/mission" onClick={() => setIsOpen(false)}>Missions</Link></li>
-          <li><Link to="/brand" onClick={() => setIsOpen(false)}>Brand</Link></li>
-          <li><Link to="/next" onClick={() => setIsOpen(false)}>What's Next</Link></li>
+          <li className="nav-item"><Link className="nav-link" to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
+          <li className="nav-item"><Link className="nav-link" to="/mission" onClick={() => setIsOpen(false)}>Missions</Link></li>
+          <li className="nav-item"><Link className="nav-link" to="/brand" onClick={() => setIsOpen(false)}>Brand</Link></li>
+          <li className="nav-item"><Link className="nav-link" to="/next" onClick={() => setIsOpen(false)}>What's Next</Link></li>
         </ul>
       </div>
     </>

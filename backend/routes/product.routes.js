@@ -3,6 +3,7 @@ import {
     getProducts, 
     addProduct, 
     requestProduct, 
+    deleteProductRequest,
     deleteAllProductRequests, 
     getAllProductRequests,
     updateProduct,
@@ -27,5 +28,6 @@ router.put("/requests/update-quantity/:id", authenticateUser, updateRequestQuant
 router.put("/admin/products/:product_id", authenticateUser, updateProduct);
 router.delete("/products/:id", authenticateUser, deleteProduct);
 router.delete("/requests/delete-all", authenticateUser, deleteAllProductRequests);
+router.delete("/requests/:id", authenticateUser, deleteProductRequest);
 
 export default router;

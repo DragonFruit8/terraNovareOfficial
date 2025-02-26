@@ -111,36 +111,75 @@ const token = localStorage.getItem("token");
   return (
     <div className="container mt-5 min-vh-100">
     <h2>Shop</h2>
+
+    {/* ✅ Section for Presale Products */}
+    <h3 className="mt-4 text-warning">🔥 Presale Products</h3>
+    <div className="row">
+      {products.filter((product) => product.is_presale).length === 0 ? (
+        <p>No presale products available.</p>
+      ) : (
+        products
+          .filter((product) => product.is_presale) // ✅ Only show presale products
+          .map((product) => {
+            const isRequested = requestedProducts.includes(product.product_id);
+
+            return (
+              <div key={product.product_id} className="col-md-4 mb-4">
+                <div className="card p-3 border-warning">
+                  <h5 className="text-warning">{product.name} (Presale) 🔥</h5>
+                  <p>{product.description}</p>
+                  <img src={product.image_url} alt={product.name} className="img-fluid" />
+
+                  {userData ? (
+                    <button
+                      className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`}
+                      onClick={() => handleProductRequest(product)}
+                      disabled={isRequested}
+                    >
+                      {isRequested ? "Already Requested ✅" : "Request Presale Product"}
+                    </button>
+                  ) : (
+                    <p className="text-muted mt-2">🔒 Login to request this product</p>
+                  )}
+                </div>
+              </div>
+            );
+          })
+      )}
+    </div>
+
+    {/* ✅ Regular Products Section */}
+    <h3 className="mt-4">All Products</h3>
     <div className="row">
       {products.length === 0 ? (
         <p>No products available.</p>
       ) : (
-        products.map((product) => {
-          const isRequested = requestedProducts.includes(product.product_id); // ✅ Check if product is requested
-  
-          return (
-            <div key={product.product_id} className="col-md-4 mb-4">
-              <div className="card p-3">
-                <h5>{product.name}</h5>
-                <p>{product.description}</p>
-                <img src={product.image_url} alt={product.name} className="img-fluid" />
-  
-                {/* ✅ Only show button if the user is logged in */}
-                {userData ? (
-                  <button 
-                    className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`} 
-                    onClick={() => handleProductRequest(product)}
-                    disabled={isRequested} // ✅ Disable if already requested
-                  >
-                    {isRequested ? "Already Requested ✅" : "Request Product"}
-                  </button>
-                ) : (
-                  <p className="text-muted mt-2">🔒 Login to request this product</p> // ✅ Show message for non-logged-in users
-                )}
+        products
+          .map((product) => {
+            const isRequested = requestedProducts.includes(product.product_id);
+
+            return (
+              <div key={product.product_id} className="col-md-4 mb-4">
+                <div className="card p-3">
+                  <h5>{product.name}</h5>
+                  <p>{product.description}</p>
+                  <img src={product.image_url} alt={product.name} className="img-fluid" />
+
+                  {userData ? (
+                    <button
+                      className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`}
+                      onClick={() => handleProductRequest(product)}
+                      disabled={isRequested}
+                    >
+                      {isRequested ? "Already Requested ✅" : "Request Product"}
+                    </button>
+                  ) : (
+                    <p className="text-muted mt-2">🔒 Login to request this product</p>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })
+            );
+          })
       )}
     </div>
   </div>
