@@ -3,3 +3,5 @@ TO DO
 -- Show Products if is_presale
 -- Fill contact footer information
 -- Organize footer
+-- COMPLETE
+
