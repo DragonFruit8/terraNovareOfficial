@@ -131,7 +131,7 @@ div#menuText.navbar {
 .dark-mode .card h4,
 .dark-mode h5,
 .dark-mode div.card  {
-    color: var(--text-color) !important;
+    color: var(--text-color);
     transition: background-color 1s ease, color 0.3s ease;
 }
 .dark-mode button.navbar-toggler {
@@ -394,7 +394,8 @@ a.nav-link:hover {
 
 .dark-mode tbody td,
 .dark-mode .card .card-body,
-.dark-mode .modal-content{
+.dark-mode .modal-content,
+.dark-mode .card{
     background-color: var(--neutral-blue);
     color: var(--text-color);
     border-color: #121212;

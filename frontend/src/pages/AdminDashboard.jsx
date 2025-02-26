@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axios.config";
 import { toast } from "react-toastify";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import { useUser } from "../context/UserContext";
 
 const AdminDashboard = () => {
@@ -17,6 +19,17 @@ const AdminDashboard = () => {
     email: "",
     password: "",
   });
+  const [newProduct, setNewProduct] = useState({
+    name: "",
+    price: "",
+    stock: "",
+    description: "",
+    image_url: "",
+    is_presale: false,
+    release_date: "",
+    stripe_product_id: "",
+    stripe_price_id: "",
+  });
 
   /** ✅ Add Admin Role */
   const handleMakeAdmin = async (id, email) => {
@@ -24,7 +37,7 @@ const AdminDashboard = () => {
       console.error("❌ Invalid user details:", { id, email });
       toast.error("Invalid user selection.");
       return;
-  }
+    }
     const confirmDelete = window.confirm(`Make user ${email} ???`);
     if (!confirmDelete) return; // ⛔ Exit if the user cancels
 
@@ -59,7 +72,7 @@ const AdminDashboard = () => {
       console.error("❌ Invalid user details:", { user_id, email });
       toast.error("Invalid user selection.");
       return;
-  }
+    }
     const confirmDelete = window.confirm(`Remove ${email} from ADMIN??`);
     if (!confirmDelete) return; // ⛔ Exit if the user cancels
     try {
@@ -176,7 +189,9 @@ const AdminDashboard = () => {
 
   /** ✅ Handle Deleting a Product Request */
   const handleDeleteRequest = async (requestId) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this product request?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this product request?"
+    );
     if (!confirmDelete) return; // ⛔ Exit if the user cancels
     try {
       await axiosInstance.delete(`/products/requests/${requestId}`, {
@@ -192,7 +207,9 @@ const AdminDashboard = () => {
 
   /** ✅ Handle Deleting All Product Requests */
   const handleDeleteAllRequests = async () => {
-    const confirmDelete = window.confirm("Are you sure you want to delete ALL product requests?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete ALL product requests?"
+    );
     if (!confirmDelete) return; // ⛔ Exit if the user cancels
     try {
       await axiosInstance.delete("/products/requests/delete-all", {
@@ -325,6 +342,101 @@ const AdminDashboard = () => {
       console.error("❌ Error deleting product:", error);
       toast.error("Failed to delete product.");
     }
+  };
+
+  /** Add New Product **/
+  const handleNewProductChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNewProduct((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleCreateProduct = async () => {
+    try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            toast.error("Unauthorized: Please log in again.");
+            return;
+        }
+
+        const response = await axiosInstance.post("/admin/product", newProduct, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.status === 201) {
+            toast.success("✅ Product added successfully!");
+            fetchProducts(); // Refresh product list
+            setNewProduct({
+                name: "",
+                price: "",
+                stock: "",
+                description: "",
+                image_url: "",
+                is_presale: false,
+                release_date: "",
+                stripe_product_id: "",
+                stripe_price_id: "",
+            });
+        } else {
+            throw new Error(response.data.message || "Failed to add product.");
+        }
+    } catch (error) {
+        console.error("❌ Error adding product:", error);
+        toast.error(error.response?.data?.error || "Failed to add product.");
+    }
+};
+
+
+  // Product Request Download
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+
+    // ✅ Add a title
+    doc.text("Product Requests", 14, 15);
+
+    // ✅ Define table headers (now including address details)
+    const headers = [
+      [
+        "ID",
+        "User Email",
+        "Product",
+        "Quantity",
+        "Status",
+        "Address",
+        "City",
+        "State",
+        "Country",
+        "Requested At",
+      ],
+    ];
+
+    // ✅ Define table data with address info
+    const data = requests.map((request) => [
+      request.id,
+      request.user_email,
+      request.product,
+      request.quantity || "N/A",
+      request.status,
+      request.address || "N/A",
+      request.city || "N/A",
+      request.state || "N/A",
+      request.country || "N/A",
+      new Date(request.requested_at).toLocaleString(),
+    ]);
+
+    // ✅ Call autoTable to generate the table
+    autoTable(doc, {
+      head: headers,
+      body: data,
+      startY: 20,
+      theme: "grid",
+    });
+
+    // ✅ Save the PDF file
+    doc.save("product_requests.pdf");
   };
 
   return (
@@ -680,12 +792,113 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      <div className="card p-3 mb-4">
+        <h3>Add New Product</h3>
+
+        <label className="form-label">Product Name</label>
+        <input
+          type="text"
+          name="name"
+          value={newProduct.name}
+          onChange={handleNewProductChange}
+          className="form-control"
+          required
+        />
+
+        <label className="form-label mt-2">Price ($)</label>
+        <input
+          type="number"
+          name="price"
+          value={newProduct.price}
+          onChange={handleNewProductChange}
+          className="form-control"
+          required
+        />
+
+        <label className="form-label mt-2">Stock</label>
+        <input
+          type="number"
+          name="stock"
+          value={newProduct.stock}
+          onChange={handleNewProductChange}
+          className="form-control"
+          required
+        />
+
+        <label className="form-label mt-2">Description</label>
+        <textarea
+          name="description"
+          value={newProduct.description}
+          onChange={handleNewProductChange}
+          className="form-control"
+        ></textarea>
+
+        <label className="form-label mt-2">Image URL</label>
+        <input
+          type="text"
+          name="image_url"
+          value={newProduct.image_url}
+          onChange={handleNewProductChange}
+          className="form-control"
+        />
+
+        <label className="form-label mt-2">Stripe Product ID</label>
+        <input
+          type="text"
+          name="stripe_product_id"
+          value={newProduct.stripe_product_id}
+          onChange={handleNewProductChange}
+          className="form-control"
+        />
+
+        <label className="form-label mt-2">Stripe Price ID</label>
+        <input
+          type="text"
+          name="stripe_price_id"
+          value={newProduct.stripe_price_id}
+          onChange={handleNewProductChange}
+          className="form-control"
+        />
+
+        <label className="form-label mt-2">Is Presale?</label>
+        <select
+          name="is_presale"
+          value={newProduct.is_presale}
+          onChange={handleNewProductChange}
+          className="form-select"
+        >
+          <option value={true}>Yes</option>
+          <option value={false}>No</option>
+        </select>
+
+        <label className="form-label mt-2">Release Date</label>
+        <input
+          type="date"
+          name="release_date"
+          value={newProduct.release_date}
+          onChange={handleNewProductChange}
+          className="form-control"
+        />
+
+        <button className="btn btn-success mt-3" onClick={handleCreateProduct}>
+          ➕ Add Product
+        </button>
+      </div>
+
       {/* ✅ Product Requests Management */}
       <h3>Product Requests</h3>
       <div className="my-2">
-      <button onClick={handleDeleteAllRequests} className="btn btn-danger my-2">
-        ❌ Delete All Requests
-      </button>
+        <button className="btn btn-success mb-3" onClick={handleDownloadPDF}>
+          📄 Download Product Requests (PDF)
+        </button>
+      </div>
+      <div className="my-2">
+        <button
+          onClick={handleDeleteAllRequests}
+          className="btn btn-danger my-2"
+        >
+          ❌ Delete All Requests
+        </button>
       </div>
       <div className="table-responsive">
         <table className="table table-bordered">

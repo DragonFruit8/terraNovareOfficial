@@ -110,6 +110,7 @@ const Register = () => {
             value={formData.firstName}
             onChange={handleChange}
             required
+            autofocus
           />
         </div>
 
@@ -122,6 +123,7 @@ const Register = () => {
             value={formData.lastName}
             onChange={handleChange}
             required
+            autofocus
           />
         </div>
 
@@ -131,6 +133,7 @@ const Register = () => {
             className="form-control shadow-sm p-3 mb-5 bg-white rounded"
             type="email"
             name="email"
+            autoComplete="on"
             value={formData.email} // ✅ Sync with state
             {...register("email", {
               required: "Email required",
@@ -141,6 +144,7 @@ const Register = () => {
               },
             })}
             onChange={handleChange} // ✅ Add onChange
+            autofocus
           />
           {errors.email && (
             <small className="text-danger">{errors.email.message}</small>
@@ -162,6 +166,7 @@ const Register = () => {
               },
             })}
             onChange={handleChange} // ✅ Add onChange
+            autofocus
           />
           {errors.password && (
             <small className="text-danger">{errors.password.message}</small>
@@ -180,6 +185,7 @@ const Register = () => {
                 value === password || "Passwords do not match",
             })}
             onChange={handleChange} // ✅ Add onChange
+            autofocus
           />
           {errors.password2 && (
             <small className="text-danger">{errors.password2.message}</small>

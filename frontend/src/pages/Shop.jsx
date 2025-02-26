@@ -69,25 +69,30 @@ const handleProductRequest = async (product) => {
       return;
   }
 
-const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
   if (!token) {
       toast.error("Session expired. Please log in again.");
       return;
   }
 
   try {
-      console.log("📩 Sending Request Data:", { product_id: product.product_id });
+      // ✅ Retrieve user email from the token or context
+      const userEmail = userData?.email;
+      if (!userEmail) {
+          toast.error("User email not found. Please log in again.");
+          return;
+      }
+
+      console.log("📩 Sending Request Data:", { product_id: product.product_id, email: userEmail });
 
       const response = await axiosInstance.post(
           "/products/request",
-          { product_id: product.product_id }, 
+          { product_id: product.product_id, email: userEmail }, // ✅ Now including email
           { headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.status === 201) {
           toast.success(response.data.message);
-
-          // ✅ Immediately update the requestedProducts state
           setRequestedProducts((prevRequested) => [...new Set([...prevRequested, product.product_id])]);
       } else {
           throw new Error(response.data.message || "Product request failed.");
@@ -95,10 +100,7 @@ const token = localStorage.getItem("token");
   } catch (error) {
       console.error("❌ Request Error:", error.response?.data || error.message);
 
-      if (error.response?.status === 409) {
-          toast.info("⚠️ This product has already been requested.");
-          setRequestedProducts((prevRequested) => [...new Set([...prevRequested, product.product_id])]); // ✅ Ensure UI updates
-      } else if (error.response?.status === 401) {
+      if (error.response?.status === 401) {
           toast.error("Session expired. Please log in again.");
           localStorage.removeItem("token"); 
           window.location.reload();
@@ -107,6 +109,7 @@ const token = localStorage.getItem("token");
       }
   }
 };
+
 
   return (
     <div className="container mt-5 min-vh-100">

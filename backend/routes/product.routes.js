@@ -19,6 +19,7 @@ const router = express.Router();
 
 router.get("/", getProducts);
 router.get("/admin/products", authenticateUser, getAllProducts);
+router.get("/admin/product", authenticateUser, addProduct);
 router.get("/requests/all", authenticateUser, getAllProductRequests);
 router.post("/add", addProduct);
 router.post("/request", authenticateUser, requestProduct);

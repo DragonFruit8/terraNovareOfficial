@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect} from 'react';
 import { Link } from 'react-router-dom';
 import Meta from "../components/Meta"
 import '../App.css'
 
 
 export default function Homepage() {
-
+  useEffect(() => {
+    window.scrollTo(0, 0); // Force scroll to the top on page load
+  }, []);
   return (
     <div>
       <Meta

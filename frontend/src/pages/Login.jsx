@@ -100,7 +100,8 @@ const Login = () => {
             value={formData.email}
             onChange={handleChange}
             required
-            autoComplete="on"
+            autoComplete={"on"}
+            autoFocus
           />
         </div>
         <div className="mb-3">
@@ -113,7 +114,7 @@ const Login = () => {
             value={formData.password}
             onChange={handleChange}
             required
-            autoComplete="on"
+            autoComplete={"on"}
           />
         </div>
         <div className="d-flex gap-2">

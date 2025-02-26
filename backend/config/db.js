@@ -12,12 +12,12 @@ const isProduction = process.env.NODE_ENV === "production";
 
 
 const pool = new Pool({
-  user: process.env.POSTGRES_USER_PROD,
-  host: process.env.POSTGRES_HOST_PROD,
-  database: process.env.POSTGRES_DB_PROD,
-  password: process.env.POSTGRES_PASSWORD_PROD,
+  user: process.env.POSTGRES_USER_DEV,
+  host: process.env.POSTGRES_HOST_DEV,
+  database: process.env.POSTGRES_DB_DEV,
+  password: process.env.POSTGRES_PASSWORD_DEV,
   // Local Host NEEDS VVVV 5434 VVVV Coded in...
-  port: Number(process.env.PGPORT_PROD) || 5432,
+  port: Number(process.env.PGPORT_DEV) || 5434,
   max: 20, // Increase max connections
   idleTimeoutMillis: 60000, // Keep idle connections for 60s
   connectionTimeoutMillis: 5000, // Wait 5s before timeout
