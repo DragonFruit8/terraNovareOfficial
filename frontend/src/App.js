@@ -7,7 +7,7 @@ import { useUser } from "./context/UserContext";
 // import ProtectedRoute from "./protected/ProtectedRoutes";
 import AdminDashboard from "./pages/AdminDashboard";
 import Cart from "./pages/Cart";
-import Checkout from "./components/Checkout";
+import Checkout from "./forms/Checkout";
 import CompleteProfile from "./pages/CompleteProfile";
 import Brand from "./pages/Brand";
 import DarkLightToggle from "./components/DarkLightToggle";
@@ -65,6 +65,7 @@ const App = () => {
       <HelmetProvider>
         <ToastContainer position="top-center" autoClose={2000} />
         <ThemeProvider>
+          {/* <UnderConstruction /> */}
           <Nav />
           <Sidebar />
 
@@ -95,7 +96,7 @@ const App = () => {
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/reset" element={<ResetPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/shop" element={<Shop />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route

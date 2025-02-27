@@ -381,7 +381,7 @@ export const requestProduct = async (req, res) => {
 };
 export const deleteAllProductRequests = async (req, res) => {
   try {
-    console.log("🔍 Checking user roles:", req.user); // Debugging log
+    // console.log("🔍 Checking user roles:", req.user); // Debugging log
 
     // ✅ Ensure only admins can delete requests
     if (!req.user?.roles || !req.user.roles.includes("admin")) {

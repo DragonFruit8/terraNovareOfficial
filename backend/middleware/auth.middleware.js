@@ -20,7 +20,7 @@ export const authenticateUser = (req, res, next) => {
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
 
-    console.log("✅ Token Decoded Successfully:", decoded);
+    // console.log("✅ Token Decoded Successfully:", decoded);
     req.user = decoded; // Attach the user data to the request
     next();
   } catch (error) {
@@ -31,7 +31,7 @@ export const authenticateUser = (req, res, next) => {
 // ✅ Admin Check Middleware
 export const isAdmin = async (req, res, next) => {
   try {
-    console.log("🔍 Checking Admin Role:", req.user.roles); // Debugging
+    // console.log("🔍 Checking Admin Role:", req.user.roles); // Debugging
 
     if (!req.user?.roles?.includes("admin")) {
       return res.status(403).json({ error: "Access denied. Admins only." });

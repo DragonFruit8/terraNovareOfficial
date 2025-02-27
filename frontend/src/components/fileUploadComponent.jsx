@@ -11,6 +11,7 @@ const UploadComponent = () => {
     "audio/mp3": [".mp3"],
     "application/pdf": [".pdf"],
     "image/png": [".png"],
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
     "image/jpeg": [".jpg", ".jpeg"],
     "video/mp4": [".mp4"],
   };

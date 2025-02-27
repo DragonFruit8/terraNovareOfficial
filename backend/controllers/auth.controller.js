@@ -119,7 +119,7 @@ export const login = async (req, res) => {
 // ✅ Fetch User Profile
 export const getUserProfile = async (req, res) => {
   try {
-    console.log("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
+    // console.log("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
 
     if (!req.user || !req.user.user_id) {
       console.error("🚫 Missing user ID in request!");
@@ -138,7 +138,7 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    console.log("✅ User fetched successfully:", user.rows[0]);
+    // console.log("✅ User fetched successfully:", user.rows[0]);
     res.json(user.rows[0]);
   } catch (error) {
     console.error("❌ Error fetching user data:", error.message);
@@ -147,7 +147,7 @@ export const getUserProfile = async (req, res) => {
 };
 export const getCurrentUser = async (req, res) => {
   try {
-    console.log("🔍 Incoming User ID:", req.user?.id); // ✅ Debug log
+    // console.log("🔍 Incoming User ID:", req.user?.id); // ✅ Debug log
 
     if (!req.user?.id) {
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
@@ -247,22 +247,32 @@ export const updatePassword = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const user = await pool.query(`SELECT user_id FROM users WHERE email = $1`, [email]);
+    const normalizedEmail = email.toLowerCase();
 
-    if (user.rows.length === 0) return res.status(404).json({ error: "User not found" });
+    const user = await pool.query(`SELECT user_id FROM users WHERE email = $1`, [normalizedEmail]);
 
-    const token = jwt.sign({ userId: user.rows[0].user_id }, process.env.JWT_SECRET, { expiresIn: "15m" });
-    const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`;
+    if (user.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const token = jwt.sign(
+      { userId: user.rows[0].user_id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    const resetLink = `${process.env.CLIENT_DEV_URL}/reset-password?token=${token}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: email,
+      to: normalizedEmail, // ✅ Use the normalized email
       subject: "Password Reset",
       text: `Click here to reset your password: ${resetLink}`,
     });
 
     res.json({ message: "Password reset email sent!" });
   } catch (error) {
+    console.error("❌ Error in forgotPassword:", error);
     res.status(500).json({ error: "Error sending email" });
   }
 };

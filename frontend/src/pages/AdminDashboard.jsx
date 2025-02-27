@@ -376,22 +376,25 @@ const AdminDashboard = () => {
 
   /** ✅ Handle Downloading Product Requests */
   const handleDownloadPDF = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: "letter",
+    });
     doc.text("Product Requests", 14, 15);
 
     autoTable(doc, {
       head: [
         [
           "ID",
-          "User Email",
+          "Email",
           "Product",
-          "Quantity",
+          "QTY.",
           "Status",
           "Address",
           "City",
           "State",
-          "Country",
-          "Requested At",
+          "Requested",
         ],
       ],
       body: requests.map((request) => [
@@ -403,21 +406,38 @@ const AdminDashboard = () => {
         request.address || "N/A",
         request.city || "N/A",
         request.state || "N/A",
-        request.country || "N/A",
-        new Date(request.requested_at).toLocaleString(),
+        new Date(request.requested_at).toLocaleString("en-US", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }),
       ]),
       startY: 20,
       theme: "grid",
+      styles: { fontSize: 10 }, // Adjust font size if needed
+      columnStyles: {
+        0: { cellWidth: "auto" }, // ID
+        1: { cellWidth: "auto" }, // User Email
+        2: { cellWidth: "auto" }, // Product
+        3: { cellWidth: "auto" }, // Quantity
+        4: { cellWidth: "auto" }, // Status
+        5: { cellWidth: "auto" }, // Address
+        6: { cellWidth: "auto" }, // City
+        7: { cellWidth: "auto" }, // State
+        8: { cellWidth: "auto" }, // Country
+        9: { cellWidth: "auto" }, // Requested At
+      },
+      overflow: "linebreak", // Ensures text doesn't overflow
     });
-
-    doc.save("product_requests.pdf");
+    // const fileName = requests.length > 0 ? `${requests[0].user_email}.pdf` : "Product_Requests.pdf";
+    doc.save("Product Requests.pdf");
   };
 
   return (
     <div className="container mt-5">
-      <h2>Admin Dashboard</h2>
+      <h2 className="p-2">Admin Dashboard</h2>
       <div className="card mb-3">
-        <h3>Admin Profile</h3>
+        <h3 className="p-2">Admin Profile</h3>
         <div className="card-body">
           {editingAdmin ? (
             <>
@@ -524,7 +544,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-      <h3>Manage Users</h3>
+      <h3 className="p-2">Manage Users</h3>
       <div className="table-responsive">
         <table className="table table-bordered">
           <thead>
@@ -566,7 +586,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* ✅ Products Table with Delete Button */}
-      <h3>Products</h3>
+      <h3 className="p-2">Products</h3>
       <div className="table-responsive">
         <table className="table table-bordered">
           <thead>
@@ -724,7 +744,7 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      <div className="card p-3 mb-4">
+      <div className="card p-3 mb-4 mt-5">
         <h3>Add New Product</h3>
 
         <label className="form-label">Product Name</label>
@@ -817,13 +837,13 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      <h3>Product Requests</h3>
-      <div className="my-2">
+      <h3  className="py-3">Product Requests</h3>
+      <div className="my-3">
         <button className="btn btn-success mb-3" onClick={handleDownloadPDF}>
           📄 Download Product Requests (PDF)
         </button>
       </div>
-      <div className="my-2">
+      <div className="mb-3">
         <button
           onClick={handleDeleteAllRequests}
           className="btn btn-danger my-2"
@@ -831,7 +851,7 @@ const AdminDashboard = () => {
           ❌ Delete All Requests
         </button>
       </div>
-      <div className="table-responsive">
+      <div className="table-responsive my-3">
         <table className="table table-bordered">
           <thead>
             <tr>

@@ -56,6 +56,9 @@
     /* Makes sure the main content expands */
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 30px;
 }
 
 /* Global Styles */
@@ -118,7 +121,10 @@ div#menuText.navbar {
 .dark-mode nav .navbar-title svg,
 .dark-mode .navbar-title,
 .dark-mode a.navbar-brand,
-.dark-mode a .nav-link {
+.dark-mode a .nav-link,
+.dark-mode .card-body > p,
+.dark-mode td ,
+.dark-mode label{
     color: white !important;
 }
 

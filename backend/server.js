@@ -14,12 +14,13 @@ import adminRoutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js"
+import inquiryRoutes from "./routes/inquiry.routes.js"
 import { authenticateUser, isAdmin } from "./middleware/auth.middleware.js"; 
 import { syncAllProducts } from "./services/stripe.service.js";
+
 import checkoutRoutes from "./routes/checkout.routes.js";
 import "./config/passport.js";
 dotenv.config({path: "./.env"});
-
 
 const app = express();
 
@@ -41,7 +42,15 @@ app.use((req, res, next) => {
     express.json()(req, res, next); // Parse JSON for other routes
   }
 });
+// app.use((req, res, next) => {
+//   if (req.headers["x-forwarded-proto"] !== "https") {
+//     return res.redirect("https://" + req.headers.host + req.url);
+//   }
+//   next();
+// });
 
+app.use(express.json({ limit: "10kb" }));
+app.disable("x-powered-by");
 // ✅ Print all routes when server starts
 
 app.use(session({
@@ -63,7 +72,7 @@ app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhoo
 // ✅ Secure Admin Routes
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
-app.use("/api/", authRoutes);
+// app.use("/api/", authRoutes);
 
 // ✅ User Routes
 app.use("/api/products", productRoutes);
@@ -72,6 +81,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
+app.use("/api/forms", inquiryRoutes)
 const upload = multer({ storage });
 
 // File upload endpoint

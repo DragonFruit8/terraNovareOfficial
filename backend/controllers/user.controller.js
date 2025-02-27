@@ -5,11 +5,11 @@ import pool from "../config/db.js";
 export const getUserProfile = async (req, res) => {
   try {
     if (!req.user || !req.user.user_id) {
-      console.error("🔍 Incoming User ID: Undefined (Invalid Token)");
+      // console.error("🔍 Incoming User ID: Undefined (Invalid Token)");
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
 
-    console.log("🔍 Incoming User ID:", req.user.user_id);
+    // console.log("🔍 Incoming User ID:", req.user.user_id);
 
     const user = await pool.query(
       `SELECT user_id, username, fullname, email, roles, address, city, state, country
@@ -30,7 +30,7 @@ export const getUserProfile = async (req, res) => {
 };
 export const getAllUsers = async (req, res) => {
   try {
-      console.log("🔍 Checking user roles:", req.user);
+      // console.log("🔍 Checking user roles:", req.user);
 
       if (!req.user?.roles || !req.user.roles.includes("admin")) {
           console.error("❌ Unauthorized: User is not an admin.");
@@ -40,7 +40,7 @@ export const getAllUsers = async (req, res) => {
       console.log("✅ Fetching users from database...");
       const users = await pool.query("SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC");
 
-      console.log("✅ Users fetched:", users.rows);
+      // console.log("✅ Users fetched:", users.rows);
       res.status(200).json(users.rows);
   } catch (error) {
       console.error("❌ Error fetching users:", error);

@@ -43,8 +43,8 @@ export default function Homepage() {
           </div>
           <div className="carousel-item">
           <img 
-        src={"images/EfinityImage.jpg"} 
-        alt="TerraNovare" 
+        src={"images/EFinityImage.jpg"} 
+        alt="EFinity" 
         style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
       />
           <div className="dark-overlay"></div>

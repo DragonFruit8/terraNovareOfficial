@@ -1,6 +1,6 @@
 import express from "express";
 import passport from "passport";
-// import {jwtDecode} from "jwt-decode";
+import limiter from "../utils/rateLimit.js";
 import {
   signup,
   login,
@@ -18,8 +18,9 @@ import {authenticateUser} from "../middleware/auth.middleware.js";
 const router = express.Router();
 
 router.get("/me", authenticateUser, getCurrentUser);
-router.post("/signup", signup);
-router.post("/login", login);
+// ✅ Apply rate limiting to login & signup routes
+router.post("/signup", limiter, signup); // ⏳ Protect signup
+router.post("/login", limiter, login); // ⏳ Protect login
 router.get("/profile", authenticateUser, getUserProfile);
 router.put("/update-profile", authenticateUser, updateUserProfile);
 router.put("/update-password", authenticateUser, updatePassword);

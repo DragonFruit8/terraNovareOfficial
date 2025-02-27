@@ -17,7 +17,7 @@ export const getAllProducts = async (req, res) => {
        FROM products`
     );
 
-    console.log("✅ Fetched all products:", products.rows);
+    // console.log("✅ Fetched all products:", products.rows);
     res.json(products.rows);
   } catch (error) {
     console.error("❌ Error fetching products:", error.message);
