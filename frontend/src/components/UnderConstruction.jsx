@@ -36,15 +36,18 @@ const UnderConstruction = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: inputPassword }),
     })
+    .then(response => response.json())  // ✅ Parse JSON response here
     .then(data => {
-      console.log("🔹 Server Response:", data);
-      if (data.success) {
+      // console.log("🔹 Server Response:", data);
+      if (data.success) {  // ✅ This now properly checks success
         localStorage.setItem("uc_access", "granted");
-        localStorage.setItem("uc_access_timestamp", new Date().getTime()); // Store current timestamp
+        localStorage.setItem("uc_access_timestamp", new Date().getTime());
         setIsAuthorized(true);
+      } else {
+        setErrorMessage("Incorrect password.");  // ✅ Handle incorrect passwords
       }
-    })    
-    .catch(error => console.error("❌ Fetch Error:", error));
+    })
+    .catch(error => console.error("❌ Fetch Error:", error));    
   };
 
   // ✅ If authorized, do not show the construction page
