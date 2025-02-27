@@ -9,10 +9,22 @@ const UnderConstruction = () => {
 
   // ✅ Check local storage for saved access
   useEffect(() => {
-    if (localStorage.getItem("uc_access") === "granted") {
-      setIsAuthorized(true);
+    const storedAccess = localStorage.getItem("uc_access");
+    const storedTimestamp = localStorage.getItem("uc_access_timestamp");
+  
+    if (storedAccess === "granted" && storedTimestamp) {
+      const now = new Date().getTime();
+      const expiration = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+  
+      if (now - storedTimestamp < expiration) {
+        setIsAuthorized(true);
+      } else {
+        localStorage.removeItem("uc_access");
+        localStorage.removeItem("uc_access_timestamp");
+      }
     }
   }, []);
+  
 
   // ✅ Handle password submission
   const handlePasswordSubmit = async (e) => {
@@ -24,11 +36,14 @@ const UnderConstruction = () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password: inputPassword }),
     })
-    .then(response => response.json())
     .then(data => {
       console.log("🔹 Server Response:", data);
-      setIsAuthorized(true);
-    })
+      if (data.success) {
+        localStorage.setItem("uc_access", "granted");
+        localStorage.setItem("uc_access_timestamp", new Date().getTime()); // Store current timestamp
+        setIsAuthorized(true);
+      }
+    })    
     .catch(error => console.error("❌ Fetch Error:", error));
   };
 
