@@ -15,6 +15,8 @@ const Register = () => {
     register,
     handleSubmit, // ✅ Re-enable handleSubmit
     formState: { errors },
+    setError,
+    clearErrors,
     watch,
   } = useForm();
 
@@ -27,24 +29,64 @@ const Register = () => {
     password2: "",
   });
 
-  // const userEmail = userData?.email || formData.email;
-
   const password = watch("password");
 
+  // ✅ Check Username Availability
+  const [usernameError, setUsernameError] = useState("");
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   // ✅ Add `handleChange` function
   if (userData) {
     // Console.log("User is already logged in:", userData);
   }
-  const handleChange = (e) => {
+  // ✅ Handle Input Change
+  const handleChange = async (e) => {
     const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
 
-    setFormData({
-      ...formData,
-      [name]: name === "email" ? value.toLowerCase() : value, // ✅ Convert email to lowercase
-    });
+    if (name === "username") {
+      try {
+        const response = await axiosInstance.post("/auth/check-username", {
+          username: value,
+        });
+        setUsernameError(
+          response.data.available ? "" : "Username is already taken."
+        );
+      } catch (error) {
+        setUsernameError("Error checking username.");
+      }
+    }
   };
 
-  const onSubmit = async () => {
+  const checkUsernameAvailability = async (username) => {
+    setIsCheckingUsername(true); // ✅ Start checking
+    try {
+      setIsCheckingUsername(true);
+      const response = await axiosInstance.post("/auth/check-username", { username });
+
+      if (!response.data.available) {
+        setError("username", {
+          type: "manual",
+          message: "Username is already taken.",
+        });
+        return false; // Prevent form submission
+      } else {
+        clearErrors("username"); // ✅ Clears error when username is available
+        return true;
+      }
+    } catch (error) {
+      console.error("❌ Error checking username:", error.response?.data || error.message);
+      setError("username", {
+        type: "manual",
+        message: "Could not verify username availability.",
+      });
+      return false;
+    } finally {
+      setIsCheckingUsername(false); // ✅ Stop checking
+    }
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
     if (
       !formData.username ||
       !formData.firstName ||
@@ -53,6 +95,10 @@ const Register = () => {
       !formData.password
     ) {
       toast.error("All fields are required.");
+      return;
+    }
+    if (usernameError) {
+      toast.error(usernameError);
       return;
     }
 
@@ -68,11 +114,8 @@ const Register = () => {
     try {
       // Console.log("Sending Data to Backend:", JSON.stringify(userData)); // ✅ Debugging
       await axiosInstance.post("/auth/signup", userData);
-
-      // Console.log("Response from Backend:", response.data);
       toast.success("Signup successful!");
-
-      navigate("/"); // ✅ Redirect to Homepage
+      navigate("/login"); // ✅ Redirect to Homepage
     } catch (error) {
       console.error("Signup error:", error.response?.data || error.message);
       toast.error(
@@ -94,22 +137,28 @@ const Register = () => {
           <div className="mb-3">
             <label className="form-label">Username</label>
             <input
-              className="form-control shadow-sm p-3 mb-5 bg-white rounded"
+              className={`form-control ${errors.username ? "is-invalid" : ""}`}
               type="text"
               name="username"
-              value={formData.username} // ✅ Sync with state
+              value={formData.username}
               {...register("username", {
+                required: "Username is required",
                 minLength: {
                   value: 4,
-                  message: "Username must be greater than 3 characters",
+                  message: "Username must be at least 4 characters",
                 },
-                required: "Username is required",
+                validate: async (value) =>
+                  await checkUsernameAvailability(value), // ✅ Integrated
               })}
-              onChange={handleChange} // ✅ Add onChange
+              onBlur={(e) => checkUsernameAvailability(e.target.value)} // ✅ Validate on blur
+              onChange={handleChange} // ✅ Live validation
+              autoFocus
             />
-            {errors.username && (
-              <small className="text-danger">{errors.username.message}</small>
-            )}
+      {/* ✅ Show loading indicator while checking username */}
+      {isCheckingUsername && <small className="text-primary">Checking username...</small>}
+
+      {/* ✅ Show error if username is taken */}
+      {errors.username && <small className="text-danger">{errors.username.message}</small>}
           </div>
 
           <div className="mb-3">
@@ -121,7 +170,6 @@ const Register = () => {
               value={formData.firstName}
               onChange={handleChange}
               required
-              autofocus
             />
           </div>
 
@@ -134,7 +182,6 @@ const Register = () => {
               value={formData.lastName}
               onChange={handleChange}
               required
-              autofocus
             />
           </div>
 
@@ -155,7 +202,6 @@ const Register = () => {
                 },
               })}
               onChange={handleChange} // ✅ Add onChange
-              autofocus
             />
             {errors.email && (
               <small className="text-danger">{errors.email.message}</small>
@@ -177,7 +223,6 @@ const Register = () => {
                 },
               })}
               onChange={handleChange} // ✅ Add onChange
-              autofocus
             />
             {errors.password && (
               <small className="text-danger">{errors.password.message}</small>
@@ -196,7 +241,6 @@ const Register = () => {
                   value === password || "Passwords do not match",
               })}
               onChange={handleChange} // ✅ Add onChange
-              autofocus
             />
             {errors.password2 && (
               <small className="text-danger">{errors.password2.message}</small>

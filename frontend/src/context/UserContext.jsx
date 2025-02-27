@@ -13,7 +13,7 @@ export const UserProvider = ({ children }) => {
       try {
         const token = sessionStorage.getItem("token");
         if (!token) {
-          console.warn("🚫 No token found, user is not authenticated.");
+          // console.warn("🚫 No token found, user is not authenticated.");
           setLoading(false);
           return;
         }

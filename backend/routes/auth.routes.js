@@ -1,6 +1,7 @@
 import express from "express";
 import passport from "passport";
 import limiter from "../utils/rateLimit.js";
+import pool from "../config/db.js";
 import {
   signup,
   login,
@@ -13,7 +14,7 @@ import {
 } from "../controllers/auth.controller.js";
 import { getCurrentUser } from "../controllers/auth.controller.js";
 import { verifyPassword } from "../controllers/verify.controller.js";
-import {authenticateUser} from "../middleware/auth.middleware.js";
+import { authenticateUser } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -22,6 +23,23 @@ router.get("/me", authenticateUser, getCurrentUser);
 router.post("/signup", limiter, signup); // ⏳ Protect signup
 router.post("/login", limiter, login); // ⏳ Protect login
 router.get("/profile", authenticateUser, getUserProfile);
+router.post("/check-username", async (req, res) => {
+  try {
+    const { username } = req.body;
+    const checkUsername = username.toLowerCase()
+    const user = await pool.query("SELECT * FROM users WHERE username = $1", [checkUsername]);
+
+    if (user.rows.length > 0) {
+      return res.json({ available: false });
+    }
+
+    res.json({ available: true });
+  } catch (error) {
+    console.error("Error checking username:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 router.put("/update-profile", authenticateUser, updateUserProfile);
 router.put("/update-password", authenticateUser, updatePassword);
 router.post("/forgot-password", forgotPassword);
