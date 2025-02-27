@@ -69,6 +69,12 @@ app.use(passport.session());
 //  Change to "https://terranovare.tech"
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions)); // ✅ Handle preflight requests globally
+// ✅ Tell Express to trust proxy headers
+app.set("trust proxy", 1);
+app.use((req, res, next) => {
+  console.log("Client IP:", req.ip);
+  next();
+});
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing
