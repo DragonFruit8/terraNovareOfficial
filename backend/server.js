@@ -47,15 +47,13 @@ app.use((req, res, next) => {
     express.json()(req, res, next); // Parse JSON for other routes
   }
 });
-// app.use((req, res, next) => {
-//   if (req.headers["x-forwarded-proto"] !== "https") {
-//     return res.redirect("https://" + req.headers.host + req.url);
-//   }
-//   next();
-// });
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect("https://" + req.headers.host + req.url);
+  }
+  next();
+});
 
-app.use(express.json({ limit: "10kb" }));
-app.disable("x-powered-by");
 // ✅ Print all routes when server starts
 
 app.use(session({
@@ -68,13 +66,15 @@ app.use(passport.session());
 
 //  Change to "https://terranovare.tech"
 app.use(cors(corsOptions));
+app.use(express.json());
+app.disable("x-powered-by");
 app.options("*", cors(corsOptions)); // ✅ Handle preflight requests globally
 // ✅ Tell Express to trust proxy headers
 app.set("trust proxy", 1);
-app.use((req, res, next) => {
-  console.log("Client IP:", req.ip);
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log("Client IP:", req.ip);
+//   next();
+// });
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing

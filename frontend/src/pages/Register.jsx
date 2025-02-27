@@ -8,6 +8,10 @@ import { toast } from "react-toastify";
 
 const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(null);
+  const [usernameError, setUsernameError] = useState("");
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+
   const { userData } = useUser();
   const navigate = useNavigate();
 
@@ -31,48 +35,51 @@ const Register = () => {
 
   const password = watch("password");
 
-  // ✅ Check Username Availability
-  const [usernameError, setUsernameError] = useState("");
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   // ✅ Add `handleChange` function
   if (userData) {
     // Console.log("User is already logged in:", userData);
   }
   // ✅ Handle Input Change
-  const handleChange = async (e) => {
+const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  
     if (name === "username") {
-      try {
-        const response = await axiosInstance.post("/auth/check-username", {
-          username: value,
-        });
-        setUsernameError(
-          response.data.available ? "" : "Username is already taken."
-        );
-      } catch (error) {
-        setUsernameError("Error checking username.");
+      setUsernameError(""); // ✅ Clear previous errors
+      setUsernameAvailable(null); // ✅ Reset availability
+  
+      if (value.length >= 4) {
+        // ✅ Debounce API call to avoid excessive requests
+        clearTimeout(window.usernameCheckTimeout);
+        window.usernameCheckTimeout = setTimeout(() => checkUsernameAvailability(value), 500);
       }
     }
   };
-
+  
   const checkUsernameAvailability = async (username) => {
-    setIsCheckingUsername(true); // ✅ Start checking
     try {
       setIsCheckingUsername(true);
+      
+      // 🔍 Log request payload before sending
+      // console.log("📡 Sending username check request:", { username });
+  
       const response = await axiosInstance.post("/auth/check-username", { username });
-
-      if (!response.data.available) {
+  
+      // console.log("✅ Response received:", response.data);
+      
+      if (response.data.available) {
+        clearErrors("username"); // ✅ Remove error if username is available
+        setUsernameAvailable(true); // ✅ Allow submission
+      } else {
         setError("username", {
           type: "manual",
           message: "Username is already taken.",
         });
-        return false; // Prevent form submission
-      } else {
-        clearErrors("username"); // ✅ Clears error when username is available
-        return true;
+        setUsernameAvailable(false); // ❌ Prevent form submission
       }
+  
+      clearErrors("username"); // ✅ Clears error when username is available
+      return true;
     } catch (error) {
       console.error("❌ Error checking username:", error.response?.data || error.message);
       setError("username", {
@@ -81,9 +88,9 @@ const Register = () => {
       });
       return false;
     } finally {
-      setIsCheckingUsername(false); // ✅ Stop checking
+      setIsCheckingUsername(false);
     }
-  };
+  };  
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -150,15 +157,19 @@ const Register = () => {
                 validate: async (value) =>
                   await checkUsernameAvailability(value), // ✅ Integrated
               })}
-              onBlur={(e) => checkUsernameAvailability(e.target.value)} // ✅ Validate on blur
+              onBlur={() => checkUsernameAvailability(formData.username)} // ✅ Validate on blur
               onChange={handleChange} // ✅ Live validation
               autoFocus
             />
-      {/* ✅ Show loading indicator while checking username */}
-      {isCheckingUsername && <small className="text-primary">Checking username...</small>}
-
-      {/* ✅ Show error if username is taken */}
-      {errors.username && <small className="text-danger">{errors.username.message}</small>}
+            {isCheckingUsername && (
+              <small className="text-info">Checking username...</small>
+            )}
+            {usernameAvailable === false && (
+              <small className="text-danger">Username is taken.</small>
+            )}
+            {usernameAvailable === true && (
+              <small className="text-success">✅ Username is available!</small>
+            )}
           </div>
 
           <div className="mb-3">
@@ -250,7 +261,7 @@ const Register = () => {
           <button
             type="submit"
             className="btn btn-primary w-100"
-            disabled={isLoading}
+            disabled={isLoading || usernameAvailable === false}
           >
             {isLoading ? "Creating Account..." : "Sign Up"}
           </button>

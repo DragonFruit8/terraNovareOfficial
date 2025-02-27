@@ -290,3 +290,25 @@ export const resetPassword = async (req, res) => {
     res.status(400).json({ error: "Invalid or expired token" });
   }
 };
+export const checkUsernameAvailability = async (req, res) => {
+  try {
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: "Username is required." });
+    }
+
+    // ✅ Lowercase username for consistent checking
+    const sanitizedUsername = username.toLowerCase().trim();
+
+    const result = await pool.query(`SELECT username FROM users WHERE LOWER(username) = $1`, [sanitizedUsername]);
+
+    if (result.rows.length > 0) {
+      return res.status(200).json({ available: false });
+    }
+
+    res.status(200).json({ available: true });
+  } catch (error) {
+    console.error("❌ Error checking username:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

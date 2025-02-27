@@ -9,7 +9,8 @@ import {
   updateUserProfile,
   updatePassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  checkUsernameAvailability
   // requestEmailVerification,
 } from "../controllers/auth.controller.js";
 import { getCurrentUser } from "../controllers/auth.controller.js";
@@ -23,23 +24,7 @@ router.get("/me", authenticateUser, getCurrentUser);
 router.post("/signup", limiter, signup); // ⏳ Protect signup
 router.post("/login", limiter, login); // ⏳ Protect login
 router.get("/profile", authenticateUser, getUserProfile);
-router.post("/check-username", async (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "*"); // ✅ Allow frontend access
-  try {
-    const { username } = req.body;
-    const checkUsername = username.toLowerCase()
-    const user = await pool.query("SELECT * FROM users WHERE username = $1", [checkUsername]);
-
-    if (user.rows.length > 0) {
-      return res.json({ available: false });
-    }
-
-    res.json({ available: true });
-  } catch (error) {
-    console.error("Error checking username:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+router.post("/check-username", checkUsernameAvailability);
 
 router.put("/update-profile", authenticateUser, updateUserProfile);
 router.put("/update-password", authenticateUser, updatePassword);
