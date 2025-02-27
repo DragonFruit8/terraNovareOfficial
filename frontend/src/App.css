@@ -56,9 +56,6 @@
     /* Makes sure the main content expands */
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding-top: 30px;
 }
 
 /* Global Styles */
