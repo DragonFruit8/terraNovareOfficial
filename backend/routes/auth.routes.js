@@ -24,6 +24,7 @@ router.post("/signup", limiter, signup); // ⏳ Protect signup
 router.post("/login", limiter, login); // ⏳ Protect login
 router.get("/profile", authenticateUser, getUserProfile);
 router.post("/check-username", async (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "*"); // ✅ Allow frontend access
   try {
     const { username } = req.body;
     const checkUsername = username.toLowerCase()

@@ -25,7 +25,12 @@ dotenv.config({path: "./.env"});
 const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
-const homePageOrigin = ["http://localhost:3000", "https:///terranovare.tech"];
+const corsOptions = {
+  origin: ["http://localhost:3000","https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
+  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  allowedHeaders: "Content-Type,Authorization",
+  credentials: true,
+};
 
 const storage = multer.diskStorage({
   destination: './uploads',
@@ -62,7 +67,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //  Change to "https://terranovare.tech"
-app.use(cors({ origin: homePageOrigin, credentials: true }));
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions)); // ✅ Handle preflight requests globally
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing
