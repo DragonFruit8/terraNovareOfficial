@@ -24,29 +24,41 @@ router.post("/create-payment-intent", async (req, res) => {
 
 router.post("/checkout", async (req, res) => {
   try {
-    const { items } = req.body;
+    console.log("🔹 Checkout Request Received:", req.body);
 
-    const lineItems = items.map((item) => ({
-      price_data: {
-        currency: "usd",
-        product_data: { name: item.name },
-        unit_amount: item.price * 100,
-      },
-      quantity: 1,
-    }));
+    const { product, userEmail } = req.body;
 
+    if (!product || !userEmail) {
+      console.error("⚠️ Missing product or user email");
+      return res.status(400).json({ error: "Missing product or user email" });
+    }
+
+    // 🔹 Validate `stripe_price_id`
+    if (!product.stripe_price_id || !product.stripe_price_id.startsWith("price_")) {
+      console.error("❌ Invalid stripe_price_id:", product.stripe_price_id);
+      return res.status(400).json({ error: "Invalid Stripe Price ID" });
+    }
+
+    // ✅ Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: lineItems,
       mode: "payment",
-      success_url: `${CLIENT_URL}/success`,
-      cancel_url: `${CLIENT_URL}/cart`,
+      customer_email: userEmail,
+      line_items: [
+        {
+          price: product.stripe_price_id, // ✅ Ensure this exists in Stripe
+          quantity: 1,
+        },
+      ],
+      success_url: `${process.env.CLIENT_URL}/success`,
+      cancel_url: `${process.env.CLIENT_URL}/cancel`,
     });
 
-    res.json({ sessionId: session.id });
+    console.log("✅ Stripe Checkout Session Created:", session.url);
+    res.json({ url: session.url });
   } catch (error) {
-    console.error("Stripe Error:", error);
-    res.status(500).json({ error: "Payment failed" });
+    console.error("❌ Stripe Checkout Error:", error);
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 });
 

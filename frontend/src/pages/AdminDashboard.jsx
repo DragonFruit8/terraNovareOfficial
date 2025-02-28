@@ -7,14 +7,14 @@ import autoTable from "jspdf-autotable";
 import { useUser } from "../context/UserContext";
 
 const AdminDashboard = () => {
-const { userData, loading } = useUser();
-const navigate = useNavigate();
-const [users, setUsers] = useState([]);
-const [products, setProducts] = useState([]);
-const [requests, setRequests] = useState([]);
-const [editingProduct, setEditingProduct] = useState(null);
-const [editingAdmin, setEditingAdmin] = useState(false);
-const [adminProfile, setAdminProfile] = useState({
+  const { userData, loading } = useUser();
+  const navigate = useNavigate();
+  const [users, setUsers] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [requests, setRequests] = useState([]);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [editingAdmin, setEditingAdmin] = useState(false);
+  const [adminProfile, setAdminProfile] = useState({
     fullname: "",
     email: "",
     password: "",
@@ -305,8 +305,21 @@ const [adminProfile, setAdminProfile] = useState({
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+
+    let newValue = value;
+
+    // ✅ Ensure checkboxes & select dropdowns store the correct boolean values
+    if (type === "checkbox" || name === "is_presale") {
+      newValue = value === "true"; // Converts "true"/"false" string to boolean
+    } else if (type === "number") {
+      newValue = Number(value); // Converts number inputs correctly
+    }
+
+    setEditingProduct((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
   };
 
   /** ✅ Handle New Product Creation */
@@ -339,7 +352,6 @@ const [adminProfile, setAdminProfile] = useState({
       toast.error("Failed to add product.");
     }
   };
-
   /** ✅ Handle Product Request Management */
   const handleUpdateRequestStatus = async (requestId, newStatus) => {
     if (!window.confirm("Confirm Product Request Status???")) return;
@@ -643,7 +655,7 @@ const [adminProfile, setAdminProfile] = useState({
                 <input
                   type="text"
                   name="name"
-                  value={editingProduct.name || ""}
+                  value={editingProduct?.name || ""}
                   onChange={handleInputChange}
                   className="form-control"
                   required
@@ -653,7 +665,7 @@ const [adminProfile, setAdminProfile] = useState({
                 <input
                   type="number"
                   name="price"
-                  value={editingProduct.price || ""}
+                  value={editingProduct?.price || ""}
                   onChange={handleInputChange}
                   className="form-control"
                   min="0"
@@ -665,7 +677,7 @@ const [adminProfile, setAdminProfile] = useState({
                 <input
                   type="number"
                   name="stock"
-                  value={editingProduct.stock || ""}
+                  value={editingProduct?.stock || ""}
                   onChange={handleInputChange}
                   className="form-control"
                   min="0"
@@ -675,7 +687,7 @@ const [adminProfile, setAdminProfile] = useState({
                 <label className="form-label mt-2">Description</label>
                 <textarea
                   name="description"
-                  value={editingProduct.description || ""}
+                  value={editingProduct?.description || ""}
                   onChange={handleInputChange}
                   className="form-control"
                   rows="3"
@@ -686,7 +698,7 @@ const [adminProfile, setAdminProfile] = useState({
                 <input
                   type="text"
                   name="stripe_product_id"
-                  value={editingProduct.stripe_product_id || ""}
+                  value={editingProduct?.stripe_product_id || ""}
                   onChange={handleInputChange}
                   className="form-control"
                 />
@@ -695,20 +707,21 @@ const [adminProfile, setAdminProfile] = useState({
                 <input
                   type="text"
                   name="stripe_price_id"
-                  value={editingProduct.stripe_price_id || ""}
+                  value={editingProduct?.stripe_price_id || ""}
                   onChange={handleInputChange}
                   className="form-control"
                 />
+
                 <label className="form-label mt-2">Is Presale?</label>
                 <select
                   name="is_presale"
-                  value={editingProduct.is_presale}
+                  value={editingProduct?.is_presale?.toString() || "false"} // ✅ Ensures value is always a string
                   onChange={handleInputChange}
                   className="form-select"
                   required
                 >
-                  <option value={true}>Yes</option>
-                  <option value={false}>No</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
                 </select>
 
                 <label className="form-label mt-2">Release Date</label>
@@ -716,7 +729,7 @@ const [adminProfile, setAdminProfile] = useState({
                   type="date"
                   name="release_date"
                   value={
-                    editingProduct.release_date
+                    editingProduct?.release_date
                       ? new Date(editingProduct.release_date)
                           .toISOString()
                           .split("T")[0]
@@ -835,7 +848,7 @@ const [adminProfile, setAdminProfile] = useState({
         </button>
       </div>
 
-      <h3  className="py-3">Product Requests</h3>
+      <h3 className="py-3">Product Requests</h3>
       <div className="my-3">
         <button className="btn btn-success mb-3" onClick={handleDownloadPDF}>
           📄 Download Product Requests (PDF)

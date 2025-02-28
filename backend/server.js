@@ -87,11 +87,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api", authRoutes);
 
 // ✅ User Routes
+app.use("/api/stripe", checkoutRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
-app.use("/api/checkout", checkoutRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
 app.use("/api/forms", inquiryRoutes)
 const upload = multer({ storage });

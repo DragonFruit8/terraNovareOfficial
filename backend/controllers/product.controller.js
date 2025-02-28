@@ -9,14 +9,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 export const getProducts = async (req, res) => {
   try {
     const { rows: products } = await pool.query(`
-      SELECT pr.product_id, 
-      p.name, 
-      p.description, 
-      p.image_url, 
-      p.stripe_price_id 
-      FROM product_requests pr
-      JOIN products p ON pr.product_id = p.product_id`);
-
+      SELECT p.product_id, 
+             p.name, 
+             p.description, 
+             p.image_url, 
+             p.is_presale,
+             p.stripe_price_id, 
+             CASE 
+                WHEN pr.product_id IS NOT NULL THEN TRUE 
+                ELSE FALSE 
+             END AS is_requested
+      FROM products p
+      LEFT JOIN product_requests pr ON p.product_id = pr.product_id
+    `);
 
     const validatedProducts = await Promise.all(
       products.map(async (product) => ({
@@ -26,7 +31,6 @@ export const getProducts = async (req, res) => {
     );
 
     res.status(200).json(validatedProducts);
-
   } catch (error) {
     console.error("❌ Error fetching products:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -260,7 +264,6 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 // DUPLICATE CODE
 // ✅ Add New Product
 export const addProduct = async (req, res) => {
