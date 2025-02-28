@@ -47,12 +47,12 @@ app.use((req, res, next) => {
     express.json()(req, res, next); // Parse JSON for other routes
   }
 });
-// app.use((req, res, next) => {
-//   if (req.headers["x-forwarded-proto"] !== "https") {
-//     return res.redirect("https://" + req.headers.host + req.url);
-//   }
-//   next();
-// });
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect("https://" + req.headers.host + req.url);
+  }
+  next();
+});
 
 // ✅ Print all routes when server starts
 
@@ -71,10 +71,7 @@ app.use(express.json());
 app.options("*", cors(corsOptions)); // ✅ Handle preflight requests globally
 // ✅ Tell Express to trust proxy headers
 app.set("trust proxy", 1);
-// app.use((req, res, next) => {
-//   console.log("Client IP:", req.ip);
-//   next();
-// });
+
 app.use(cookieParser());
 
 // ✅ Apply webhook route separately with raw body parsing
