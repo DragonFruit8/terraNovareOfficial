@@ -14,3 +14,11 @@ frontend/build/
 # Logs & Debug
 *.log
 *.lock
+
+# PM2 process logs and dump files
+pm2.log
+pm2.pid
+pm2-dump.log
+
+# PM2 ecosystem file (if generated dynamically)
+ecosystem.config.js
