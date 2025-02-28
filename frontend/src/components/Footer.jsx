@@ -5,6 +5,8 @@ import {
   FaLinkedin, 
   FaTiktok } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
+import Phone from "../security/PhoneReveal";
+import Email from "../security/EmailObfuscate";
 
 const Footer = () => {
   return (
@@ -45,8 +47,8 @@ const Footer = () => {
           {/* Right Section - Contact */}
           <div className="col-md-4">
             <h5>Contact Us</h5>
-            <p>Email: <br /><a className="nav-link" href="mailto:jtb.phoenixone@gmail.com">jtb.phoenixone@gmail.com</a></p>
-            <p>Phone: <br /><a className="nav-link" href="tel:3138892915"> (313) 889-2915</a></p>
+            <p>Email: <br /><Email /></p>
+            <p>Phone: <br /> <Phone /> </p>
           </div>
         </div>
 

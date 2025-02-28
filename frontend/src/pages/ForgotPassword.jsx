@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import axiosInstance from "../api/axios.config";
+import ReCAPTCHA from "react-google-recaptcha";
 import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
+  const recaptchaRef = useRef(null);
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
@@ -14,7 +16,9 @@ const ForgotPassword = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+   // Get reCAPTCHA token
+    // const token = await recaptchaRef.current.executeAsync();
+    recaptchaRef.current.reset();
     if (!email) {
       toast.error("Please enter your email.");
       return;
@@ -46,7 +50,6 @@ const ForgotPassword = () => {
     }, 1000);
   };
 
-
   return (
     <div className="container d-flex col justify-content-center align-items-center">
       <div className="card p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
@@ -76,6 +79,12 @@ const ForgotPassword = () => {
           Be sure to check your spam folder!
         </p>
         <p>Didn't get the email? Click below to resend it.</p>
+          {/* Invisible reCAPTCHA */}
+          <ReCAPTCHA
+            sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+            size="invisible"
+            ref={recaptchaRef}
+          />
         <button
           className={resendDisabled ? "btn btn-danger" : "btn btn-success"}
           onClick={handleSubmit}

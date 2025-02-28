@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -16,43 +17,79 @@ const transporter = nodemailer.createTransport({
 // ✅ Signup Controller - Add Default Role
 export const signup = async (req, res) => {
   try {
-    let { username, fullname, email, password, roles } = req.body;
+    let { username, fullname, email, password, roles, recaptchaToken } = req.body;
 
-    // ✅ Ensure all fields exist
+    // ✅ Ensure required fields exist
     if (!username || !fullname || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    // ✅ Normalize email (trim + lowercase)
+    // ✅ reCAPTCHA Verification
+    if (!recaptchaToken) {
+      return res.status(400).json({ error: "reCAPTCHA verification is required." });
+    }
+
+    const googleResponse = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify`,
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET_KEY,
+          response: recaptchaToken,
+        },
+      }
+    );
+
+    if (!googleResponse.data.success) {
+      return res.status(400).json({ error: "reCAPTCHA verification failed." });
+    }
+
+    // ✅ Normalize & Validate Email
     email = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format." });
+    }
+
+    // ✅ Check for existing user
+    const existingUser = await pool.query(`SELECT email FROM users WHERE email = $1`, [email]);
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
+    // ✅ Password Security Check
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({
+        error: "Password must be at least 8 characters, include a number and special character.",
+      });
+    }
 
     // ✅ Validate role or default to 'user'
     const validRoles = ["user", "admin", "moderator"];
     const userRole = validRoles.includes(roles) ? roles : "user";
 
-    // ✅ Convert userRole into an array for PostgreSQL (important!)
-    const roleArray = `{${userRole}}`; // ✅ Formats it properly for PostgreSQL
-
-    // ✅ Hash password securely
+    // ✅ Securely hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("🔹 Inserting user into database...");
+    console.log("🔹 Inserting new user into database...");
 
-    // ✅ Insert user & return newly created user
+    // ✅ Insert user into DB & return user info
     const newUser = await pool.query(
       `INSERT INTO users (username, fullname, email, password, roles)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING user_id, username, fullname, email, roles`,
-      [username.trim(), fullname.trim(), email, hashedPassword, roleArray] // ✅ Fixes array insertion
+      [username.trim(), fullname.trim(), email, hashedPassword, `{${userRole}}`] // ✅ PostgreSQL-friendly roles
     );
 
     console.log("✅ User registered successfully:", newUser.rows[0]);
 
     return res.status(201).json({
       message: "User registered successfully!",
-      user: newUser.rows[0].user_id,
+      user_id: newUser.rows[0].user_id,
       role: newUser.rows[0].roles,
     });
+
   } catch (error) {
     console.error("❌ Error registering user:", error);
 
@@ -61,77 +98,94 @@ export const signup = async (req, res) => {
       return res.status(400).json({ error: "Email already exists." });
     }
 
-    // ✅ Send detailed error in development
-    return res.status(500).json({ error: "Internal server error.", details: error.message });
+    return res.status(500).json({ error: "Internal server error." });
   }
 };
 // ✅ Login Controller - Ensure Token Includes Roles
 export const login = async (req, res) => {
   try {
+    console.log("🔹 Login Request Received:", req.body);
 
-    // ✅ Validate input early
     if (!req.body.email || !req.body.password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
-    const { email, password } = req.body;
-    const loginEmail = email.trim().toLowerCase(); // ✅ Fixed variable name
+    const { email, password, recaptchaToken } = req.body;
 
-    // ✅ Query DB for user
+    if (!recaptchaToken) {
+      return res
+        .status(400)
+        .json({ error: "reCAPTCHA verification is required" });
+    }
+
+    console.log("🔹 Verifying reCAPTCHA token...");
+
+    // Verify with Google
+    const googleResponse = await axios.post(
+      `https://www.google.com/recaptcha/api/siteverify`,
+      null,
+      {
+        params: {
+          secret: process.env.RECAPTCHA_SECRET_KEY,
+          response: recaptchaToken,
+        },
+      }
+    );
+
+    console.log("🔹 Google reCAPTCHA Response:", googleResponse.data);
+
+    if (!googleResponse.data.success) {
+      return res.status(400).json({ error: "reCAPTCHA verification failed" });
+    }
+
+    console.log("✅ reCAPTCHA verified. Proceeding with login...");
+    // 🔹 Check if user exists
     const { rows } = await pool.query(
-      `SELECT user_id, username, email, password, roles
-       FROM users
-       WHERE email = $1`,
-      [loginEmail]
+      `SELECT user_id, username, email, password, roles FROM users WHERE email = $1`,
+      [email.trim().toLowerCase()]
     );
 
     if (rows.length === 0) {
-      return res.status(401).json({ error: "Invalid email or password" });
+      console.log("❌ Invalid login attempt:", email);
+      return res.status(401).json({ error: "⚠️ Invalid email or password" });
     }
 
     const user = rows[0];
-
-    // ✅ Secure password comparison
     const isValidPassword = await bcrypt.compare(password, user.password);
+
     if (!isValidPassword) {
-      return res.status(401).json({ error: "Invalid email or password" });
+      console.log("❌ Invalid password for:", email);
+      return res.status(401).json({ error: "⚠️ Invalid email or password" });
     }
 
-    // ✅ Ensure roles are properly formatted
-    const roles = Array.isArray(user.roles)
-      ? user.roles
-      : user.roles ? user.roles.split(",") : [];
-
-    if (roles.length === 0) {
-      console.error("❌ Error: User has no roles assigned!", { user_id: user.user_id, loginEmail: user.email });
-      return res.status(500).json({ error: "User roles missing" });
-    }
-
-    // ✅ Generate JWT token
+    // 🔹 Generate JWT Token
     const token = jwt.sign(
       {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        roles: roles,
+        roles: user.roles.split(","),
       },
       process.env.JWT_SECRET,
       { expiresIn: "12h" }
     );
 
-    // ✅ Return token & user data (excluding password)
-    res.json({
+    console.log("✅ User logged in:", user.email);
+
+    return res.json({
       token,
       user: {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        roles: roles,
+        roles: user.roles.split(","),
       },
     });
   } catch (error) {
     console.error("❌ Login Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 };
 // ✅ Fetch User Profile
@@ -188,7 +242,9 @@ export const updateUserProfile = async (req, res) => {
     email = email.toLowerCase();
 
     if (!fullname || !email || !username) {
-      return res.status(400).json({ error: "Username, full name, and email are required" });
+      return res
+        .status(400)
+        .json({ error: "Username, full name, and email are required" });
     }
 
     // 🔹 Check if username already exists (excluding current user)
@@ -241,7 +297,10 @@ export const updatePassword = async (req, res) => {
     }
 
     // 🔹 Validate current password
-    const isMatch = await bcrypt.compare(currentPassword, user.rows[0].password);
+    const isMatch = await bcrypt.compare(
+      currentPassword,
+      user.rows[0].password
+    );
     if (!isMatch) {
       return res.status(400).json({ error: "Incorrect current password" });
     }
@@ -250,10 +309,10 @@ export const updatePassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // 🔹 Update password in database
-    await pool.query(
-      `UPDATE users SET password = $1 WHERE user_id = $2`,
-      [hashedPassword, userId]
-    );
+    await pool.query(`UPDATE users SET password = $1 WHERE user_id = $2`, [
+      hashedPassword,
+      userId,
+    ]);
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {
@@ -267,7 +326,10 @@ export const forgotPassword = async (req, res) => {
     const { email } = req.body;
     const normalizedEmail = email.toLowerCase();
 
-    const user = await pool.query(`SELECT user_id FROM users WHERE email = $1`, [normalizedEmail]);
+    const user = await pool.query(
+      `SELECT user_id FROM users WHERE email = $1`,
+      [normalizedEmail]
+    );
 
     if (user.rows.length === 0) {
       return res.status(404).json({ error: "User not found" });
@@ -301,7 +363,10 @@ export const resetPassword = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    await pool.query(`UPDATE users SET password = $1 WHERE user_id = $2`, [hashedPassword, decoded.userId]);
+    await pool.query(`UPDATE users SET password = $1 WHERE user_id = $2`, [
+      hashedPassword,
+      decoded.userId,
+    ]);
 
     res.json({ message: "Password updated successfully!" });
   } catch (error) {
@@ -318,7 +383,10 @@ export const checkUsernameAvailability = async (req, res) => {
     // ✅ Lowercase username for consistent checking
     const sanitizedUsername = username.toLowerCase().trim();
 
-    const result = await pool.query(`SELECT username FROM users WHERE LOWER(username) = $1`, [sanitizedUsername]);
+    const result = await pool.query(
+      `SELECT username FROM users WHERE LOWER(username) = $1`,
+      [sanitizedUsername]
+    );
 
     if (result.rows.length > 0) {
       return res.status(200).json({ available: false });

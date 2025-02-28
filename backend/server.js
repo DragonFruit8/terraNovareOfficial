@@ -15,6 +15,7 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js"
 import inquiryRoutes from "./routes/inquiry.routes.js"
+import verifyRecaptcha from "./routes/verify-recaptcha.js"
 import { authenticateUser, isAdmin } from "./middleware/auth.middleware.js"; 
 import { syncAllProducts } from "./services/stripe.service.js";
 
@@ -49,12 +50,12 @@ app.use((req, res, next) => {
 });
 
 
-app.use((req, res, next) => {
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    return res.redirect("https://" + req.headers.host + req.url);
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   if (req.headers["x-forwarded-proto"] !== "https") {
+//     return res.redirect("https://" + req.headers.host + req.url);
+//   }
+//   next();
+// });
 
 // ✅ Print all routes when server starts
 
@@ -84,6 +85,7 @@ app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhoo
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", authRoutes);
+app.use("/api/verify-recaptcha", verifyRecaptcha);
 
 // ✅ User Routes
 app.use("/api/stripe", checkoutRoutes);

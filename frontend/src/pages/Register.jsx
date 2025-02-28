@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import ReCAPTCHA from "react-google-recaptcha";
 import axiosInstance from "../api/axios.config";
 import { toast } from "react-toastify";
 
 const Register = () => {
+  const recaptchaRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState(""); // ✅ Stores PostgreSQL error
   const [usernameStatus, setUsernameStatus] = useState("idle"); // "idle" | "checking" | "available" | "taken"
@@ -38,36 +40,41 @@ const Register = () => {
 
     setUsernameStatus("checking");
 
-    try {
-      const response = await axiosInstance.post("/auth/check-username", {
-        username,
-      });
+    clearTimeout(window.usernameCheckTimeout); // 🔹 Clears previous request
+    window.usernameCheckTimeout = setTimeout(async () => {
+      try {
+        const response = await axiosInstance.post("/auth/check-username", {
+          username,
+        });
 
-      if (response.data.available) {
-        setUsernameStatus("available");
-        clearErrors("username");
-      } else {
-        setUsernameStatus("taken");
+        if (response.data.available) {
+          setUsernameStatus("available");
+          clearErrors("username");
+        } else {
+          setUsernameStatus("taken");
+          setError("username", {
+            type: "manual",
+            message: "Username is already taken.",
+          });
+        }
+      } catch (error) {
+        console.error(
+          "❌ Error checking username:",
+          error.response?.data || error.message
+        );
+        setUsernameStatus("idle");
         setError("username", {
           type: "manual",
-          message: "Username is already taken.",
+          message: "Could not verify username.",
         });
       }
-    } catch (error) {
-      console.error(
-        "❌ Error checking username:",
-        error.response?.data || error.message
-      );
-      setUsernameStatus("idle");
-      setError("username", {
-        type: "manual",
-        message: "Could not verify username.",
-      });
-    }
+    }, 500); // 🔹 Delays API request by 500ms
   };
 
   // ✅ Form Submission
   const onSubmit = async (data) => {
+    // Password must be at least 8 characters, contain a number & special character
+    const passwordRegex =/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if (usernameStatus === "checking") {
       toast.error("Please wait for username validation to complete.");
       return;
@@ -83,11 +90,25 @@ const Register = () => {
       return;
     }
 
+    if (!passwordRegex.test(password)) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "Password must be at least 8 characters, include a number and special character.",
+        });
+    }
+
+    // Get reCAPTCHA token
+    const token = await recaptchaRef.current.executeAsync();
+    recaptchaRef.current.reset();
+
     const userData = {
       username: data.username,
       fullname: `${data.firstName} ${data.lastName}`.trim(),
       email: data.email,
       password: data.password,
+      recaptchaToken: token,
     };
     setServerError("");
     setIsLoading(true);
@@ -183,12 +204,13 @@ const Register = () => {
                 },
               })}
             />
-          {/* ✅ Display PostgreSQL Error Message */}
-          {serverError && (
-            <div className="alert alert-danger mt-2">
-              <i className="bi bi-exclamation-triangle-fill"></i> {serverError}
-            </div>
-          )}
+            {/* ✅ Display PostgreSQL Error Message */}
+            {serverError && (
+              <div className="alert alert-danger mt-2">
+                <i className="bi bi-exclamation-triangle-fill"></i>{" "}
+                {serverError}
+              </div>
+            )}
           </div>
 
           {/* ✅ Password */}
@@ -226,6 +248,7 @@ const Register = () => {
             ) : confirmPassword ? (
               <small className="text-danger">❌ Passwords do not match</small>
             ) : null}
+            <ReCAPTCHA sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY} />
           </div>
 
           {/* ✅ Submit Button */}
