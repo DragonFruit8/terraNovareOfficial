@@ -48,7 +48,7 @@ const Shop = () => {
         return;
       }
   
-      const { data } = await axiosInstance.post("/api/stripe/checkout", {
+      const { data } = await axiosInstance.post("/stripe/checkout", {
         product,
         userEmail: userData?.email,
       });
