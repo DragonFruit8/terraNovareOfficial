@@ -26,7 +26,7 @@ const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
 const corsOptions = {
-  origin: ["http://localhost:3000","https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
+  origin: ["https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
   methods: "GET,POST,PUT,DELETE,OPTIONS",
   allowedHeaders: "Content-Type,Authorization",
   credentials: true,
@@ -47,12 +47,12 @@ app.use((req, res, next) => {
     express.json()(req, res, next); // Parse JSON for other routes
   }
 });
-// app.use((req, res, next) => {
-//   if (req.headers["x-forwarded-proto"] !== "https") {
-//     return res.redirect("https://" + req.headers.host + req.url);
-//   }
-//   next();
-// });
+app.use((req, res, next) => {
+  if (req.headers["x-forwarded-proto"] !== "https") {
+    return res.redirect("https://" + req.headers.host + req.url);
+  }
+  next();
+});
 
 // ✅ Print all routes when server starts
 

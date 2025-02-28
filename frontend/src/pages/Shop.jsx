@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import { loadStripe } from "@stripe/stripe-js";
 
 const stripePromise = loadStripe(
-  "pk_test_51H9yaJCJsM5FOXWHqbppEf6qNGuuLHOWiDcX9n9JXW5a62Kq1uSWhuhCbIMkPVf7fc7g16Icq6FKVvchxqxCBzTu00Bl3o1w1K"
+  `pk_live_51H9yaJCJsM5FOXWHe4MYqZdeoHiRQHmwDkmXuvs1qqprojx7p2kJq4QiDZOjTp7bhWjWi9VroFyPgQuSr9rwLOmT00fjHhiTva`
 );
 
 const Shop = () => {

@@ -1,4 +1,4 @@
-import { scan } from "react-scan";
+// import { scan } from "react-scan";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
@@ -12,11 +12,13 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { ThemeProvider } from "./context/ThemeContext";
 
-const stripePromise = loadStripe("pk_test_51H9yaJCJsM5FOXWHqbppEf6qNGuuLHOWiDcX9n9JXW5a62Kq1uSWhuhCbIMkPVf7fc7g16Icq6FKVvchxqxCBzTu00Bl3o1w1K");
+const stripePromise = loadStripe(
+  `pk_live_51H9yaJCJsM5FOXWHe4MYqZdeoHiRQHmwDkmXuvs1qqprojx7p2kJq4QiDZOjTp7bhWjWi9VroFyPgQuSr9rwLOmT00fjHhiTva`
+);
 
-scan({
-  enabled: true,
-});
+// scan({
+//   enabled: true,
+// });
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <ThemeProvider>
