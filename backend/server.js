@@ -26,7 +26,7 @@ const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
 const corsOptions = {
-  origin: ["https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
+  origin: ["http://localhost:3000","https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
   methods: "GET,POST,PUT,DELETE,OPTIONS",
   allowedHeaders: "Content-Type,Authorization",
   credentials: true,

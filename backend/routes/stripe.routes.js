@@ -34,9 +34,11 @@ router.post("/checkout", async (req, res) => {
   try {
     const { product, userEmail } = req.body;
 
-    if (!product || !userEmail) {
-      return res.status(400).json({ error: "Missing product or user email" });
+    if (!product || !product.price_id || !product.price_id.startsWith("price_")) {
+      return res.status(400).json({ error: "Invalid Stripe Price ID" });
     }
+
+    console.log("💳 Creating Stripe checkout session for:", product.name, product.price_id);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -44,11 +46,7 @@ router.post("/checkout", async (req, res) => {
       customer_email: userEmail,
       line_items: [
         {
-          price_data: {
-            currency: "usd",
-            product_data: { name: product.name },
-            unit_amount: Math.round(product.price * 100),
-          },
+          price: product.price_id,
           quantity: 1,
         },
       ],

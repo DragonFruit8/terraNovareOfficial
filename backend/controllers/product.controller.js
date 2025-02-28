@@ -14,6 +14,7 @@ export const getProducts = async (req, res) => {
              p.name, 
              p.description, 
              p.image_url, 
+             p.price,
              p.is_presale,
              p.stripe_price_id, 
              CASE 

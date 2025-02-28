@@ -147,38 +147,38 @@ export const getProductById = async (req, res) => {
 export const updateProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
-    const { name, slug, price, stock, is_presale, release_date, description, stripe_product_id, stripe_price_id } = req.body;
-
-    const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
+    const { name, slug, price, stock, is_presale, release_date, image_url, description, stripe_product_id, stripe_price_id } = req.body;
 
     if (!product_id) {
       return res.status(400).json({ error: "Product ID is required." });
     }
 
-    console.log("🔍 Updating Product:", { product_id, name, slug, price, stock, is_presale, release_date, description, stripe_product_id, stripe_price_id });
+    console.log("🔍 Updating Product:", { product_id, name, price, stock, is_presale, release_date, description, image_url, stripe_product_id, stripe_price_id });
+
+    const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
 
     const updatedProduct = await pool.query(
-      `UPDATE products
-       SET name = $1, 
-           slug = $2, 
-           price = $3, 
-           stock = $4, 
-           is_presale = $5,
-           release_date = $6,
-           description = $7,
-           stripe_product_id = $8, 
-           stripe_price_id = $9
+      `UPDATE products 
+       SET name = COALESCE($1, name),
+           price = COALESCE($2, price),
+           stock = COALESCE($3, stock),
+           description = COALESCE($4, description),
+           image_url = COALESCE($5, image_url),
+           stripe_product_id = COALESCE($6, stripe_product_id),
+           stripe_price_id = COALESCE($7, stripe_price_id),
+           is_presale = COALESCE($8, is_presale),
+           release_date = COALESCE($9, release_date)
        WHERE product_id = $10
-       RETURNING *;`,
-      [name, slug, price, stock, is_presale, formattedReleaseDate, description, stripe_product_id, stripe_price_id, product_id]
+       RETURNING *`, // ✅ Ensure updated product is returned
+      [name, price, stock, description, image_url, stripe_product_id, stripe_price_id, is_presale, formattedReleaseDate, product_id]
     );
 
-    if (updatedProduct.rows.length === 0) {
+    if (updatedProduct.rowCount === 0) {
       return res.status(404).json({ error: "Product not found" });
     }
 
     console.log("✅ Product updated:", updatedProduct.rows[0]);
-    res.json(updatedProduct.rows[0]);
+    res.json({ message: "Product updated successfully!", product: updatedProduct.rows[0] });
   } catch (error) {
     console.error("❌ Error updating product:", error.message);
     res.status(500).json({ error: "Internal Server Error" });

@@ -694,6 +694,14 @@ const AdminDashboard = () => {
                   required
                 ></textarea>
 
+                <label className="form-label mt-2">Image URL</label>
+                <input
+                  type="text"
+                  name="image_url"
+                  value={editingProduct?.image_url || ""}
+                  onChange={handleInputChange}
+                  className="form-control"
+                />
                 <label className="form-label mt-2">Stripe Product ID</label>
                 <input
                   type="text"
