@@ -34,7 +34,7 @@ const Login = () => {
   };
 
   return (
-    <div className="container d-flex row align-items-center justify-content-center mt-5">
+    <div className="container d-flex col align-items-center justify-content-center my-5">
       <div
         className="card p-4 shadow-sm"
         style={{ maxWidth: "500px", width: "100%" }}

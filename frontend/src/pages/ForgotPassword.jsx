@@ -48,7 +48,7 @@ const ForgotPassword = () => {
 
 
   return (
-    <div className="container d-flex justify-content-center mt-5">
+    <div className="container d-flex col justify-content-center align-items-center">
       <div className="card p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
     <h2>Forgot Password</h2>
 

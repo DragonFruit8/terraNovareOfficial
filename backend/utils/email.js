@@ -13,11 +13,27 @@ const transporter = nodemailer.createTransport({
   });
 
 export const sendProductRequestEmail = async (to, product) => {
+  const emailHTML = `
+    <html>
+      <body>
+        <div style="text-align: center; padding: 20px;">
+          <h2>🌿 Terra'Novare</h2>
+          <p>Thank you for requesting <strong>${productName}</strong> from Terra'Novare.</p>
+          <p>We will notify you once it becomes available.</p>
+          <p><strong>Requested On:</strong> ${requestDate}</p>
+          <a href="https://terranovare.tech" style="background:#184e77;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
+            Visit Our Shop
+          </a>
+          <p style="color:#666;font-size:12px;margin-top:20px;">© ${new Date().getFullYear()} Terra'Novare | All Rights Reserved</p>
+        </div>
+      </body>
+    </html>`;
+
   const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject: "Product Request Confirmation",
-    text: `Thank you for requesting "${product}". We will notify you once it's available!`,
+      from: process.env.EMAIL_USER,
+      to,
+      subject: `${productName} Request Confirmation`,
+      text: emailHTML,
   };
 
   try {
