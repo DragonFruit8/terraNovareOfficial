@@ -49,22 +49,22 @@ const Shop = () => {
       console.log("🔗 Sending price ID to Stripe:", product.stripe_price_id);
   
       const { data } = await axiosInstance.post("/stripe/checkout", {
-        product: {
-          name: product.name,
-          price_id: product.stripe_price_id,
-          price: product.price,
-        },
-        userEmail: userData?.email,
+        price_id: product.stripe_price_id, // ✅ Send only price_id
+        userEmail: userData?.email, // ✅ Send userEmail
       });
   
-      window.location.href = data.url; // Redirect to Stripe checkout
+      if (data?.url) {
+        window.location.href = data.url; // ✅ Redirect to Stripe checkout
+      } else {
+        throw new Error("Stripe session URL missing");
+      }
     } catch (error) {
       console.error("❌ Checkout session error:", error.response?.data || error.message);
       toast.error("❌ Payment failed. Try again.");
     }
   };
   
-
+  
   useEffect(() => {
     const fetchRequestedProducts = async () => {
       if (!userData?.email) return;

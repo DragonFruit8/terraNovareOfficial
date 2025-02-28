@@ -13,7 +13,6 @@ if (!process.env.STRIPE_SECRET_KEY) {
     process.exit(1); // Stop the server if key is missing
 }
 
-
 router.post("/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
   const sig = req.headers["stripe-signature"];
 

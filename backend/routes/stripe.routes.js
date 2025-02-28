@@ -32,21 +32,24 @@ router.post("/webhook", express.raw({ type: "application/json" }), (req, res) =>
 });
 router.post("/checkout", async (req, res) => {
   try {
-    const { product, userEmail } = req.body;
+    const { price_id, userEmail } = req.body; // ✅ Extract only price_id and userEmail
 
-    if (!product || !product.price_id || !product.price_id.startsWith("price_")) {
-      return res.status(400).json({ error: "Invalid Stripe Price ID" });
+    // Validate input
+    if (!price_id || !userEmail) {
+      console.error("⚠️ Missing price ID or user email:", { price_id, userEmail });
+      return res.status(400).json({ error: "Missing price ID or user email" });
     }
 
-    console.log("💳 Creating Stripe checkout session for:", product.name, product.price_id);
+    console.log("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
 
+    // Create the Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: userEmail,
       line_items: [
         {
-          price: product.price_id,
+          price: price_id, // ✅ Use only price_id
           quantity: 1,
         },
       ],
@@ -54,10 +57,11 @@ router.post("/checkout", async (req, res) => {
       cancel_url: `${process.env.CLIENT_URL}/cancel`,
     });
 
-    res.json({ url: session.url });
+    res.json({ url: session.url }); // ✅ Return the checkout URL
+
   } catch (error) {
     console.error("❌ Stripe Checkout Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ error: error.message });
   }
 });
 
