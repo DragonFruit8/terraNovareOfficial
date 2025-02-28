@@ -1,5 +1,5 @@
 import { transporter } from "../services/email.service.js"; // ✅ Reuse global transporter
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 import pool from "../config/db.js";
 
 export const getUserProfile = async (req, res) => {
@@ -30,21 +30,27 @@ export const getUserProfile = async (req, res) => {
 };
 export const getAllUsers = async (req, res) => {
   try {
-      // console.log("🔍 Checking user roles:", req.user);
+    // console.log("🔍 Checking user roles:", req.user);
 
-      if (!req.user?.roles || !req.user.roles.includes("admin")) {
-          console.error("❌ Unauthorized: User is not an admin.");
-          return res.status(403).json({ error: "Unauthorized: Admin access required" });
-      }
+    if (!req.user?.roles || !req.user.roles.includes("admin")) {
+      console.error("❌ Unauthorized: User is not an admin.");
+      return res
+        .status(403)
+        .json({ error: "Unauthorized: Admin access required" });
+    }
 
-      console.log("✅ Fetching users from database...");
-      const users = await pool.query("SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC");
+    console.log("✅ Fetching users from database...");
+    const users = await pool.query(
+      "SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC"
+    );
 
-      // console.log("✅ Users fetched:", users.rows);
-      res.status(200).json(users.rows);
+    // console.log("✅ Users fetched:", users.rows);
+    res.status(200).json(users.rows);
   } catch (error) {
-      console.error("❌ Error fetching users:", error);
-      res.status(500).json({ error: "Internal Server Error", details: error.message });
+    console.error("❌ Error fetching users:", error);
+    res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 };
 export const requestEmailVerification = async (req, res) => {
@@ -72,38 +78,60 @@ export const requestEmailVerification = async (req, res) => {
   }
 };
 export const sendProductRequestEmail = async (to, productName) => {
-
-  const emailHTML = `
-    <html>
-      <body>
-        <div style="text-align: center; padding: 20px;">
-          <h2>🌿 Terra'Novare</h2>
-          <p>Thank you for requesting <strong>${productName}</strong> from Terra'Novare.</p>
-          <p>We will notify you once it becomes available.</p>
-          <p><strong>Requested On:</strong> ${requestDate}</p>
-          <a href="https://terranovare.tech" style="background:#184e77;color:white;padding:10px 20px;text-decoration:none;border-radius:5px;">
-            Visit Our Shop
-          </a>
-          <p style="color:#666;font-size:12px;margin-top:20px;">© ${new Date().getFullYear()} Terra'Novare | All Rights Reserved</p>
-        </div>
-      </body>
-    </html>`;
+  const requestDate = requestDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 
   const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to,
-      subject: `${productName} Request Confirmation`,
-      text: emailHTML,
+    from: process.env.EMAIL_USER,
+    to,
+    subject: `${productName} Request Confirmation`,
+    html: `<html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; color: #333; background-color: #f9f9f9; padding: 20px; }
+            .email-container { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); max-width: 600px; margin: auto; }
+            .header { text-align: center; padding: 10px; background-color: #1a1a1a; color: #fff; border-radius: 8px 8px 0 0; }
+            .content { padding: 20px; text-align: left; }
+            .footer { text-align: center; font-size: 12px; color: #888; padding: 10px; }
+            .button { display: inline-block; padding: 10px 15px; background-color: #e63946; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+            .button:hover { background-color: #cc3333; }
+          </style>
+        </head>
+        <body>
+          <div class="email-container">
+            <div class="header">
+              <h2>Terra'Novare 🌍</h2>
+            </div>
+            <div class="content">
+              <h3>🌟 Thank You for Your Product Request!</h3>
+              <p>Dear Valued Supporter,</p>
+              <p>You have successfully requested <strong>${productName}</strong>. We appreciate your interest and will notify you as soon as it's available.</p>
+              <p><strong>Requested On:</strong> ${requestDate}</p>
+              <p>If you have any questions, feel free to reach out to our support team.</p>
+              <p style="text-align:center;">
+                <a href="https://www.terranovare.tech" target="_blank">Visit Terra'Novare</a>
+              </p>
+            </div>
+            <div class="footer">
+              <p>🌱 Together, we rise. | Terra’Novare Team</p>
+              <p><a href="mailto:support@terranovare.tech">Contact Support</a></p>
+            </div>
+          </div>
+        </body>
+        </html>`,
   };
 
   try {
-      console.log("📨 Sending email to:", to);
-      const info = await transporter.sendMail(mailOptions);
-      console.log("✅ Email sent successfully:", info.response);
-      return info;
+    console.log("📨 Sending email to:", to);
+    const info = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent successfully:", info.response);
+    return info;
   } catch (error) {
-      console.error("❌ Error sending email:", error);
-      throw new Error("Failed to send email");
+    console.error("❌ Error sending email:", error);
+    throw new Error("Failed to send email");
   }
 };
 // ✅ Update User Profile
@@ -142,7 +170,14 @@ export const updateUserProfile = async (req, res) => {
       WHERE user_id = $6
       RETURNING user_id, username, email, address, city, state, country;
       `,
-      [trimmedUsername, trimmedAddress, trimmedCity, trimmedState, trimmedCountry, userId]
+      [
+        trimmedUsername,
+        trimmedAddress,
+        trimmedCity,
+        trimmedState,
+        trimmedCountry,
+        userId,
+      ]
     );
 
     // If no rows were returned, the user wasn't found
@@ -163,7 +198,9 @@ export const updateUserPassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: "Both current and new passwords are required" });
+      return res
+        .status(400)
+        .json({ error: "Both current and new passwords are required" });
     }
 
     // 🔹 Fetch the user's existing password
@@ -177,7 +214,10 @@ export const updateUserPassword = async (req, res) => {
     }
 
     // 🔹 Compare old password
-    const isMatch = await bcrypt.compare(currentPassword, user.rows[0].password);
+    const isMatch = await bcrypt.compare(
+      currentPassword,
+      user.rows[0].password
+    );
     if (!isMatch) {
       return res.status(400).json({ error: "Current password is incorrect" });
     }

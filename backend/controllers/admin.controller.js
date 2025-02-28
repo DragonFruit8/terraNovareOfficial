@@ -15,7 +15,7 @@ const generateSlug = (name) => {
 export const getAllProducts = async (req, res) => {
   try {
     const products = await pool.query(
-      `SELECT product_id, name, slug, price, description, stock, is_presale, release_date, stripe_product_id, stripe_price_id
+      `SELECT product_id, name, slug, price, description, stock, is_presale, image_url, release_date, stripe_product_id, stripe_price_id
        FROM products`
     );
 
@@ -86,42 +86,75 @@ export const updateAdminProfile = async (req, res) => {
 // Helper function to generate a slug from the product name
 export const addProduct = async (req, res) => {
   try {
-    const { name, price, slug, stock, description } = req.body;
-    
+    const {
+      name,
+      price,
+      stock,
+      description,
+      image_url,
+      is_presale,
+      release_date,
+      slug
+    } = req.body;
+
+    // Ensure required fields are present
+    if (!name || !price || !stock || !description) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
     // Create the product in Stripe
-    const stripeProduct = await stripe.products.create({ name });
+    const stripeProduct = await stripe.products.create({
+      name,
+      images: image_url ? [image_url] : [], // Include image if available
+    });
     const stripeProductId = stripeProduct.id;
 
-    // Create the price in Stripe for this product (price in cents)
+    // Create the price in Stripe (Stripe requires price in cents)
     const stripePrice = await stripe.prices.create({
-      unit_amount: Math.round(price * 100), // converting dollars to cents
+      unit_amount: Math.round(price * 100), // Convert dollars to cents
       currency: "usd",
-      product: stripeProductId
+      product: stripeProductId,
     });
     const stripePriceId = stripePrice.id;
 
     // Helper function to generate a slug from the product name
-    const generateSlug = (name) => {
-      return name.toLowerCase().trim().replace(/\s+/g, '-');
-    };
+    const generateSlug = (name) => name.toLowerCase().trim().replace(/\s+/g, "-");
 
-    // Use the provided slug or generate one if not provided
+    // Use provided slug or generate one if not provided
     const finalSlug = slug || generateSlug(name);
-    
-    // Insert the new product into the DB, now including valid stripe_product_id and stripe_price_id
-    const result = await pool.query(`
-      INSERT INTO products(name, slug, price, stock, stripe_product_id, stripe_price_id, description)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+
+    // Convert release_date to proper format (or set to NULL)
+    const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
+
+    // Insert the new product into the database
+    const result = await pool.query(
+      `
+      INSERT INTO products (name, slug, price, stock, description, image_url, is_presale, release_date, stripe_product_id, stripe_price_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *;
-    `, [name, finalSlug, price, stock, stripeProductId, stripePriceId, description]);
-    
+      `,
+      [
+        name,
+        finalSlug,
+        price,
+        stock,
+        description,
+        image_url,
+        is_presale,
+        formattedReleaseDate,
+        stripeProductId,
+        stripePriceId,
+      ]
+    );
+
     res.status(201).json(result.rows[0]);
-    
+
   } catch (error) {
     console.error("❌ Error adding product:", error);
     res.status(500).json({ error: "Failed to add product" });
   }
 };
+
 export const getProductById = async (req, res) => {
   try {
     const { product_id } = req.params;
@@ -153,7 +186,7 @@ export const updateProduct = async (req, res) => {
       return res.status(400).json({ error: "Product ID is required." });
     }
 
-    console.log("🔍 Updating Product:", { product_id, name, price, stock, is_presale, release_date, description, image_url, stripe_product_id, stripe_price_id });
+    // console.log("🔍 Updating Product:", { product_id, name, price, stock, is_presale, release_date, description, image_url, stripe_product_id, stripe_price_id });
 
     const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
 
@@ -255,8 +288,6 @@ export const makeAdmin = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 // ✅ Remove admin role
 export const removeAdmin = async (req, res) => {
   try {

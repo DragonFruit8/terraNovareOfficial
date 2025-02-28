@@ -123,16 +123,16 @@ const Shop = () => {
     return (
       <div key={product.product_id} className="col-md-6 mb-4 p-4">
         <div className={`card p-3 ${isPresale ? "border-warning" : ""}`}>
-          <h5 className={isPresale ? "text-warning" : ""}>
+          <h3 className={isPresale ? "text-warning" : ""}>
             {product.name} {isPresale && "🔥 (Presale)"}
-          </h5>
-          <p>{product.description}</p>
+          </h3>
           <img
             src={product.image_url}
             alt={product.name}
             className="img-fluid rounded mb-2"
             style={{ maxHeight: "400px", objectFit: "cover" }} // ✅ Limits image height
-          />
+            />
+            <p className="py-2"><small>{product.description}</small></p>
 
           {/* Display price if userData exists */}
           {userData &&

@@ -534,7 +534,7 @@ const AdminDashboard = () => {
                 <strong>Email:</strong> {adminProfile.email}
               </p>
               <p className="card-text">
-                <strong>Address:</strong>{" "}
+                <strong>Address:</strong>
                 {adminProfile.address || "Not Provided"}
               </p>
               <p className="card-text">
@@ -544,7 +544,7 @@ const AdminDashboard = () => {
                 <strong>State:</strong> {adminProfile.state || "Not Provided"}
               </p>
               <p className="card-text">
-                <strong>Country:</strong>{" "}
+                <strong>Country:</strong>
                 {adminProfile.country || "Not Provided"}
               </p>
               <button className="btn btn-primary" onClick={handleEditAdmin}>
@@ -568,7 +568,6 @@ const AdminDashboard = () => {
           <tbody>
             {users.map((user) => (
               <tr key={user.id}>
-                {" "}
                 <td>{user.email}</td>
                 <td>{user.id}</td> {/* ✅ Display the correct user ID */}
                 <td>{user.roles.join(", ")}</td>

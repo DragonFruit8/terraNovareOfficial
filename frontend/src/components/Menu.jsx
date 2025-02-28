@@ -66,11 +66,11 @@ const Menu = () => {
                     </li>
                     <li>
                         <Link
-                            to="https://bsky.app/"
+                            to="https://bsky.app/profile/terranovare.bsky.social"
                             target="_blank"
                             rel="noopener noreferrer"
                             style={styles.menuItem}
-                            // onMouseEnter={(e) => (e.currentTarget.style.background = "#0096ff")}
+                            onMouseEnter={(e) => (e.currentTarget.style.background = "#0096ff")}
                             onMouseLeave={(e) => (e.currentTarget.style.color = "#444")}
                         >
                             <SiBluesky className="social-icon blueSky" />

@@ -20,7 +20,7 @@ import HomePage from "./pages/Homepage";
 // import Layout from "./layout/Layout";
 import Login from "./pages/Login";
 import Mission from "./pages/Mission";
-// import Menu from "./components/Menu"
+import Menu from "./components/Menu"
 import Nav from "./components/Nav";
 import Next from "./pages/Next";
 import NotFound from "./pages/404";
@@ -84,7 +84,9 @@ const App = () => {
 
           <div className="app-container">
             <div className="content">
-              {/* <Menu /> */}
+             {userData ? (
+               <Menu />
+             ):(null)}
               <Routes>
                 <Route
                   path="/admin"
