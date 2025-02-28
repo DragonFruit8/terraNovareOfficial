@@ -47,6 +47,8 @@ app.use((req, res, next) => {
     express.json()(req, res, next); // Parse JSON for other routes
   }
 });
+
+
 app.use((req, res, next) => {
   if (req.headers["x-forwarded-proto"] !== "https") {
     return res.redirect("https://" + req.headers.host + req.url);

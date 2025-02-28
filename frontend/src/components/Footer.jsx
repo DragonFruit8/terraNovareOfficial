@@ -30,7 +30,7 @@ const Footer = () => {
               <Link className="nav-link" to="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">
                 <FaTiktok />
               </Link>
-              <Link className="nav-link" to="https://bsky.app/" target="_blank" rel="noopener noreferrer">
+              <Link className="nav-link" to="https://bsky.app/profile/terranovare.bsky.social" target="_blank" rel="noopener noreferrer">
                 <FaBluesky  />
               </Link>
               {/* <Link className="nav-link" to="/" target="_blank" rel="noopener noreferrer">
