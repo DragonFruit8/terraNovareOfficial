@@ -2,7 +2,8 @@ import pool from "../config/db.js";
 import { sendProductRequestEmail } from "../services/email.service.js";
 import { validateStripePrice } from "../services/stripe.service.js";
 import Stripe from "stripe";
-
+import dotenv from "dotenv";
+dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Get all products
