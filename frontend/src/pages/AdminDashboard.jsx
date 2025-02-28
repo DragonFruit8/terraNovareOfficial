@@ -7,16 +7,14 @@ import autoTable from "jspdf-autotable";
 import { useUser } from "../context/UserContext";
 
 const AdminDashboard = () => {
-  /** ✅ State Management */
-  const { userData, loading } = useUser();
-  const navigate = useNavigate();
-
-  const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [requests, setRequests] = useState([]);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [editingAdmin, setEditingAdmin] = useState(false);
-  const [adminProfile, setAdminProfile] = useState({
+const { userData, loading } = useUser();
+const navigate = useNavigate();
+const [users, setUsers] = useState([]);
+const [products, setProducts] = useState([]);
+const [requests, setRequests] = useState([]);
+const [editingProduct, setEditingProduct] = useState(null);
+const [editingAdmin, setEditingAdmin] = useState(false);
+const [adminProfile, setAdminProfile] = useState({
     fullname: "",
     email: "",
     password: "",
@@ -68,14 +66,14 @@ const AdminDashboard = () => {
       return;
     }
 
-    console.log("📡 Fetching admin profile with token:", token); // ✅ Log token before request
+    // console.log("📡 Fetching admin profile with token:", token); // ✅ Log token before request
 
     try {
       const response = await axiosInstance.get("/user/me", {
         headers: { Authorization: `Bearer ${token}` }, // ✅ Attach token
       });
 
-      console.log("✅ Response received:", response.data); // ✅ Log response
+      // console.log("✅ Response received:", response.data); // ✅ Log response
 
       if (!response.data.roles.includes("admin")) {
         console.warn("🚫 User is not an admin, redirecting...");
@@ -865,7 +863,7 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {requests.length === 0 ? (
+            {requests.length <= 0 ? (
               <tr>
                 <td colSpan="7" className="text-center">
                   No requests found.

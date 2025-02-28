@@ -14,6 +14,23 @@ if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
     console.error("❌ Stripe API keys are missing! Check your .env file.");
     process.exit(1); // Stop the server if keys are missing
 }
+
+export const validateStripePrice = async (priceId) => {
+    try {
+        if (!priceId) return false;
+        const price = await stripe.prices.retrieve(priceId, { expand: ['product'] });
+
+        // Extract quantity if available in Stripe metadata
+        const quantity = price.product.metadata?.quantity || 1;
+
+        return { isValid: price && price.active, quantity };
+    } catch (error) {
+        console.error(`Invalid stripe_price_id: ${priceId}`, error);
+        return { isValid: false, quantity: 0 };
+    }
+};
+
+
 // ✅ Middleware to handle raw body for Stripe Webhooks
 router.post(
     "/stripe/webhook",
@@ -79,6 +96,7 @@ router.post(
         }
     }
 );
+
 
 // ✅ Correctly export the function
 export const syncAllProducts = async () => {

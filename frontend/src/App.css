@@ -360,9 +360,11 @@ a.nav-link:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7); /* Dark overlay with 50% transparency */
-    z-index: 0; /* Ensures the overlay is on top of the image but behind the text */
-  }
+    background-color: rgba(0, 0, 0, 0.6); 
+    will-change: opacity;
+    transition: opacity 0.3s ease-in-out;
+}
+
 
   .dark-mode .modal-header .btn-close {
     color: white !important;
@@ -398,6 +400,12 @@ a.nav-link:hover {
     background-color: var(--primary-bg);
     color: var(--text-color);
 }
+.dark-mode thead tr th{
+    content: "N/A";
+    color: white; /* Light gray */
+    font-style: italic;
+  }
+  
 
 .dark-mode tbody td,
 .dark-mode .card .card-body,
@@ -492,3 +500,51 @@ a.nav-link:hover {
     background-color: var(--primary-bg-dark);
     color: var(--text-light);
 }
+
+/* carousel */
+
+.carousel-item {
+    backface-visibility: hidden;
+    will-change: transform, opacity;
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+
+/* Keep the menu in your required position */
+/* Smooth transition effect */
+.transition-menu {
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
+  /* When the menu is open */
+  .transition-menu.open {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  
+  /* Social Media Icon Styles */
+  .social-link {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #1a1919;
+    border-radius: 50%;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* Hover Effects for Social Media Icons */
+  .social-link:hover {
+    transform: scale(1.2);
+  }
+  
+.social-link .tikTok:hover { background: #ff0050; }
+.social-link .blueSky:hover { background: #0096ff; } 
+.social-link .instaGram:hover { background: #C13584; } 
+.social-link .soundCloud:hover { background: #ff8800; } 
+  

@@ -1,19 +1,31 @@
 import pool from "../config/db.js";
-import { sendProductRequestEmail } from "../services/email.service.js"; 
+import { sendProductRequestEmail } from "../services/email.service.js";
+import { validateStripePrice } from "../services/stripe.service.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ Get all products
+// Get all products
 export const getProducts = async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT product_id, name, description, image_url, is_presale
-      FROM products
-      ORDER BY created_at DESC
-    `);
-    
-    res.status(200).json(result.rows); // ✅ Send all products, including presale ones
+    const { rows: products } = await pool.query(`
+      SELECT pr.product_id, 
+      p.name, 
+      p.description, 
+      p.image_url, 
+      p.stripe_price_id 
+      FROM product_requests pr
+      JOIN products p ON pr.product_id = p.product_id`);
+
+
+    const validatedProducts = await Promise.all(
+      products.map(async (product) => ({
+        ...product,
+        isValidStripePrice: await validateStripePrice(product.stripe_price_id),
+      }))
+    );
+
+    res.status(200).json(validatedProducts);
 
   } catch (error) {
     console.error("❌ Error fetching products:", error);
@@ -139,11 +151,14 @@ export const getProductRequests = async (req, res) => {
     } else {
       // ✅ Fetch all product requests (admin)
       query = `
-        SELECT pr.id, pr.user_email, pr.product, pr.quantity, pr.status, pr.requested_at,
-               u.address, u.city, u.state, u.country
+        SELECT pr.id, pr.user_email, pr.product, pr.status, pr.requested_at,
+        p.stock, -- Keep stock from products table
+        u.address, u.city, u.state, u.country
         FROM product_requests pr
         JOIN users u ON pr.user_id = u.user_id
+        JOIN products p ON pr.product_id = p.product_id -- Join products to get stock
         ORDER BY pr.requested_at DESC;
+
       `;
       params = []; // No parameters for fetching all
     }
@@ -198,7 +213,7 @@ export const updateRequestQuantity = async (req, res) => {
     }
 
     const updatedRequest = await pool.query(
-      `UPDATE product_requests 
+          `UPDATE product_requests 
            SET quantity = $1 
            WHERE id = $2 RETURNING *`,
       [quantity, id]
@@ -245,24 +260,6 @@ export const deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-// export const sendProductRequestEmail = async (to, productName) => {
-//   const mailOptions = {
-//       from: process.env.EMAIL_USER,
-//       to,
-//       subject: "Product Request Confirmation",
-//       text: `Thank you for requesting ${productName}. We will notify you once it's available!`,
-//   };
-
-//   try {
-//       console.log("📧 Preparing to send email to:", to);
-//       const info = await transporter.sendMail(mailOptions);
-//       console.log("✅ Email sent successfully:", info.response);
-//       return info;
-//   } catch (error) {
-//       console.error("❌ Error sending email:", error);
-//       throw new Error("Failed to send email");
-//   }
-// };
 
 // DUPLICATE CODE
 // ✅ Add New Product
@@ -277,7 +274,7 @@ export const addProduct = async (req, res) => {
 
     // ✅ Generate Stripe product
     console.log("🛒 Creating Stripe Product for:", name);
-    
+
     const stripeProduct = await stripe.products.create({
       name,
       description: description || "",
@@ -287,7 +284,7 @@ export const addProduct = async (req, res) => {
 
     // ✅ Create Stripe price
     console.log("💲 Creating Stripe Price for:", name);
-    
+
     const stripePrice = await stripe.prices.create({
       unit_amount: Math.round(price * 100), // Convert dollars to cents
       currency: "usd",
@@ -311,9 +308,9 @@ export const addProduct = async (req, res) => {
     );
 
     console.log("✅ Product successfully added:", newProduct.rows[0]);
-    
-    res.status(201).json({ 
-      message: "Product added successfully!", 
+
+    res.status(201).json({
+      message: "Product added successfully!",
       product: newProduct.rows[0],
       stripe_product_id: stripeProductId,
       stripe_price_id: stripePriceId,
@@ -329,54 +326,54 @@ export const requestProduct = async (req, res) => {
   const { user_email, user_id, product_id } = req.body;
 
   try {
-      console.log("📩 Incoming product request from:", user_email, "for product:", product_id);
+    console.log("📩 Incoming product request from:", user_email, "for product:", product_id);
 
-      // ✅ Fetch product name
-      const productQuery = await pool.query(
-          "SELECT name FROM products WHERE product_id = $1",
-          [product_id]
-      );
+    // ✅ Fetch product name
+    const productQuery = await pool.query(
+      "SELECT name FROM products WHERE product_id = $1",
+      [product_id]
+    );
 
-      if (productQuery.rowCount === 0) {
-          console.error("❌ Product not found:", product_id);
-          return res.status(404).json({ error: "Product not found" });
-      }
+    if (productQuery.rowCount === 0) {
+      console.error("❌ Product not found:", product_id);
+      return res.status(404).json({ error: "Product not found" });
+    }
 
-      const productName = productQuery.rows[0].name;
-      console.log("✅ Product found:", productName);
+    const productName = productQuery.rows[0].name;
+    console.log("✅ Product found:", productName);
 
-      // ✅ Check if product is already requested
-      const existingRequest = await pool.query(
-          "SELECT * FROM product_requests WHERE user_email = $1 AND product_id = $2",
-          [user_email, product_id]
-      );
+    // ✅ Check if product is already requested
+    const existingRequest = await pool.query(
+      "SELECT * FROM product_requests WHERE user_email = $1 AND product_id = $2",
+      [user_email, product_id]
+    );
 
-      if (existingRequest.rowCount > 0) {
-          console.log("⚠️ Product already requested by this user. Sending confirmation email anyway...");
+    if (existingRequest.rowCount > 0) {
+      console.log("⚠️ Product already requested by this user. Sending confirmation email anyway...");
 
-          // ✅ Send email confirmation even if already requested
-          await sendProductRequestEmail(user_email, productName);
-          return res.status(200).json({ message: "Product already requested. Email sent again." });
-      }
-
-      // ✅ Insert new request
-      console.log("📝 Inserting request into database...");
-      await pool.query(
-          "INSERT INTO product_requests (user_id, user_email, product_id, product, requested_at, status) VALUES ($1, $2, $3, $4, NOW(), 'pending')",
-          [user_id, user_email, product_id, productName]
-      );
-      console.log("✅ Request inserted successfully.");
-
-      // ✅ Send confirmation email
-      console.log("📧 Attempting to send email to:", user_email);
+      // ✅ Send email confirmation even if already requested
       await sendProductRequestEmail(user_email, productName);
-      console.log("✅ Email successfully sent!");
+      return res.status(200).json({ message: "Product already requested. Email sent again." });
+    }
 
-      res.status(201).json({ message: "Product requested successfully and email sent." });
+    // ✅ Insert new request
+    console.log("📝 Inserting request into database...");
+    await pool.query(
+      "INSERT INTO product_requests (user_id, user_email, product_id, product, requested_at, status) VALUES ($1, $2, $3, $4, NOW(), 'pending')",
+      [user_id, user_email, product_id, productName]
+    );
+    console.log("✅ Request inserted successfully.");
+
+    // ✅ Send confirmation email
+    console.log("📧 Attempting to send email to:", user_email);
+    await sendProductRequestEmail(user_email, productName);
+    console.log("✅ Email successfully sent!");
+
+    res.status(201).json({ message: "Product requested successfully and email sent." });
 
   } catch (error) {
-      console.error("❌ Error processing product request:", error);
-      res.status(500).json({ error: "Server error while requesting product." });
+    console.error("❌ Error processing product request:", error);
+    res.status(500).json({ error: "Server error while requesting product." });
   }
 };
 export const deleteAllProductRequests = async (req, res) => {

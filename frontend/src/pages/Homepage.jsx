@@ -17,71 +17,77 @@ export default function Homepage() {
         url="https://terranovare.tech"
         image="https://terranovare.tech/default-image.jpg"
       />
-      <div id="myCarousel" className="carousel slide" data-bs-ride="carousel">
-        <div className="carousel-indicators">
-          <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" className="active" aria-label="Slide 1" aria-current="true"></button>
-          <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2" className=""></button>
-          <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3" className=""></button>
+      <div id="myCarousel" className="carousel slide">
+    <div className="carousel-indicators">
+        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="0" className="active" aria-label="Slide 1" aria-current="true"></button>
+        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        <button type="button" data-bs-target="#myCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+    </div>
+    
+    <div className="carousel-inner mb-5">
+        <div className="carousel-item active">
+            <img 
+                src={"images/TerraNovareImage.jpg"} 
+                alt="TerraNovare" 
+                loading="lazy"
+                style={{ width: '100%', height: '50vh', borderRadius: '8px', objectFit: 'cover' }} 
+            />
+            <div className="dark-overlay"></div>
+            <div className="container">
+                <div className="carousel-caption text-start">
+                    <p className='mb-0'>Welcome to</p>
+                    <h1 className='mt-0'>Terra'Novare</h1>
+                    <p>We're looking forward to creating something spectacular for you to enjoy!</p>
+                    <p><Link className="btn btn-lg btn-primary" to="mission">Our Mission</Link></p>
+                </div>
+            </div>
         </div>
-        <div className="carousel-inner mb-5">
-          <div className="carousel-item active">
-          <img 
-        src={"images/TerraNovareImage.jpg"} 
-        alt="TerraNovare" 
-        style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
-      />
-          <div className="dark-overlay"></div>
 
+        <div className="carousel-item">
+            <img 
+                src={"images/EFinityImage.jpg"} 
+                alt="EFinity" 
+                loading="lazy"
+                style={{ width: '100%', height: '50vh', borderRadius: '8px', objectFit: 'cover' }} 
+            />
+            <div className="dark-overlay"></div>
             <div className="container">
-              <div className="carousel-caption text-start">
-                <p className='mb-0'>Welcome to</p>
-                <h1 className='mt-0'>Terra'Novare</h1>
-                <p>We're looking forward to creating something spectacular for you to enjoy!</p>
-                <p><Link className="btn btn-lg btn-primary" to="mission">Our Mission</Link></p>
-              </div>
+                <div className="carousel-caption">
+                    <h1>A Brand made with the <br/> Human Experience in mind</h1>
+                    <p>Some representative placeholder content for the second slide of the carousel.</p>
+                    <p><Link className="btn btn-lg btn-primary" to="brand">Learn More</Link></p>
+                </div>
             </div>
-          </div>
-          <div className="carousel-item">
-          <img 
-        src={"images/EFinityImage.jpg"} 
-        alt="EFinity" 
-        style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
-      />
-          <div className="dark-overlay"></div>
-            <div className="container">
-              <div className="carousel-caption">
-                <h1>A Brand made with the <br/> Human Experience in mind</h1>
-                <p>Some representative placeholder content for the second slide of the carousel.</p>
-                <p><Link className="btn btn-lg btn-primary" to="brand">Learn More</Link></p>
-              </div>
-            </div>
-          </div>
-          <div className="carousel-item">
-          <img 
-        src={"images/SupportiveBrands.jpg"} 
-        alt="TerraNovare" 
-        style={{ width: '100%', height: '50vh', borderRadius: '8px' }} 
-      />
-          <div className="dark-overlay"></div>
-
-            <div className="container">
-              <div className="carousel-caption text-end">
-                <h1>Products you would love.</h1>
-                <p>Some representative placeholder content for the third slide of this carousel.</p>
-                <p><Link className="btn btn-lg btn-primary" to="/shop">Shop Now</Link></p>
-              </div>
-            </div>
-          </div>
         </div>
-        <button className="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
-          <span className="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span className="visually-hidden">Previous</span>
-        </button>
-        <button className="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
-          <span className="carousel-control-next-icon" aria-hidden="true"></span>
-          <span className="visually-hidden">Next</span>
-        </button>
-      </div>
+
+        <div className="carousel-item">
+            <img 
+                src={"images/SupportiveBrands.jpg"} 
+                alt="TerraNovare" 
+                loading="lazy"
+                style={{ width: '100%', height: '50vh', borderRadius: '8px', objectFit: 'cover' }} 
+            />
+            <div className="dark-overlay"></div>
+            <div className="container">
+                <div className="carousel-caption text-end">
+                    <h1>Products you would love.</h1>
+                    <p>Some representative placeholder content for the third slide of this carousel.</p>
+                    <p><Link className="btn btn-lg btn-primary" to="/shop">Shop Now</Link></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button className="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+        <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span className="visually-hidden">Previous</span>
+    </button>
+    <button className="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+        <span className="carousel-control-next-icon" aria-hidden="true"></span>
+        <span className="visually-hidden">Next</span>
+    </button>
+</div>
+
 
       <div className="container justify-items-center mt-5">
 

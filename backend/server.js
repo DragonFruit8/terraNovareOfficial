@@ -47,12 +47,12 @@ app.use((req, res, next) => {
     express.json()(req, res, next); // Parse JSON for other routes
   }
 });
-app.use((req, res, next) => {
-  if (req.headers["x-forwarded-proto"] !== "https") {
-    return res.redirect("https://" + req.headers.host + req.url);
-  }
-  next();
-});
+// app.use((req, res, next) => {
+//   if (req.headers["x-forwarded-proto"] !== "https") {
+//     return res.redirect("https://" + req.headers.host + req.url);
+//   }
+//   next();
+// });
 
 // ✅ Print all routes when server starts
 
@@ -67,7 +67,7 @@ app.use(passport.session());
 //  Change to "https://terranovare.tech"
 app.use(cors(corsOptions));
 app.use(express.json());
-app.disable("x-powered-by");
+// app.disable("x-powered-by");
 app.options("*", cors(corsOptions)); // ✅ Handle preflight requests globally
 // ✅ Tell Express to trust proxy headers
 app.set("trust proxy", 1);

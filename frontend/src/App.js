@@ -1,3 +1,4 @@
+
 import { HelmetProvider } from "react-helmet-async";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -19,6 +20,7 @@ import HomePage from "./pages/Homepage";
 // import Layout from "./layout/Layout";
 import Login from "./pages/Login";
 import Mission from "./pages/Mission";
+// import Menu from "./components/Menu"
 import Nav from "./components/Nav";
 import Next from "./pages/Next";
 import NotFound from "./pages/404";
@@ -41,6 +43,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 const TRACKING_ID = "G-2GV3JM9TGV";
+
+
 
 const App = () => {
   const isLocalhost = window.location.hostname === "localhost";
@@ -74,12 +78,13 @@ const App = () => {
       <HelmetProvider>
         <ToastContainer position="top-center" autoClose={2000} />
         <ThemeProvider>
-        {!shouldBlockFeature ? <UnderConstruction /> : (console.log("🚫 Production security feature is disabled on localhost.")) }
+          {!shouldBlockFeature ? <UnderConstruction /> : (console.log("🚫 Production security feature is disabled on localhost."))}
           <Nav />
           <Sidebar />
 
           <div className="app-container">
             <div className="content">
+              {/* <Menu /> */}
               <Routes>
                 <Route
                   path="/admin"

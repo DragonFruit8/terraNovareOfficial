@@ -2,129 +2,104 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import axiosInstance from "../api/axios.config";
-import { useUser } from "../context/UserContext";
 import { toast } from "react-toastify";
-// import toast from "react-hot-toast";
 
 const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [usernameAvailable, setUsernameAvailable] = useState(null);
-  const [usernameError, setUsernameError] = useState("");
-  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [serverError, setServerError] = useState(""); // ✅ Stores PostgreSQL error
+  const [usernameStatus, setUsernameStatus] = useState("idle"); // "idle" | "checking" | "available" | "taken"
 
-  const { userData } = useUser();
   const navigate = useNavigate();
 
   const {
     register,
-    handleSubmit, // ✅ Re-enable handleSubmit
+    handleSubmit,
     formState: { errors },
     setError,
     clearErrors,
     watch,
-  } = useForm();
-
-  const [formData, setFormData] = useState({
-    username: "",
-    firstName: "", //
-    lastName: "", //
-    email: "",
-    password: "",
-    password2: "",
-  });
+  } = useForm({ mode: "onBlur" });
 
   const password = watch("password");
+  const confirmPassword = watch("password2"); // ✅ Watch second password field
 
-  // ✅ Add `handleChange` function
-  if (userData) {
-    // Console.log("User is already logged in:", userData);
-  }
-  // ✅ Handle Input Change
-const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  
-    if (name === "username") {
-      setUsernameError(""); // ✅ Clear previous errors
-      setUsernameAvailable(null); // ✅ Reset availability
-  
-      if (value.length >= 4) {
-        // ✅ Debounce API call to avoid excessive requests
-        clearTimeout(window.usernameCheckTimeout);
-        window.usernameCheckTimeout = setTimeout(() => checkUsernameAvailability(value), 500);
-      }
-    }
+  // ✅ Password match validation (green if match, red if not)
+  const getPasswordMatchClass = () => {
+    if (!confirmPassword) return ""; // No color when empty
+    return confirmPassword === password ? "is-valid" : "is-invalid";
   };
-  
+
+  // ✅ Reworked Username Validation
   const checkUsernameAvailability = async (username) => {
+    if (!username || username.length < 4) {
+      setUsernameStatus("idle");
+      return;
+    }
+
+    setUsernameStatus("checking");
+
     try {
-      setIsCheckingUsername(true);
-      
-      // 🔍 Log request payload before sending
-      // console.log("📡 Sending username check request:", { username });
-  
-      const response = await axiosInstance.post("/auth/check-username", { username });
-  
-      // console.log("✅ Response received:", response.data);
-      
+      const response = await axiosInstance.post("/auth/check-username", {
+        username,
+      });
+
       if (response.data.available) {
-        clearErrors("username"); // ✅ Remove error if username is available
-        setUsernameAvailable(true); // ✅ Allow submission
+        setUsernameStatus("available");
+        clearErrors("username");
       } else {
+        setUsernameStatus("taken");
         setError("username", {
           type: "manual",
           message: "Username is already taken.",
         });
-        setUsernameAvailable(false); // ❌ Prevent form submission
       }
-  
-      clearErrors("username"); // ✅ Clears error when username is available
-      return true;
     } catch (error) {
-      console.error("❌ Error checking username:", error.response?.data || error.message);
+      console.error(
+        "❌ Error checking username:",
+        error.response?.data || error.message
+      );
+      setUsernameStatus("idle");
       setError("username", {
         type: "manual",
-        message: "Could not verify username availability.",
+        message: "Could not verify username.",
       });
-      return false;
-    } finally {
-      setIsCheckingUsername(false);
     }
-  };  
+  };
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (
-      !formData.username ||
-      !formData.firstName ||
-      !formData.lastName ||
-      !formData.email ||
-      !formData.password
-    ) {
-      toast.error("All fields are required.");
-      return;
-    }
-    if (usernameError) {
-      toast.error(usernameError);
+  // ✅ Form Submission
+  const onSubmit = async (data) => {
+    if (usernameStatus === "checking") {
+      toast.error("Please wait for username validation to complete.");
       return;
     }
 
-    const fullName = `${formData.firstName} ${formData.lastName}`.trim(); // ✅ Combine first & last name
+    if (usernameStatus === "taken") {
+      toast.error("Username is already taken.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
     const userData = {
-      username: formData.username,
-      fullname: fullName, // ✅ Send combined name
-      email: formData.email,
-      password: formData.password,
+      username: data.username,
+      fullname: `${data.firstName} ${data.lastName}`.trim(),
+      email: data.email,
+      password: data.password,
     };
-
+    setServerError("");
     setIsLoading(true);
     try {
-      // Console.log("Sending Data to Backend:", JSON.stringify(userData)); // ✅ Debugging
       await axiosInstance.post("/auth/signup", userData);
       toast.success("Signup successful!");
-      navigate("/login"); // ✅ Redirect to Homepage
+      navigate("/login");
     } catch (error) {
       console.error("Signup error:", error.response?.data || error.message);
+      setServerError(
+        error.response.data.error || "An unexpected error occurred."
+      );
       toast.error(
         error.response?.data?.error || "Signup failed. Please try again."
       );
@@ -141,91 +116,87 @@ const handleChange = (e) => {
       >
         <h2 className="text-center">Create an Account</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
+          {/* ✅ Username Field */}
           <div className="mb-3">
             <label className="form-label">Username</label>
             <input
               className={`form-control ${errors.username ? "is-invalid" : ""}`}
               type="text"
-              name="username"
-              value={formData.username}
               {...register("username", {
                 required: "Username is required",
                 minLength: {
                   value: 4,
                   message: "Username must be at least 4 characters",
                 },
-                validate: async (value) =>
-                  await checkUsernameAvailability(value), // ✅ Integrated
               })}
-              onBlur={() => checkUsernameAvailability(formData.username)} // ✅ Validate on blur
-              onChange={handleChange} // ✅ Live validation
+              onBlur={(e) => checkUsernameAvailability(e.target.value)}
               autoFocus
             />
-            {isCheckingUsername && (
+            {usernameStatus === "checking" && (
               <small className="text-info">Checking username...</small>
             )}
-            {usernameAvailable === false && (
+            {usernameStatus === "taken" && (
               <small className="text-danger">Username is taken.</small>
             )}
-            {usernameAvailable === true && (
+            {usernameStatus === "available" && (
               <small className="text-success">✅ Username is available!</small>
             )}
           </div>
 
+          {/* ✅ First Name */}
           <div className="mb-3">
             <label className="form-label">First Name</label>
             <input
               type="text"
               className="form-control"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
+              {...register("firstName", { required: "First name is required" })}
             />
+            {errors.firstName && (
+              <small className="text-danger">{errors.firstName.message}</small>
+            )}
           </div>
 
+          {/* ✅ Last Name */}
           <div className="mb-3">
             <label className="form-label">Last Name</label>
             <input
               type="text"
               className="form-control"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
+              {...register("lastName", { required: "Last name is required" })}
             />
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Email</label>
-            <input
-              className="form-control shadow-sm p-3 mb-5 bg-white rounded"
-              type="email"
-              name="email"
-              autoComplete="on"
-              value={formData.email} // ✅ Sync with state
-              {...register("email", {
-                required: "Email required",
-                pattern: {
-                  // eslint-disable-next-line
-                  value: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g,
-                  message: "Email not valid",
-                },
-              })}
-              onChange={handleChange} // ✅ Add onChange
-            />
-            {errors.email && (
-              <small className="text-danger">{errors.email.message}</small>
+            {errors.lastName && (
+              <small className="text-danger">{errors.lastName.message}</small>
             )}
           </div>
 
+          {/* ✅ Email */}
+          <div className="mb-3">
+            <label className="form-label">Email</label>
+            <input
+              type="email"
+              className={`form-control ${errors.email ? "is-invalid" : ""}`}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/,
+                  message: "Invalid email format",
+                },
+              })}
+            />
+          {/* ✅ Display PostgreSQL Error Message */}
+          {serverError && (
+            <div className="alert alert-danger mt-2">
+              <i className="bi bi-exclamation-triangle-fill"></i> {serverError}
+            </div>
+          )}
+          </div>
+
+          {/* ✅ Password */}
           <div className="mb-3">
             <label className="form-label">Password</label>
             <input
               type="password"
-              className="form-control shadow-sm p-3 mb-5 bg-white rounded"
-              name="password"
-              value={formData.password} // ✅ Sync with state
+              className="form-control"
               {...register("password", {
                 required: "Password is required",
                 minLength: {
@@ -233,35 +204,35 @@ const handleChange = (e) => {
                   message: "Password must be at least 6 characters",
                 },
               })}
-              onChange={handleChange} // ✅ Add onChange
             />
             {errors.password && (
               <small className="text-danger">{errors.password.message}</small>
             )}
           </div>
 
+          {/* ✅ Confirm Password - Changes color based on match */}
           <div className="mb-3">
             <label className="form-label">Confirm Password</label>
             <input
               type="password"
-              className="form-control shadow-sm p-3 mb-5 bg-white rounded"
-              name="password2"
-              value={formData.password2} // ✅ Sync with state
+              className={`form-control ${getPasswordMatchClass()}`}
               {...register("password2", {
                 validate: (value) =>
                   value === password || "Passwords do not match",
               })}
-              onChange={handleChange} // ✅ Add onChange
             />
-            {errors.password2 && (
-              <small className="text-danger">{errors.password2.message}</small>
-            )}
+            {confirmPassword && confirmPassword === password ? (
+              <small className="text-success">✅ Passwords match!</small>
+            ) : confirmPassword ? (
+              <small className="text-danger">❌ Passwords do not match</small>
+            ) : null}
           </div>
 
+          {/* ✅ Submit Button */}
           <button
             type="submit"
             className="btn btn-primary w-100"
-            disabled={isLoading || usernameAvailable === false}
+            disabled={isLoading || usernameStatus === "checking"}
           >
             {isLoading ? "Creating Account..." : "Sign Up"}
           </button>

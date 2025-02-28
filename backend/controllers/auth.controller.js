@@ -17,34 +17,52 @@ const transporter = nodemailer.createTransport({
 export const signup = async (req, res) => {
   try {
     let { username, fullname, email, password, roles } = req.body;
-    email = email.toLowerCase();
 
-    const validRoles = ['user','admin','moderator'];
-    const userRole = validRoles.includes(roles) ? roles : 'user';
-
+    // ✅ Ensure all fields exist
     if (!username || !fullname || !email || !password) {
       return res.status(400).json({ error: "All fields are required." });
     }
 
-    // 🔹 Hash the password
+    // ✅ Normalize email (trim + lowercase)
+    email = email.trim().toLowerCase();
+
+    // ✅ Validate role or default to 'user'
+    const validRoles = ["user", "admin", "moderator"];
+    const userRole = validRoles.includes(roles) ? roles : "user";
+
+    // ✅ Convert userRole into an array for PostgreSQL (important!)
+    const roleArray = `{${userRole}}`; // ✅ Formats it properly for PostgreSQL
+
+    // ✅ Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 🔹 Insert user with default role ["user"]
+    console.log("🔹 Inserting user into database...");
+
+    // ✅ Insert user & return newly created user
     const newUser = await pool.query(
       `INSERT INTO users (username, fullname, email, password, roles)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING user_id, username, fullname, email, roles`,
-      [username, fullname, email, hashedPassword, ['user']]
+      [username.trim(), fullname.trim(), email, hashedPassword, roleArray] // ✅ Fixes array insertion
     );
 
-    res.json({
+    console.log("✅ User registered successfully:", newUser.rows[0]);
+
+    return res.status(201).json({
       message: "User registered successfully!",
-      user: newUser.rows[0].id,
-      role: newUser.rows[0].roles
+      user: newUser.rows[0].user_id,
+      role: newUser.rows[0].roles,
     });
   } catch (error) {
     console.error("❌ Error registering user:", error);
-    res.status(500).json({ error: "Error registering user" });
+
+    // ✅ Handle duplicate email error
+    if (error.code === "23505") {
+      return res.status(400).json({ error: "Email already exists." });
+    }
+
+    // ✅ Send detailed error in development
+    return res.status(500).json({ error: "Internal server error.", details: error.message });
   }
 };
 // ✅ Login Controller - Ensure Token Includes Roles

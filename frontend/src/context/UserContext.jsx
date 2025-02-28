@@ -4,9 +4,8 @@ import axiosInstance from "../api/axios.config";
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+const [userData, setUserData] = useState(null);
+const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -17,8 +16,6 @@ export const UserProvider = ({ children }) => {
           setLoading(false);
           return;
         }
-
-        // ✅ Ensure token is sent in the headers
         const response = await axiosInstance.get("/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         });

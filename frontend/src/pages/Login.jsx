@@ -19,7 +19,7 @@ const Login = () => {
       });
 
       if (response.data.token) {
-        console.log("✅ User logged in, token stored:", response.data.token);
+        // console.log("✅ User logged in, token stored:", response.data.token);
         sessionStorage.setItem("token", response.data.token);
         sessionStorage.setItem("user", JSON.stringify(response.data.user));
         setUserData(response.data.user); // ✅ Update context state
