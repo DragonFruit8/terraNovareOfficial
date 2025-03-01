@@ -103,11 +103,18 @@ app.post('/upload', upload.array('files'), (req, res) => {
 });
 app.use("/api", webhookRouter);
 
-app.get('/api/health', (req, res) =>{
-	res.status(200).json({status: 'Server is running!!'})
+app.use((req, res, next) => {
+  console.time(`⏳ Request to ${req.originalUrl}`);
+  res.on("finish", () => console.timeEnd(`⏳ Request to ${req.originalUrl}`));
+  next();
 });
 
-printRoutes(app);
+
+app.get('/api/health', (req, res) =>{
+ printRoutes(app);
+	res.status(200).json({status: 'Server is running! Check you Console...'})
+});
+
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

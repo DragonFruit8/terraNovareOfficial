@@ -6,7 +6,9 @@ import "../App.css"
 
 const Menu = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [hovered, setHovered] = useState(null);
     const menuRef = useRef(null);
+
 
     // Close menu if clicking outside
     useEffect(() => {
@@ -51,58 +53,101 @@ const Menu = () => {
                 }}
             >
                 <ul style={styles.menuList}>
-                    <li>
-                        <Link
-                            to="https://www.tiktok.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.menuItem}
-                            onMouseEnter={(e) => (e.currentTarget.style.color = "#ff0050")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "#444")}
-                        >
-                            <FaTiktok className="social-icon tikTok" />
-                        </Link>
+                          {/* TikTok */}
+      <li>
+        <Link
+          to="https://www.tiktok.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: hovered === "tiktok" ? "#ff0050" : "#444",
+            color: hovered === "tiktok" ? "white" : "white",
+            transition: "background 0.3s ease, color 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+          }}
+          onMouseEnter={() => setHovered("tiktok")}
+          onMouseLeave={() => setHovered(null)}
+        >
+          <FaTiktok className="social-icon" />
+        </Link>
+      </li>
 
-                    </li>
-                    <li>
-                        <Link
-                            to="https://bsky.app/profile/terranovare.bsky.social"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.menuItem}
-                            onMouseEnter={(e) => (e.currentTarget.style.background = "#0096ff")}
-                            onMouseLeave={(e) => (e.currentTarget.style.color = "#444")}
-                        >
-                            <SiBluesky className="social-icon blueSky" />
-                        </Link>
+      {/* Bluesky */}
+      <li>
+        <Link
+          to="https://bsky.app/profile/terranovare.bsky.social"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: hovered === "bluesky" ? "#0085FF" : "#444",
+            color: hovered === "bluesky" ? "white" : "white",
+            transition: "background 0.3s ease, color 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+          }}
+          onMouseEnter={() => setHovered("bluesky")}
+          onMouseLeave={() => setHovered(null)}
+        >
+          <SiBluesky className="social-icon" />
+        </Link>
+      </li>
 
-                    </li>
-                    <li>
-                        <Link
-                            to="https://www.instagram.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.menuItem}
-                            // onMouseEnter={(e) => (e.currentTarget.style.color = "#C13584")}
-                            onMouseLeave={(e) => (e.currentTarget.style.background = "#444")}
-                        >
-                            <FaInstagram className="social-icon instaGram" />
-                        </Link>
+      {/* Instagram */}
+      <li>
+        <Link
+          to="https://www.instagram.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: hovered === "instagram" ? "#E4405F" : "#444",
+            color: hovered === "instagram" ? "white" : "#E4405F",
+            transition: "background 0.3s ease, color 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+          }}
+          onMouseEnter={() => setHovered("instagram")}
+          onMouseLeave={() => setHovered(null)}
+        >
+          <FaInstagram className="social-icon" />
+        </Link>
+      </li>
 
-                    </li>
-                    <li>
-                        <Link
-                            to="https://soundcloud.com/"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={styles.menuItem}
-                            // onMouseEnter={(e) => (e.currentTarget.style.color = "#ff8800")}
-                            // onMouseLeave={(e) => (e.currentTarget.style.background = "#444")}
-                        >
-                            <FaCloud className="social-icon soundCloud" />
-                        </Link>
-
-                    </li>
+      {/* SoundCloud */}
+      <li>
+        <Link
+          to="https://soundcloud.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: hovered === "soundcloud" ? "#ff8800" : "#444",
+            color: hovered === "soundcloud" ? "white" : "white",
+            transition: "background 0.3s ease, color 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "40px",
+            height: "40px",
+            borderRadius: "50%",
+          }}
+          onMouseEnter={() => setHovered("soundcloud")}
+          onMouseLeave={() => setHovered(null)}
+        >
+          <FaCloud className="social-icon" />
+        </Link>
+      </li>
                 </ul>
             </div>            
         </div>
@@ -112,8 +157,9 @@ const Menu = () => {
 const styles = {
     menuContainer: {
         position: "fixed",
-        bottom: "25px",
-        left: "20px",
+        bottom: "5px",
+        left: "0",
+        width: "auto",
         zIndex: 1000,
         display: "flex",
         alignItems: "center",

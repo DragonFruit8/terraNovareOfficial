@@ -104,23 +104,19 @@ export const signup = async (req, res) => {
 // ✅ Login Controller - Ensure Token Includes Roles
 export const login = async (req, res) => {
   try {
-    console.log("🔹 Login Request Received:", req.body);
-
     if (!req.body.email || !req.body.password) {
       return res.status(400).json({ error: "Email and password are required" });
     }
 
     const { email, password, recaptchaToken } = req.body;
+    const loginEmail = email.trim().toLowerCase();
 
     if (!recaptchaToken) {
-      return res
-        .status(400)
-        .json({ error: "reCAPTCHA verification is required" });
+      return res.status(400).json({ error: "reCAPTCHA token missing" });
     }
 
     console.log("🔹 Verifying reCAPTCHA token...");
 
-    // Verify with Google
     const googleResponse = await axios.post(
       `https://www.google.com/recaptcha/api/siteverify`,
       null,
@@ -139,53 +135,57 @@ export const login = async (req, res) => {
     }
 
     console.log("✅ reCAPTCHA verified. Proceeding with login...");
-    // 🔹 Check if user exists
+
+    // ✅ Query DB for user
     const { rows } = await pool.query(
       `SELECT user_id, username, email, password, roles FROM users WHERE email = $1`,
-      [email.trim().toLowerCase()]
+      [loginEmail]
     );
 
     if (rows.length === 0) {
-      console.log("❌ Invalid login attempt:", email);
-      return res.status(401).json({ error: "⚠️ Invalid email or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
     const user = rows[0];
-    const isValidPassword = await bcrypt.compare(password, user.password);
 
+    // ✅ Secure password comparison
+    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      console.log("❌ Invalid password for:", email);
-      return res.status(401).json({ error: "⚠️ Invalid email or password" });
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // 🔹 Generate JWT Token
+    // 🔹 **Fix: Ensure roles is always an array**
+    const roles = Array.isArray(user.roles) ? user.roles : [user.roles];
+
+    console.log("🔹 User roles:", roles);
+
+    // ✅ Generate JWT token
     const token = jwt.sign(
       {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        roles: user.roles.split(","),
+        roles: roles,
       },
       process.env.JWT_SECRET,
       { expiresIn: "12h" }
     );
 
-    console.log("✅ User logged in:", user.email);
+    console.log("✅ Login successful:", { user_id: user.user_id, email: user.email });
 
-    return res.json({
+    // ✅ Return token & user data (excluding password)
+    res.json({
       token,
       user: {
         user_id: user.user_id,
         username: user.username,
         email: user.email,
-        roles: user.roles.split(","),
+        roles: roles,
       },
     });
   } catch (error) {
     console.error("❌ Login Error:", error);
-    res
-      .status(500)
-      .json({ error: "Internal Server Error", details: error.message });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 // ✅ Fetch User Profile

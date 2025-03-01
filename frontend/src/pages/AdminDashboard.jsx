@@ -534,17 +534,17 @@ const AdminDashboard = () => {
                 <strong>Email:</strong> {adminProfile.email}
               </p>
               <p className="card-text">
-                <strong>Address:</strong>
+                <strong>Address: </strong>
                 {adminProfile.address || "Not Provided"}
               </p>
               <p className="card-text">
-                <strong>City:</strong> {adminProfile.city || "Not Provided"}
+                <strong>City:  </strong> {adminProfile.city || "Not Provided"}
               </p>
               <p className="card-text">
-                <strong>State:</strong> {adminProfile.state || "Not Provided"}
+                <strong>State:  </strong> {adminProfile.state || "Not Provided"}
               </p>
               <p className="card-text">
-                <strong>Country:</strong>
+                <strong>Country:  </strong>
                 {adminProfile.country || "Not Provided"}
               </p>
               <button className="btn btn-primary" onClick={handleEditAdmin}>
@@ -566,8 +566,8 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
-              <tr key={user.id}>
+            {users.map((user, index) => (
+              <tr key={user.id || index}>
                 <td>{user.email}</td>
                 <td>{user.id}</td> {/* ✅ Display the correct user ID */}
                 <td>{user.roles.join(", ")}</td>
@@ -590,7 +590,7 @@ const AdminDashboard = () => {
                 </td>
               </tr>
             ))}
-          </tbody>
+            </tbody>
         </table>
       </div>
 

@@ -34,10 +34,10 @@ export default function Homepage() {
             />
             <div className="dark-overlay"></div>
             <div className="container">
-                <div className="carousel-caption text-start">
+                <div className="carousel-caption text-start mb-4">
                     <p className='mb-0'>Welcome to</p>
-                    <h1 className='mt-0'>Terra'Novare</h1>
-                    <p>We're looking forward to creating something spectacular for you to enjoy!</p>
+                    <h1 className='mt-0 fs-1'>Terra'Novare</h1>
+                    <p>A Movement Toward Sustainability and Innovation</p>
                     <p><Link className="btn btn-lg btn-primary" to="mission">Our Mission</Link></p>
                 </div>
             </div>
@@ -89,70 +89,67 @@ export default function Homepage() {
 </div>
 
 
-      <div className="container justify-items-center mt-5">
+      <div className="container-fluid justify-items-center mt-5">
 
-        <div id='mission' className="row featurette">
-          <div className="col-md-7 p-3">
-            <h2 className="featurette-heading">First featurette heading. <span className="text-muted">It’ll blow your mind.</span></h2>
-            <p className="lead">Some great placeholder content for the first featurette here. Imagine some exciting prose here.</p>
-          </div>
-          <div className="col-md-5">
-            <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
-
-          </div>
+      <section className="mission-section py-5">
+        <div className="container text-center">
+          <h2 className="fw-bold">Our Mission</h2>
+          <p className="lead">
+            Terra'Novare stands as the guiding force behind E-Finity, ensuring its mission stays true while
+            forging financial pathways and enterprise connections. We believe in a future where communities 
+            and businesses collaborate for sustainable progress.
+          </p>
         </div>
+      </section>
 
         <hr className="featurette-divider" />
 
-        <div className="row featurette">
-          <div className="col-md-7 p-3 order-md-2">
-            <h2 className="featurette-heading">Oh yeah, it’s that good. <span className="text-muted">See for yourself.</span></h2>
-            <p className="lead">Another featurette? Of course. More placeholder content here to give you an idea of how this layout would work with some actual real-world content in place.</p>
-          </div>
-          <div className="col-md-5 order-md-1">
-            <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
+        <section className="impact-section py-5">
+        <div className="container-fluid container-md text-center">
+          <h3 className="fw-bold">The Impact We're Creating</h3>
+          <p className="lead">
+            We empower startups, drive local initiatives, and promote environmental stewardship. 
+            Through strong community ties, we enable businesses and individuals to invest in meaningful change.
+          </p>
+          <div className="row mt-3">
+            <div className="col-md-4">
+              <img src="images/Golden Compass.png" alt="Guidance" className="img-fluid rounded mb-3" />
+              <h4>Strategic Guidance</h4>
+              <p>We provide a structured path for startups and sustainable enterprises.</p>
+            </div>
+            <div className="col-md-4">
+              <img src="images/Gold.png" alt="Support" className="img-fluid rounded mb-3" />
+              <h4>Community Support</h4>
+              <p>Connecting businesses and individuals to create a thriving, interconnected world.</p>
+            </div>
+            <div className="col-md-4">
+              <img src="images/Golden Door.png" alt="Opportunities" className="img-fluid rounded mb-3" />
+              <h4>Endless Opportunities</h4>
+              <p>Opening doors for those who are ready to take an active role in meaningful change.</p>
+            </div>
           </div>
         </div>
+      </section>
 
         <hr className="featurette-divider" />
-
-        <div className="row featurette">
-          <div className="col-md-7 p-3">
-            <h2 className="featurette-heading">And lastly, this one. <span className="text-muted">Checkmate.</span></h2>
-            <p className="lead">And yes, this is the last block of representative placeholder content. Again, not really intended to be actually read, simply here to give you a better view of what this would look like with some actual content. Your content.</p>
-          </div>
-          <div className="col-md-5">
-            <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
-
-          </div>
-        </div>
-
-        <hr className="featurette-divider" />
-
         
-        <div className="row">
-          <div className="col-lg-4 p-3">
-            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
-
-            <h2 className="my-4">Heading</h2>
-            <p>Some representative placeholder content for the three columns of text below the carousel. This is the first column.</p>
-            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
-          </div>
-          <div className="col-lg-4 p-3">
-            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
-
-            <h2 className="my-4">Heading</h2>
-            <p>Another exciting bit of representative placeholder content. This time, we've moved on to the second column.</p>
-            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
-          </div>
-          <div className="col-lg-4 p-3">
-            <svg className="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"></rect><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
-
-            <h2 className="my-4">Heading</h2>
-            <p>And lastly this, the third column of representative placeholder content.</p>
-            <p><Link className="btn btn-secondary" to="/">View details »</Link></p>
-          </div>
+        <section id="join-us" className="cta-section text-center text-white py-5">
+        <div className="container">
+          <h4 className="fw-bold">Ready to Make a Difference?</h4>
+          <p className="lead">Become a part of the movement. Whether as a supporter, entrepreneur, or investor, your role is key.</p>
+          <button id="joinBtn" href="/membership" className="btn">Get Involved</button>
         </div>
+      </section>
+
+      <section className="membership-section py-5">
+        <div className="container text-start">
+          <h4 className="fw-bold">Membership Coming Soon...</h4>
+          <p className="lead">
+            Exclusive benefits. Meaningful contributions. A role in the future of sustainability.
+            Stay tuned for Platinum, Gold, and Silver tiers—where real impact begins.
+          </p>
+        </div>
+      </section>
       </div>
     </div>
   );

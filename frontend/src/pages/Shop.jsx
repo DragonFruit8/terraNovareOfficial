@@ -1,35 +1,45 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../api/axios.config";
 import { useUser } from "../context/UserContext";
+import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
-// import { loadStripe } from "@stripe/stripe-js";
-
-// const stripePromise = loadStripe(
-//   `pk_live_51H9yaJCJsM5FOXWHe4MYqZdeoHiRQHmwDkmXuvs1qqprojx7p2kJq4QiDZOjTp7bhWjWi9VroFyPgQuSr9rwLOmT00fjHhiTva`
-// );
 
 const Shop = () => {
   const { userData } = useUser();
   const [products, setProducts] = useState([]);
+  const [loading, setLoading ] = useState(true);
   const [requestedProducts, setRequestedProducts] = useState([]);
 
   const fetchProducts = useCallback(async () => {
+    setLoading(true); // ✅ Start loading before fetching
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // ✅ Increase timeout to 10s
+
     try {
-      console.log("📡 Fetching products...");
-      const response = await axiosInstance.get("/products");
+      const response = await axiosInstance.get("/products", {
+        signal: controller.signal, // ✅ Attach abort signal
+      });
+
+      clearTimeout(timeoutId); // ✅ Clear timeout if successful
 
       if (!response.data || response.data.length === 0) {
         toast.warning("⚠️ No products available.");
       }
 
       setProducts(response.data);
-      console.log("✅ Products fetched:", response.data);
     } catch (error) {
-      console.error(
-        "❌ Error fetching products:",
-        error.response?.data || error.message
-      );
-      toast.error("❌ Failed to load products.");
+      clearTimeout(timeoutId); // ✅ Ensure timeout is cleared
+
+      if (error.name === "AbortError") {
+        console.error("⏳ Request timed out. Please try again.");
+        toast.error("⏳ Server is slow. Please refresh.");
+      } else {
+        console.error("❌ Error fetching products:", error.response?.data || error.message);
+        toast.error("❌ Failed to load products.");
+      }
+    } finally {
+      setLoading(false); // ✅ Stop loading after request completes
     }
   }, []);
 
@@ -70,7 +80,7 @@ const Shop = () => {
       if (!userData?.email) return;
 
       try {
-        console.log("🔍 Fetching requested products for:", userData.email);
+        // console.log("🔍 Fetching requested products for:", userData.email);
         const { data } = await axiosInstance.get(
           `/products/requested?email=${encodeURIComponent(userData.email)}`
         );
@@ -183,32 +193,42 @@ const Shop = () => {
 
   return (
     <div className="container mt-5 min-vh-100">
-      <h2>Shop</h2>
+    <h2>Shop</h2>
 
-      {/* ✅ Show Presale Section ONLY if at least one presale product exists */}
-      {products.some((product) => product?.is_presale) && (
-        <div>
-          <h3 className="mt-4 text-warning">🔥 Presale Products</h3>
-          <div className="row">
-            {products
-              .filter((product) => product.is_presale)
-              .map((product) => renderProductCard(product, true))}
-          </div>
-        </div>
-      )}
-
-      {/* ✅ Regular Products Section */}
-      <h3 className="mt-4">All Products</h3>
-      <div className="row">
-        {products.filter((product) => !product.is_presale).length === 0 ? (
-          <p>No products available.</p>
-        ) : (
-          products
-            .filter((product) => !product.is_presale)
-            .map((product) => renderProductCard(product, false))
-        )}
+    {/* ✅ Show Spinner While Loading */}
+    {loading ? (
+      <div className="text-center mt-5">
+        <Spinner /> 
+        <p>Loading products...</p>
       </div>
-    </div>
+    ) : (
+      <>
+        {/* ✅ Show Presale Section ONLY if at least one presale product exists */}
+        {products.some((product) => product?.is_presale) && (
+          <div>
+            <h3 className="mt-4 text-warning">🔥 Presale Products</h3>
+            <div className="row">
+              {products
+                .filter((product) => product.is_presale)
+                .map((product) => renderProductCard(product, true))}
+            </div>
+          </div>
+        )}
+
+        {/* ✅ Regular Products Section */}
+        <h3 className="mt-4">All Products</h3>
+        <div className="row">
+          {products.filter((product) => !product.is_presale).length === 0 ? (
+            <p>No products available.</p>
+          ) : (
+            products
+              .filter((product) => !product.is_presale)
+              .map((product) => renderProductCard(product, false))
+          )}
+        </div>
+      </>
+    )}
+  </div>
   );
 };
 

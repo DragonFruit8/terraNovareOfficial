@@ -4,49 +4,86 @@ import '../index.css';
 // Who we are, change-makers
 export default function Next() {
   return (
+   
+<div>
+  <section id="titleHeader" className="col-lg-12 col-md-12 bg-dark text-white text-center py-5">
+    <h1 className="fw-light">
+      <em>Believe <strong>AND YOU CAN</strong> and <strong>IMAGINE</strong></em>
+    </h1>
+    <p className="lead">A Vision for Sustainable Growth</p>
+  </section>
 
-    <div>
-        <section id='titleHeader' className="col-lg-12 col-md-12 bg-dark text-white text-center">
-          <h1 className="fw-light"><em>Believe<strong> YOU CAN </strong>and <strong>IMAGINE</strong></em></h1>
-        </section>
-      <div className="container justify-items-center pt-5 mt-2">
+  <div className="container pt-5 mt-2">
 
-
-        <div id='#next' className="row featurette">
-          <h1> <span className='fs-bold fs-5'>What's</span><em> Next?</em></h1>
-          <div className="col-md-8">
-            <h2 className="featurette-heading">First featurette heading. <span className="text-muted">It’ll blow your mind.</span></h2>
-            <p className="lead">Some great placeholder content for the first featurette here. Imagine some exciting prose here.</p>
-          </div>
-          <div className="col-md-4">
-            <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
-          </div>
-        </div>
-
-        <hr className="featurette-divider" />
-
-        <div className="row featurette">
-          <div className="col-md-7 order-md-2">
-            <h2 className="featurette-heading">Oh yeah, it’s that good. <span className="text-muted">See for yourself.</span></h2>
-            <p className="lead">Another featurette? Of course. More placeholder content here to give you an idea of how this layout would work with some actual real-world content in place.</p>
-          </div>
-          <div className="col-md-5 order-md-1">
-            <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
-          </div>
-        </div>
-
-        <hr className="featurette-divider" />
-
-        <div className="row featurette">
-          <div className="col-md-7">
-            <h2 className="featurette-heading">And lastly, this one. <span className="text-muted">Checkmate.</span></h2>
-            <p className="lead">And yes, this is the last block of representative placeholder content. Again, not really intended to be actually read, simply here to give you a better view of what this would look like with some actual content. Your content.</p>
-          </div>
-          <div className="col-md-5">
-            <svg className="bd-placeholder-img bd-placeholder-img-lg featurette-image img-fluid mx-auto" width="500" height="500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 500x500" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#eee"></rect><text x="50%" y="50%" fill="#aaa" dy=".3em">500x500</text></svg>
-          </div>
-        </div>
+    {/* First Featurette */}
+    <div id="next" className="row featurette align-items-center">
+      <h1><span className="fw-bold fs-5">What's</span> <em>Next?</em></h1>
+      <div className="col-md-8">
+        <h2 className="featurette-heading">
+          Terra'Novare stands as the guiding force behind E-Finity 
+          <span className="text-muted"> ensuring its mission stays true while forging financial pathways and enterprise connections.</span>
+        </h2>
+        <p className="lead">
+          As an entity dedicated to sustainability and progress, Terra'Novare oversees 
+          E-Finity's direction, providing the resources and strategic insight needed to make lasting change. We believe in building a 
+          future where businesses, communities, and individuals collaborate to shape a thriving, interconnected world.
+        </p>
+      </div>
+      <div className="col-md-4">
+        <img 
+          className="img-fluid w-100 rounded mb-2"
+          src="images/Golden Compass.png"
+          alt="Gold Compass"
+        />
       </div>
     </div>
+
+    <hr className="featurette-divider" />
+
+    {/* Second Featurette */}
+    <div className="row featurette align-items-center">
+      <div className="col-md-8 order-md-2">
+        <h2 className="featurette-heading">
+          More Than a Seat—A Role in <span className="text-muted">the Revolution.</span>
+        </h2>
+        <p className="lead">
+          For those looking to support this movement, we invite businesses and entities to become long-term partners 
+          through our sponsorship program. More than just donors, our sponsors become invested stakeholders, with a voice in the initiatives 
+          they help bring to life. Our membership model ensures that those who align with our vision have the opportunity to participate in shaping 
+          the direction of our efforts, creating an ecosystem where investment flows both ways.
+        </p>
+      </div>
+      <div className="col-md-4 order-md-1">
+        <img 
+          className="img-fluid w-100 rounded mb-2"
+          src="images/Gold.png"
+          alt="Gold Medal"
+        />
+      </div>
+    </div>
+
+    <hr className="featurette-divider" />
+
+    {/* Third Featurette */}
+    <div className="row featurette align-items-center">
+      <div className="col-md-7">
+        <h2 className="featurette-heading">
+          Have Hope <span className="text-muted">This is just the beginning.</span>
+        </h2>
+        <p className="lead">
+          As we grow, we will unveil deeper levels of involvement, exclusive opportunities, and structured membership tiers tailored for those who want to take an active role in this journey. Early supporters will not just witness change—they will help define it. The future belongs to those who build it with us. Will you be one of them?
+        </p>
+      </div>
+      <div className="col-md-5">
+        <img 
+          className="img-fluid w-100 rounded mb-2"
+          src="images/Golden Door.png"
+          alt="Gold Door"
+        />
+      </div>
+    </div>
+
+  </div>
+</div>
   );
 }

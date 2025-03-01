@@ -73,61 +73,53 @@ const Register = () => {
 
   // ✅ Form Submission
   const onSubmit = async (data) => {
-    // Password must be at least 8 characters, contain a number & special character
-    const passwordRegex =/^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (usernameStatus === "checking") {
-      toast.error("Please wait for username validation to complete.");
-      return;
-    }
-
-    if (usernameStatus === "taken") {
-      toast.error("Username is already taken.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-
+    console.log("📡 Sending signup request...");
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  
+    // 🔹 Validate Username Status
+    if (usernameStatus === "checking") return toast.error("Please wait for username validation.");
+    if (usernameStatus === "taken") return toast.error("Username is already taken.");
+  
+    // 🔹 Validate Passwords
+    if (password !== confirmPassword) return toast.error("Passwords do not match.");
     if (!passwordRegex.test(password)) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Password must be at least 8 characters, include a number and special character.",
-        });
+      return toast.error("Password must be at least 8 characters, include a number and a special character.");
     }
-
-    // Get reCAPTCHA token
-    const token = await recaptchaRef.current.executeAsync();
-    recaptchaRef.current.reset();
-
-    const userData = {
-      username: data.username,
-      fullname: `${data.firstName} ${data.lastName}`.trim(),
-      email: data.email,
-      password: data.password,
-      recaptchaToken: token,
-    };
-    setServerError("");
-    setIsLoading(true);
+  
     try {
+      // 🔹 Get reCAPTCHA Token
+      setIsLoading(true);
+      console.log("⚡ Getting reCAPTCHA token...");
+      const token = await recaptchaRef.current.executeAsync();
+      console.log("✅ Got reCAPTCHA token:", token);
+      recaptchaRef.current.reset();
+  
+      // 🔹 Construct User Data
+      const userData = {
+        username: data.username,
+        fullname: `${data.firstName} ${data.lastName}`.trim(),
+        email: data.email,
+        password: data.password,
+        recaptchaToken: token,
+      };
+  
+      // 🔹 API Call
+      setServerError("");
       await axiosInstance.post("/auth/signup", userData);
+      console.log("✅ Signup request completed.");
       toast.success("Signup successful!");
       navigate("/login");
     } catch (error) {
-      console.error("Signup error:", error.response?.data || error.message);
-      setServerError(
-        error.response.data.error || "An unexpected error occurred."
-      );
-      toast.error(
-        error.response?.data?.error || "Signup failed. Please try again."
-      );
+      console.error("❌ Signup error:", error.response?.data || error.message);
+      
+      const errorMsg = error.response?.data?.error || "Signup failed. Please try again.";
+      setServerError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   return (
     <div className="container d-flex col align-items-center justify-content-center my-5">
@@ -248,7 +240,11 @@ const Register = () => {
             ) : confirmPassword ? (
               <small className="text-danger">❌ Passwords do not match</small>
             ) : null}
-            <ReCAPTCHA sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY} />
+                      <ReCAPTCHA
+              sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+              size="invisible"
+              ref={recaptchaRef}
+            />
           </div>
 
           {/* ✅ Submit Button */}

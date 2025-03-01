@@ -54,10 +54,6 @@ const App = () => {
 
   const shouldBlockFeature = isLocalhost && !isProduction && !isVPS;
 
-  // if (isLocalhost && !isProduction) {
-  //   console.log("🚫 Blocking this feature on localhost...");
-  // }
-
   useEffect(() => {
     document.body.className = theme; // ✅ Apply theme to body
   }, [theme]);
@@ -119,7 +115,6 @@ const App = () => {
                   path="/terms-and-conditions"
                   element={<TermConditions />}
                 />
-
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <PrivacyNotice />

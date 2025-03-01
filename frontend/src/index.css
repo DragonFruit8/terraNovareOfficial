@@ -114,8 +114,9 @@ button:hover {
 /* Sections */
 
 #titleHeader {
-  height: 50vh;
+  height: 40vh;
   width: 100vw;
+  margin: 1em 0;
   display: flex;
   justify-content: center;
   align-items: center;
