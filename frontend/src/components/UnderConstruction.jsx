@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 // import axios from "axios";
+import Countdown from "./Countdown";
 import '../UnderConstruction.css'
 
 const UnderConstruction = () => {
@@ -62,7 +63,7 @@ const UnderConstruction = () => {
         <p className="lead text-light">
           This site is currently being built. Enter the password to proceed.
         </p>
-
+       <Countdown />
         {/* Password Form */}
         <form onSubmit={handlePasswordSubmit} className="mt-4">
           <input
