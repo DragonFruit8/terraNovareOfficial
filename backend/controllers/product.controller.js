@@ -177,7 +177,7 @@ export const deleteProductRequest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log("🛠 Deleting request with ID:", id);
+    // console.log("🛠 Deleting request with ID:", id);
 
     if (!id) {
       return res.status(400).json({ error: "Request ID is required" });
@@ -283,7 +283,7 @@ export const addProduct = async (req, res) => {
     }
 
     // ✅ Generate Stripe product
-    console.log("🛒 Creating Stripe Product for:", name);
+    // console.log("🛒 Creating Stripe Product for:", name);
 
     const stripeProduct = await stripe.products.create({
       name,
@@ -293,7 +293,7 @@ export const addProduct = async (req, res) => {
     const stripeProductId = stripeProduct.id;
 
     // ✅ Create Stripe price
-    console.log("💲 Creating Stripe Price for:", name);
+    // console.log("💲 Creating Stripe Price for:", name);
 
     const stripePrice = await stripe.prices.create({
       unit_amount: Math.round(price * 100), // Convert dollars to cents
@@ -328,7 +328,7 @@ export const addProduct = async (req, res) => {
       ]
     );
 
-    console.log("✅ Product successfully added:", newProduct.rows[0]);
+    // console.log("✅ Product successfully added:", newProduct.rows[0]);
 
     res.status(201).json({
       message: "Product added successfully!",
@@ -346,7 +346,7 @@ export const requestProduct = async (req, res) => {
   const { user_email, user_id, product_id } = req.body;
 
   try {
-    console.log(
+    // console.log(
       "📩 Incoming product request from:",
       user_email,
       "for product:",
@@ -365,7 +365,7 @@ export const requestProduct = async (req, res) => {
     }
 
     const productName = productQuery.rows[0].name;
-    console.log("✅ Product found:", productName);
+    // console.log("✅ Product found:", productName);
 
     // ✅ Check if product is already requested
     const existingRequest = await pool.query(
@@ -374,7 +374,7 @@ export const requestProduct = async (req, res) => {
     );
 
     if (existingRequest.rowCount > 0) {
-      console.log(
+      // console.log(
         "⚠️ Product already requested by this user. Sending confirmation email anyway..."
       );
 
@@ -386,17 +386,17 @@ export const requestProduct = async (req, res) => {
     }
 
     // ✅ Insert new request
-    console.log("📝 Inserting request into database...");
+    // console.log("📝 Inserting request into database...");
     await pool.query(
       "INSERT INTO product_requests (user_id, user_email, product_id, product, requested_at, status) VALUES ($1, $2, $3, $4, NOW(), 'pending')",
       [user_id, user_email, product_id, productName]
     );
-    console.log("✅ Request inserted successfully.");
+    // console.log("✅ Request inserted successfully.");
 
     // ✅ Send confirmation email
-    console.log("📧 Attempting to send email to:", user_email);
+    // console.log("📧 Attempting to send email to:", user_email);
     await sendProductRequestEmail(user_email, productName);
-    console.log("✅ Email successfully sent!");
+    // console.log("✅ Email successfully sent!");
 
     res
       .status(201)
@@ -420,7 +420,7 @@ export const deleteAllProductRequests = async (req, res) => {
 
     await pool.query("DELETE FROM product_requests");
 
-    console.log("✅ All product requests deleted.");
+    // console.log("✅ All product requests deleted.");
     res.status(200).json({ message: "All product requests deleted." });
   } catch (error) {
     console.error("❌ Error deleting product requests:", error);

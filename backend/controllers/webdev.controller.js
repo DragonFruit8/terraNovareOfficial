@@ -10,18 +10,18 @@ export const handleWebDevInquiry = async (req, res) => {
       features, techStack, budget, deadline, notes
     } = req.body;
 
-    if (!name || !email || !websiteType || !budget) {
-      return res.status(400).json({ error: "Required fields are missing." });
+    if (!name || !email || !phone || !websiteType || !techStack || !budget) {
+      return res.status(400).json({ error: "Missing required fields." });
     }
 
-    console.log("📩 New Website Development Inquiry:", req.body);
+    // console.log("📩 New Website Development Inquiry:", req.body);
 
     // Nodemailer transporter setup
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
-        user: process.env.EMAIL_USER, // Your email
-        pass: process.env.EMAIL_PASS, // Your email app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -29,26 +29,26 @@ export const handleWebDevInquiry = async (req, res) => {
     const mailOptions = {
       from: `"Web Dev Inquiry" <${process.env.EMAIL_USER}>`,
       to: process.env.EMAIL_RECEIVER || process.env.EMAIL_USER,
-      subject: `New Web Dev Inquiry from ${name}`,
+      subject: `Web Dev Inquiry from ${req.body.name}`,
       html: `
         <h2>New Website Development Inquiry</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone || "Not Provided"}</p>
-        <p><strong>Company:</strong> ${company || "Not Provided"}</p>
-        <p><strong>Industry:</strong> ${industry || "Not Provided"}</p>
-        <p><strong>Existing Website:</strong> ${website || "Not Provided"}</p>
-        <p><strong>Website Type:</strong> ${websiteType}</p>
-        <p><strong>Features:</strong> ${features.length ? features.join(", ") : "None"}</p>
-        <p><strong>Preferred Tech Stack:</strong> ${techStack || "Not Specified"}</p>
-        <p><strong>Budget:</strong> ${budget}</p>
-        <p><strong>Deadline:</strong> ${deadline || "Not Specified"}</p>
-        <p><strong>Additional Notes:</strong> ${notes || "None"}</p>
+        <p><strong>Name:</strong> <br />${name}</p>
+        <p><strong>Email:</strong> <br />${email}</p>
+        <p><strong>Phone:</strong> <a href="tel:${phone}"> <br />${phone || "Not Provided"}</a></p>
+        <p><strong>Company:</strong> <br />${company || "Not Provided"}</p>
+        <p><strong>Industry:</strong> <br />${industry || "Not Provided"}</p>
+        <p><strong>Existing Website:</strong> <br />${website || "Not Provided"}</p>
+        <p><strong>Website Type:</strong> <br />${websiteType}</p>
+        <p><strong>Features:</strong> <br />${features.length ? features.join(", ") : "None"}</p>
+        <p><strong>Preferred Tech Stack:</strong> <br />${techStack || "Not Specified"}</p>
+        <p><strong>Budget:</strong> <br />${budget}</p>
+        <p><strong>Deadline:</strong> <br />${deadline || "Not Specified"}</p>
+        <p><strong>Additional Notes:</strong> <br />${notes || "None"}</p>
       `,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log("✅ Web dev inquiry sent!");
+    // console.log("✅ Web dev inquiry sent!");
 
     res.status(200).json({ message: "Inquiry submitted successfully!" });
   } catch (error) {

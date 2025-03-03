@@ -18,7 +18,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("📡 Sending login request...");
+    // console.log("📡 Sending login request...");
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // ✅ 10s timeout
   

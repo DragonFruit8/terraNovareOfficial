@@ -72,7 +72,7 @@ export const signup = async (req, res) => {
     // ✅ Securely hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("🔹 Inserting new user into database...");
+    // console.log("🔹 Inserting new user into database...");
 
     // ✅ Insert user into DB & return user info
     const newUser = await pool.query(
@@ -82,7 +82,7 @@ export const signup = async (req, res) => {
       [username.trim(), fullname.trim(), email, hashedPassword, `{${userRole}}`] // ✅ PostgreSQL-friendly roles
     );
 
-    console.log("✅ User registered successfully:", newUser.rows[0]);
+    // console.log("✅ User registered successfully:", newUser.rows[0]);
 
     return res.status(201).json({
       message: "User registered successfully!",
@@ -115,7 +115,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: "reCAPTCHA token missing" });
     }
 
-    console.log("🔹 Verifying reCAPTCHA token...");
+    // console.log("🔹 Verifying reCAPTCHA token...");
 
     const googleResponse = await axios.post(
       `https://www.google.com/recaptcha/api/siteverify`,
@@ -128,13 +128,13 @@ export const login = async (req, res) => {
       }
     );
 
-    console.log("🔹 Google reCAPTCHA Response:", googleResponse.data);
+    // console.log("🔹 Google reCAPTCHA Response:", googleResponse.data);
 
     if (!googleResponse.data.success) {
       return res.status(400).json({ error: "reCAPTCHA verification failed" });
     }
 
-    console.log("✅ reCAPTCHA verified. Proceeding with login...");
+    // console.log("✅ reCAPTCHA verified. Proceeding with login...");
 
     // ✅ Query DB for user
     const { rows } = await pool.query(
@@ -157,7 +157,7 @@ export const login = async (req, res) => {
     // 🔹 **Fix: Ensure roles is always an array**
     const roles = Array.isArray(user.roles) ? user.roles : [user.roles];
 
-    console.log("🔹 User roles:", roles);
+    // console.log("🔹 User roles:", roles);
 
     // ✅ Generate JWT token
     const token = jwt.sign(
@@ -171,7 +171,7 @@ export const login = async (req, res) => {
       { expiresIn: "12h" }
     );
 
-    console.log("✅ Login successful:", { user_id: user.user_id, email: user.email });
+    // console.log("✅ Login successful:", { user_id: user.user_id, email: user.email });
 
     // ✅ Return token & user data (excluding password)
     res.json({

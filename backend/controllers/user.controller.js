@@ -39,7 +39,7 @@ export const getAllUsers = async (req, res) => {
         .json({ error: "Unauthorized: Admin access required" });
     }
 
-    console.log("✅ Fetching users from database...");
+    // console.log("✅ Fetching users from database...");
     const users = await pool.query(
       "SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC"
     );
@@ -125,9 +125,9 @@ export const sendProductRequestEmail = async (to, productName) => {
   };
 
   try {
-    console.log("📨 Sending email to:", to);
+    // console.log("📨 Sending email to:", to);
     const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully:", info.response);
+    // console.log("✅ Email sent successfully:", info.response);
     return info;
   } catch (error) {
     console.error("❌ Error sending email:", error);
@@ -233,7 +233,7 @@ export const updateUserPassword = async (req, res) => {
       [hashedPassword, userId]
     );
 
-    console.log("✅ Password updated for user:", userId);
+    // console.log("✅ Password updated for user:", userId);
     return res.json({ message: "Password updated successfully!" });
   } catch (error) {
     console.error("❌ Error updating password:", error.message);

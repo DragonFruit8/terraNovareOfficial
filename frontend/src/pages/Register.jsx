@@ -73,7 +73,7 @@ const Register = () => {
 
   // ✅ Form Submission
   const onSubmit = async (data) => {
-    console.log("📡 Sending signup request...");
+    // console.log("📡 Sending signup request...");
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   
     // 🔹 Validate Username Status
@@ -89,9 +89,9 @@ const Register = () => {
     try {
       // 🔹 Get reCAPTCHA Token
       setIsLoading(true);
-      console.log("⚡ Getting reCAPTCHA token...");
+      // console.log("⚡ Getting reCAPTCHA token...");
       const token = await recaptchaRef.current.executeAsync();
-      console.log("✅ Got reCAPTCHA token:", token);
+      // console.log("✅ Got reCAPTCHA token:", token);
       recaptchaRef.current.reset();
   
       // 🔹 Construct User Data
@@ -106,7 +106,7 @@ const Register = () => {
       // 🔹 API Call
       setServerError("");
       await axiosInstance.post("/auth/signup", userData);
-      console.log("✅ Signup request completed.");
+      // console.log("✅ Signup request completed.");
       toast.success("Signup successful!");
       navigate("/login");
     } catch (error) {

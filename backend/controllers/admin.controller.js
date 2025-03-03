@@ -169,7 +169,7 @@ export const getProductById = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    console.log("✅ Product Fetched:", product.rows[0]);
+    // console.log("✅ Product Fetched:", product.rows[0]);
     res.json(product.rows[0]);
   } catch (error) {
     console.error("❌ Error fetching product by ID:", error.message);
@@ -210,7 +210,7 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    console.log("✅ Product updated:", updatedProduct.rows[0]);
+    // console.log("✅ Product updated:", updatedProduct.rows[0]);
     res.json({ message: "Product updated successfully!", product: updatedProduct.rows[0] });
   } catch (error) {
     console.error("❌ Error updating product:", error.message);
@@ -222,7 +222,7 @@ export const deleteProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
 
-    console.log("🔍 Deleting product with ID:", product_id);
+    // console.log("🔍 Deleting product with ID:", product_id);
 
     // ✅ Check if product exists
     const productExists = await pool.query(
@@ -240,7 +240,7 @@ export const deleteProduct = async (req, res) => {
       [product_id]
     );
 
-    console.log(`✅ Product with ID ${product_id} deleted.`);
+    // console.log(`✅ Product with ID ${product_id} deleted.`);
     res.json({ message: "Product deleted successfully!" });
 
   } catch (error) {
@@ -255,7 +255,7 @@ export const makeAdmin = async (req, res) => {
     const { user_id } = req.params;
 
     // ✅ Debugging: Log user_id before proceeding
-    console.log("🔍 Received user_id:", user_id);
+    // console.log("🔍 Received user_id:", user_id);
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });

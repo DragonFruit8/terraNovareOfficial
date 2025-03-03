@@ -11,7 +11,7 @@ const OrderDetails = () => {
     const fetchOrderDetails = async () => {
       try {
         const response = await axiosInstance.get(`/orders/${id}`);
-        console.log("📦 Order Details Fetched:", response.data);
+        // console.log("📦 Order Details Fetched:", response.data);
         setOrder(response.data);
       } catch (error) {
         console.error("❌ Error fetching order details:", error);

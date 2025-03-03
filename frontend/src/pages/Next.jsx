@@ -6,11 +6,11 @@ export default function Next() {
   return (
    
 <div>
-  <section id="titleHeader" className="row-lg-12 row-md-12 bg-dark text-white text-center py-5">
+  <section id="titleHeader" className="row bg-dark text-white text-center py-5">
     <h1 className="fw-light">
-      <em>Believe <strong>AND YOU CAN</strong> and <strong>IMAGINE</strong></em>
+      <em>Believe <strong>AND YOU CAN</strong> <strong><br />IMAGINE</strong></em>
     </h1>
-    <p className="lead">A Vision for Sustainable Growth</p>
+    <p className="text-light">A Vision for Sustainable Growth</p>
   </section>
 
   <div className="container pt-5 mt-2">

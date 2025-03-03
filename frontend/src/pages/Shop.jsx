@@ -56,7 +56,7 @@ const Shop = () => {
     }
   
     try {
-      console.log("🔗 Sending price ID to Stripe:", product.stripe_price_id);
+      // console.log("🔗 Sending price ID to Stripe:", product.stripe_price_id);
   
       const { data } = await axiosInstance.post("/stripe/checkout", {
         price_id: product.stripe_price_id, // ✅ Send only price_id

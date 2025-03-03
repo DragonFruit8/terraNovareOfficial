@@ -16,6 +16,7 @@ import {
 import { getCurrentUser } from "../controllers/auth.controller.js";
 import { verifyPassword } from "../controllers/verify.controller.js";
 import { authenticateUser } from "../middleware/auth.middleware.js";
+import { createCheckoutSession } from "../services/stripe.service.js";
 
 const router = express.Router();
 
@@ -25,6 +26,7 @@ router.post("/signup", limiter, signup); // ⏳ Protect signup
 router.post("/login", limiter, login); // ⏳ Protect login
 router.get("/profile", authenticateUser, getUserProfile);
 router.post("/check-username", checkUsernameAvailability);
+router.post("/create-checkout-session", createCheckoutSession);
 
 router.put("/update-profile", authenticateUser, updateUserProfile);
 router.put("/update-password", authenticateUser, updatePassword);
@@ -46,7 +48,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-    console.log("✅ Authenticated User:", req.user); // Debugging user data
+    // console.log("✅ Authenticated User:", req.user); // Debugging user data
     res.redirect("/"); // Redirect the user after successful login
   }
 );

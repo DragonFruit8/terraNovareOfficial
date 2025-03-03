@@ -1,6 +1,7 @@
 import React, { useEffect} from 'react';
 import { Link } from 'react-router-dom';
-import Meta from "../components/Meta"
+import Meta from "../components/Meta";
+import TVModal from '../forms/TVModel';
 import '../App.css'
 
 
@@ -137,7 +138,7 @@ export default function Homepage() {
         <div className="container">
           <h4 className="fw-bold">Ready to Make a Difference?</h4>
           <p className="lead">Become a part of the movement. Whether as a supporter, entrepreneur, or investor, your role is key.</p>
-          <button id="joinBtn" href="/membership" className="btn">Get Involved</button>
+          <TVModal />
         </div>
       </section>
 

@@ -11,11 +11,11 @@ const Orders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        console.log("📡 Fetching orders...");
+        // console.log("📡 Fetching orders...");
         const response = await axiosInstance.get("/orders", {
           headers: { Authorization: `Bearer ${userData?.token}` },
         });
-        console.log("📦 Orders Received:", response.data);
+        // console.log("📦 Orders Received:", response.data);
         setOrders(response.data);
         setLoading(false);
       } catch (error) {

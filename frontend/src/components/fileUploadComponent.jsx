@@ -38,7 +38,7 @@ const UploadComponent = () => {
       const response = await axiosInstance.post("/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log("Upload successful:", response.data);
+      // console.log("Upload successful:", response.data);
       setUploadSuccess("Files uploaded successfully!");
       setFiles([]); // Clear file list after upload
     } catch (error) {

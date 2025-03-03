@@ -12,57 +12,60 @@ const DJServiceForm = () => {
     email: "",
     phone: "",
     notes: "",
+    hours: "",
+    distance: "",
   });
 
-  const [currentArtist, setCurrentArtist] = useState("");
+  const [quote, setQuote] = useState(null);
 
-  const genresList = ["Hip-Hop", "Trance", "EDM", "Jazz", "Rock", "Pop", "Reggae", "House", "Techno"];
-
-  // Handle form input changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Handle genre selection (toggle selection)
-  const handleGenreToggle = (genre) => {
-    setFormData((prev) => ({
-      ...prev,
-      genres: prev.genres.includes(genre)
-        ? prev.genres.filter((g) => g !== genre)
-        : [...prev.genres, genre],
-    }));
+  const calculateQuote = () => {
+    const hourlyRate = 50.0;
+    const mileageRate = 0.7;
+    const setupFee = 50.0;
+
+    const hours = parseFloat(formData.hours) || 0;
+    const distance = parseFloat(formData.distance) || 0;
+
+    const totalCost = (hourlyRate * hours) + (mileageRate * distance) + setupFee;
+    setQuote(totalCost.toFixed(2));
   };
 
-  // Handle artist input and add to list
-  const handleAddArtist = (e) => {
-    if (e.key === "Enter" && currentArtist.trim()) {
-      setFormData({ ...formData, artists: [...formData.artists, currentArtist.trim()] });
-      setCurrentArtist("");
-    }
-  };
-
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axiosInstance.post("/forms/dj", formData);
-      alert("Booking request sent successfully!");
-      setFormData({
-        eventType: "",
-        eventDate: "",
-        genres: [],
-        artists: [],
-        venue: "",
-        organizer: "",
-        email: "",
-        phone: "",
-        notes: "",
-      });
+      const stripe = await stripePromise;
+      // console.log("Submitting form data:", formData);
+  
+      if (formData.contributionType === "donation" && formData.amount) {
+        // ✅ First, send form data to your backend
+        await axiosInstance.post("/forms/dj", formData);
+        alert("Booking request sent successfully!");
+  
+        // ✅ Then, create a Stripe checkout session
+        const response = await axiosInstance.post("/create-checkout-session", {
+          amount: formData.amount,
+          email: formData.email,
+        });
+  
+        // ✅ Axios parses JSON automatically, so use `response.data`
+        const session = response.data;
+  
+        if (session.id) {
+          await stripe.redirectToCheckout({ sessionId: session.id });
+        }
+      } else {
+        // console.log("Form Submitted (Non-Donation):", formData);
+      }
     } catch (error) {
-      console.error("Error sending email", error);
-      alert("Failed to send request.");
+      console.error("Error processing donation:", error.response?.data || error.message);
+      alert("Failed to process donation.");
     }
   };
+  
 
   return (
     <div className="container mt-5">
@@ -83,36 +86,36 @@ const DJServiceForm = () => {
         <label>Event Date</label>
         <input type="date" className="form-control" name="eventDate" value={formData.eventDate} onChange={handleChange} />
 
-        {/* Genre Selection */}
-        <label>Music Genres</label>
-        <div className="d-flex flex-wrap">
-          {genresList.map((genre) => (
-            <button
-              type="button"
-              key={genre}
-              className={`btn m-1 ${formData.genres.includes(genre) ? "btn-primary" : "btn-outline-secondary"}`}
-              onClick={() => handleGenreToggle(genre)}
-            >
-              {genre}
-            </button>
-          ))}
-        </div>
-
-        {/* Artist Preferences (Dynamic Input List) */}
-        <label>Preferred Artists</label>
+        {/* Hours */}
+        <label>Hours of DJ Service</label>
         <input
-          type="text"
+          type="number"
           className="form-control"
-          value={currentArtist}
-          onChange={(e) => setCurrentArtist(e.target.value)}
-          onKeyDown={handleAddArtist}
-          placeholder="Type an artist name and press Enter"
+          name="hours"
+          value={formData.hours}
+          onChange={handleChange}
+          placeholder="Number of hours"
+          required
         />
-        <ul>
-          {formData.artists.map((artist, index) => (
-            <li key={index}>{artist}</li>
-          ))}
-        </ul>
+
+        {/* Distance */}
+        <label>Distance (miles)</label>
+        <input
+          type="number"
+          className="form-control"
+          name="distance"
+          value={formData.distance}
+          onChange={handleChange}
+          placeholder="Enter travel distance"
+          required
+        />
+
+        {/* Quote Display */}
+        {quote !== null && (
+          <div className="alert alert-info mt-3">
+            <strong>Estimated Cost: ${quote}</strong>
+          </div>
+        )}
 
         {/* Venue & Contact Information */}
         <label>Event Venue</label>
@@ -131,8 +134,12 @@ const DJServiceForm = () => {
         <label>Additional Notes</label>
         <textarea className="form-control" name="notes" value={formData.notes} onChange={handleChange} />
 
+        {/* Submit Button */}
         <button type="submit" className="btn btn-success mt-3">Submit Booking Request</button>
       </form>
+
+      {/* Calculate Quote Button */}
+      <button onClick={calculateQuote} className="btn btn-primary mt-3">Calculate Quote</button>
     </div>
   );
 };

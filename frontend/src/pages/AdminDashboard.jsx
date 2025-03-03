@@ -245,13 +245,13 @@ const AdminDashboard = () => {
         return;
       }
 
-      console.log("📡 Updating admin profile...", profileData);
+      // console.log("📡 Updating admin profile...", profileData);
 
       const response = await axiosInstance.put("/admin/update", profileData, {
         headers: { Authorization: `Bearer ${token}` }, // ✅ Attach token
       });
 
-      console.log("✅ Profile updated successfully:", response.data);
+      // console.log("✅ Profile updated successfully:", response.data);
       setAdminProfile(response.data); // ✅ Save updated profile
       setEditingAdmin(false); // ✅ Exit editing mode
       toast.success("Profile updated successfully!");

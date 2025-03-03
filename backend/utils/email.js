@@ -61,7 +61,7 @@ export const sendProductRequestEmail = async (to, product) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    console.log("📩 Confirmation email sent to:", to);
+    // console.log("📩 Confirmation email sent to:", to);
   } catch (error) {
     console.error("❌ Error sending email:", error);
   }

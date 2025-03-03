@@ -34,7 +34,7 @@ router.post("/checkout", async (req, res) => {
       return res.status(400).json({ error: "Missing price ID or user email" });
     }
 
-    console.log("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
+    // console.log("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
 
     // Create the Stripe Checkout session
     const session = await stripe.checkout.sessions.create({

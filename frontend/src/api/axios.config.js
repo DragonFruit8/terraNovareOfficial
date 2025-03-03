@@ -10,7 +10,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // ✅ Use fallback URL in case env vars are missing
 const baseURL = isProduction ? API_BASE_URL : DEV_BASE_URL;
 // ✅ Debugging logs
-console.log(`✅ Axios Base URL: ${baseURL} (Mode: ${process.env.NODE_ENV})`);
+// console.log(`✅ Axios Base URL: ${baseURL} (Mode: ${process.env.NODE_ENV})`);
 // ✅ Create Axios instance
 const axiosInstance = axios.create({
   baseURL: baseURL,
