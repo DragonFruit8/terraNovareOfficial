@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 
 const Countdown = () => {
-  const targetDate = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from now
+  const getStoredTargetDate = () => {
+    const storedDate = localStorage.getItem("countdownTargetDate");
+    if (storedDate) return parseInt(storedDate, 10);
+
+    const newTargetDate = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days from NOW
+    localStorage.setItem("countdownTargetDate", newTargetDate);
+    return newTargetDate;
+  };
+
+  const [targetDate] = useState(getStoredTargetDate);
   const [timeLeft, setTimeLeft] = useState(targetDate - Date.now());
 
   useEffect(() => {
@@ -9,15 +18,17 @@ const Countdown = () => {
       setTimeLeft(targetDate - Date.now());
     }, 1000);
 
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval);
   }, [targetDate]);
 
   const formatTime = (ms) => {
+    if (ms <= 0) return "🎉 Time’s Up! 🎉";
+
     const days = Math.floor(ms / (1000 * 60 * 60 * 24));
     const hours = Math.floor((ms % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((ms % (1000 * 60)) / 1000);
-    
+
     return `${days}d ${hours}h ${minutes}m ${seconds}s`;
   };
 
