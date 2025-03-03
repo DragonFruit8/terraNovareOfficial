@@ -1,5 +1,6 @@
 import React from 'react';
 import '../index.css';
+import DonateButton from "../components/DonateButton"
 // import { Link } from 'react-router-dom';
 // Who we are, change-makers
 export default function Homepage() {
@@ -54,10 +55,8 @@ export default function Homepage() {
           <div className="col-md-10 text-end">
             <h2 className="featurette-heading">Donate to<span className="text-muted"> the Movement</span></h2>
             <p className="lead">Your donation helps us continue developing products, services, and initiatives that promote sustainability and innovation. Every contribution, big or small, accelerates the positive changes we strive to create.</p>
-            <div>
-              <button type="button" className="btn btn-success">
-                Donate Now
-                </button>
+            <div className="my-2">
+		<DonateButton />
             </div>
           </div>
           {/* <div className="col-md-5">

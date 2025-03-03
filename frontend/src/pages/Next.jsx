@@ -6,7 +6,7 @@ export default function Next() {
   return (
    
 <div>
-  <section id="titleHeader" className="col-lg-12 col-md-12 bg-dark text-white text-center py-5">
+  <section id="titleHeader" className="row-lg-12 row-md-12 bg-dark text-white text-center py-5">
     <h1 className="fw-light">
       <em>Believe <strong>AND YOU CAN</strong> and <strong>IMAGINE</strong></em>
     </h1>
