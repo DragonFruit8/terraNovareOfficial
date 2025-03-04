@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import "../index.css";
 import axiosInstance from "../api/axios.config";
 import MusicPlayer from "../components/MusicPlayer";
@@ -8,6 +9,19 @@ import "../MusicPlayer.css";
 export default function Next() {
   const [songList, setSongList] = useState([]);
   const [user, setUser] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (location.state?.scrollToBottom) {
+      setTimeout(() => {
+        const bottomElement = document.getElementById("bottom");
+        if (bottomElement) {
+          bottomElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500);
+    }
+  }, [location]);
 
   useEffect(() => {
     // Fetch song list from backend
@@ -38,6 +52,15 @@ export default function Next() {
 
     fetchSongs();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.scrollToBottom) {
+      const bottomElement = document.getElementById("bottom");
+      if (bottomElement) {
+        bottomElement.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  }, [location]);
 
   return (
     <div>
@@ -143,17 +166,25 @@ export default function Next() {
             />
           </div>
         </div>
-        <div className="m-3">
-          {songList.length > 0 && (
-            <>
-          <h2 className="my-4">How I'm Fundraising</h2>
-            <MusicPlayer
-              tracks={songList}
-              isAdmin={user?.roles?.includes("admin")}
-            />
-            </>
-          )}
+        <div className="m-3" id="bottom">
+        {songList.length > 0 ? (
+          <>
+            <h2 className="my-4">How I'm Fundraising</h2>
+            <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
+          </>
+        ) : (
+          <div className="alert alert-warning my-2">
+            HAHA... Excuse me... No songs available. Please check back later.
+          </div>
+        )}
+
+        {/* 🔙 Back to Book Section Button */}
+        <div className="mt-4">
+          <button className="btn btn-secondary" onClick={() => navigate("/")}>
+            Back to Book
+          </button>
         </div>
+      </div>
       </div>
     </div>
   );
