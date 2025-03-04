@@ -15,35 +15,37 @@ import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import inquiryRoutes from "./routes/inquiry.routes.js";
-import musicRoutes from "./routes/music.router.js";
+import musicRoutes from "./routes/music.routes.js";
 import verifyRecaptcha from "./routes/verify-recaptcha.js";
 import { authenticateUser } from "./middleware/auth.middleware.js"; 
 import { syncAllProducts } from "./services/stripe.service.js";
-import path from "path";
+import uploadRoutes from "./routes/upload.js";
 import fs from "fs";
-import { fileURLToPath } from "url";
+import mime from "mime-types";
+import path from "path";
+
 
 import checkoutRoutes from "./routes/checkout.routes.js";
 import "./config/passport.js";
 dotenv.config({path: "./.env"});
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const app = express();
+
+
 
 const isProduction = process.env.NODE_ENV === "production";
 const corsOptions = {
   origin: ["http://localhost:3000","https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
   methods: "GET,POST,PUT,DELETE,OPTIONS",
-  allowedHeaders: "Content-Type,Authorization",
+  allowedHeaders: "Content-Type, Authorization",
   credentials: true,
 };
+const uploadDir = path.resolve("/var/www/terraNovareOfficial/backend/uploads/music");
+console.log("🎵 Serving music from:", uploadDir);
 
 const storage = multer.diskStorage({
-  destination: './uploads',
-  filename: (req, file, cb) => {
-      cb(null, `${Date.now()}-${file.originalname}`);
-  }
+  destination: (req, file, cb) => cb(null, uploadDir),
+  filename: (req, file, cb) => cb(null, file.originalname), // ✅ Keep original filename
 });
 
 // ✅ Use `express.json()` for all routes EXCEPT webhook
@@ -72,8 +74,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-//  Change to "https://terranovare.tech"
+app.use(express.static(path.join(path.resolve(), "public")));
+// app.use(express.static(path.join(path.resolve(), "uploads/music")));
 app.use(cors(corsOptions));
 app.use(express.json());
 // app.disable("x-powered-by");
@@ -86,9 +88,25 @@ app.use(cookieParser());
 // ✅ Apply webhook route separately with raw body parsing
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhookRouter);
 // ✅ Register other routes
+
 // Music API
-app.use("/uploads/music", express.static(path.join(__dirname, "uploads/music")));
+
+if (!fs.existsSync(uploadDir)) {
+  console.error("❌ Upload directory does not exist:", uploadDir);
+} else {
+  console.log("✅ Serving music from:", uploadDir);
+}
+// ✅ Serve music files
+app.use("/uploads/music", express.static(uploadDir, {
+  setHeaders: (res, filePath) => {
+    const mimeType = mime.lookup(filePath) || "audio/mpeg";
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  }
+}));
+console.log("🎵 Serving music files from:", uploadDir);
 app.use("/api/music", musicRoutes);
+app.use("/api/uploads", uploadRoutes);
 app.use("/api", authRoutes);
 // ✅ Secure Admin Routes
 app.use("/api/admin", adminRoutes);

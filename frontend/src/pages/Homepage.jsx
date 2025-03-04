@@ -6,8 +6,9 @@ import '../App.css'
 
 
 export default function Homepage() {
+
   useEffect(() => {
-    window.scrollTo(0, 0); // Force scroll to the top on page load
+    window.scrollTo(0, 0); // ✅ Ensure Homepage always loads from the top
   }, []);
   return (
     <div>
@@ -137,7 +138,7 @@ export default function Homepage() {
         <section id="join-us" className="cta-section text-center text-white py-5">
         <div className="container">
           <h4 className="fw-bold">Ready to Make a Difference?</h4>
-          <p className="lead">Become a part of the movement. Whether as a supporter, entrepreneur, or investor, your role is key.</p>
+          <p className="lead" id='bottom'>Become a part of the movement. Whether as a supporter, entrepreneur, or investor, your role is key.</p>
           <TVModal />
         </div>
       </section>

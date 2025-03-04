@@ -446,6 +446,10 @@ const AdminDashboard = () => {
 
   return (
     <div className="container mt-5">
+      <div className="my-3">
+        <h5>Music Uploader</h5>
+        <MusicUpload />
+        </div>
       <h2 className="p-2">Admin Dashboard</h2>
       <div className="card mb-3">
         <h3 className="p-2">Admin Profile</h3>
@@ -923,10 +927,7 @@ const AdminDashboard = () => {
           </tbody>
         </table>
       </div>
-       <div className="my-3">
-        <h5>Music Uploader</h5>
-        <MusicUpload />
-        </div>
+       
     </div>
   );
 };

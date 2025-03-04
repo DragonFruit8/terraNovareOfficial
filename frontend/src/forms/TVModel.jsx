@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Dialog, DialogActions, DialogContent, Button } from "@mui/material";
 import DonorSponsorForm from "./DonorSponsorForm";
 import WebDevForm from "./WebDevForm";
+import DJServiceForm from "./DJServiceForm";
 
 export default function TVModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,7 +67,7 @@ export default function TVModal() {
                       <h2 className="modal-title">Choose Form</h2>
 
                       {/* Tab Buttons */}
-                      <div className="flex justify-center gap-4 mt-4">
+                      <div className="col gap-2 d-flex justify-content-center">
                         <Button
                           className={`btn fw-bold ${
                             activeForm === "A"
@@ -88,6 +89,16 @@ export default function TVModal() {
                         >
                           Web Dev
                         </Button>
+                        <Button
+                          className={`btn fw-bold ${
+                            activeForm === "C"
+                              ? "btn-dark bg-dark border border-light text-warning"
+                              : "btn-outline-dark"
+                          }`}
+                          onClick={() => setActiveForm("C")}
+                        >
+                          DJ Request
+                        </Button>
                       </div>
 
                       {/* Show the Selected Form */}
@@ -98,6 +109,10 @@ export default function TVModal() {
                         {activeForm === "B" && (
                           <WebDevForm setIsOpen={setIsOpen} onSuccess={handleSuccess} />
                         )}
+                        {activeForm === "C" && (
+                          <DJServiceForm setIsOpen={setIsOpen} onSuccess={handleSuccess} />
+                        )}
+                        
                       </div>
                     </>
                   )}
