@@ -18,8 +18,23 @@ const DJServiceForm = () => {
 
   const [quote, setQuote] = useState(null);
 
+  const genresList = [
+    "Hip-Hop", "EDM", "Rock", "Pop", "Jazz", "House", "Techno", "Reggae", "R&B", "Classical"
+  ];
+
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleGenreChange = (e) => {
+    const { value, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      genres: checked
+        ? [...prev.genres, value]
+        : prev.genres.filter((genre) => genre !== value),
+    }));
   };
 
   const calculateQuote = () => {
@@ -32,49 +47,48 @@ const DJServiceForm = () => {
 
     const totalCost = (hourlyRate * hours) + (mileageRate * distance) + setupFee;
     setQuote(totalCost.toFixed(2));
+
+    return totalCost.toFixed(2);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const estimatedQuote = calculateQuote();
+
     try {
-      const stripe = await stripePromise;
-      // console.log("Submitting form data:", formData);
-  
-      if (formData.contributionType === "donation" && formData.amount) {
-        // ✅ First, send form data to your backend
-        await axiosInstance.post("/forms/dj", formData);
-        alert("Booking request sent successfully!");
-  
-        // ✅ Then, create a Stripe checkout session
-        const response = await axiosInstance.post("/create-checkout-session", {
-          amount: formData.amount,
-          email: formData.email,
-        });
-  
-        // ✅ Axios parses JSON automatically, so use `response.data`
-        const session = response.data;
-  
-        if (session.id) {
-          await stripe.redirectToCheckout({ sessionId: session.id });
-        }
-      } else {
-        // console.log("Form Submitted (Non-Donation):", formData);
-      }
+      await axiosInstance.post("/forms/dj", { ...formData, estimatedQuote });
+      alert("Booking request sent successfully!");
+
+      // Reset form
+      setFormData({
+        eventType: "",
+        eventDate: "",
+        genres: [],
+        artists: [],
+        venue: "",
+        organizer: "",
+        email: "",
+        phone: "",
+        notes: "",
+        hours: "",
+        distance: "",
+      });
+
+      setQuote(null);
     } catch (error) {
-      console.error("Error processing donation:", error.response?.data || error.message);
-      alert("Failed to process donation.");
+      console.error("Error sending email", error);
+      alert("Failed to send request.");
     }
   };
-  
 
   return (
     <div className="container mt-5">
       <h2>Book DJ Services</h2>
       <form onSubmit={handleSubmit}>
 
-        {/* Event Type Dropdown */}
+        {/* Event Type */}
         <label>Event Type</label>
-        <select className="form-control" name="eventType" value={formData.eventType} onChange={handleChange}>
+        <select className="form-control" name="eventType" value={formData.eventType} onChange={handleChange} required>
           <option value="">Select an Event Type</option>
           <option value="Wedding">Wedding</option>
           <option value="Club">Club</option>
@@ -82,53 +96,50 @@ const DJServiceForm = () => {
           <option value="Corporate Event">Corporate Event</option>
         </select>
 
-        {/* Date Picker */}
+        {/* Event Date */}
         <label>Event Date</label>
-        <input type="date" className="form-control" name="eventDate" value={formData.eventDate} onChange={handleChange} />
+        <input type="date" className="form-control" name="eventDate" value={formData.eventDate} onChange={handleChange} required />
+
+        {/* Genres */}
+        <label>Preferred Music Genres</label>
+        <div className="form-group">
+          {genresList.map((genre) => (
+            <div key={genre} className="form-check">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                value={genre}
+                checked={formData.genres.includes(genre)}
+                onChange={handleGenreChange}
+              />
+              <label className="form-check-label">{genre}</label>
+            </div>
+          ))}
+        </div>
 
         {/* Hours */}
         <label>Hours of DJ Service</label>
-        <input
-          type="number"
-          className="form-control"
-          name="hours"
-          value={formData.hours}
-          onChange={handleChange}
-          placeholder="Number of hours"
-          required
-        />
+        <input type="number" className="form-control" name="hours" value={formData.hours} onChange={handleChange} placeholder="Number of hours" required />
 
         {/* Distance */}
         <label>Distance (miles)</label>
-        <input
-          type="number"
-          className="form-control"
-          name="distance"
-          value={formData.distance}
-          onChange={handleChange}
-          placeholder="Enter travel distance"
-          required
-        />
+        <input type="number" className="form-control" name="distance" value={formData.distance} onChange={handleChange} placeholder="Enter travel distance" required />
 
-        {/* Quote Display */}
-        {quote !== null && (
-          <div className="alert alert-info mt-3">
-            <strong>Estimated Cost: ${quote}</strong>
-          </div>
-        )}
+        {/* Estimated Quote Display */}
+        {quote !== null && <div className="alert alert-info mt-3"><strong>Estimated Cost: ${quote}</strong></div>}
 
-        {/* Venue & Contact Information */}
+        {/* Contact Info */}
         <label>Event Venue</label>
-        <input type="text" className="form-control" name="venue" value={formData.venue} onChange={handleChange} />
+        <input type="text" className="form-control" name="venue" value={formData.venue} onChange={handleChange} required />
 
         <label>Organizer Name</label>
-        <input type="text" className="form-control" name="organizer" value={formData.organizer} onChange={handleChange} />
+        <input type="text" className="form-control" name="organizer" value={formData.organizer} onChange={handleChange} required />
 
         <label>Email</label>
-        <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} />
+        <input type="email" className="form-control" name="email" value={formData.email} onChange={handleChange} required />
 
         <label>Phone Number</label>
-        <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleChange} />
+        <input type="tel" className="form-control" name="phone" value={formData.phone} onChange={handleChange} required />
 
         {/* Additional Notes */}
         <label>Additional Notes</label>
