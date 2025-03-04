@@ -52,7 +52,7 @@ const MusicPlayer = () => {
       const response = await axiosInstance.get("/music/music-list");
       const formattedFiles = response.data.files.map((file) => ({
         name: file,
-        url: `http://localhost:9000/uploads/music/${file}`,
+        url: `https://terranovare.tech/api/music/${file}`,
       }));
       setMusicFiles(formattedFiles);
     } catch (error) {

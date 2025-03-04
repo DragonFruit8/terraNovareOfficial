@@ -31,7 +31,7 @@ export default function Next() {
         setSongList(
           response.data.files.map((file) => ({
             name: file,
-            url: `http://localhost:9000/uploads/music/${file}`,
+            url: `https://terranovare.tech/api/${file}`,
           }))
         );
       } catch (error) {
