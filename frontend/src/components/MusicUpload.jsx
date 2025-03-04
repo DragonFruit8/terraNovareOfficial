@@ -16,25 +16,48 @@ const MusicUpload = () => {
       setMessage("Please select a file to upload.");
       return;
     }
-
+  
+    const token = sessionStorage.getItem("token"); // Retrieve token
+    console.log("🔑 Token from sessionStorage:", token);
+    if (!token) {
+      setMessage("You must be logged in to upload.");
+      return;
+    }
+  
+    // 🔥 Decode token to get `user_email`
+    const user = JSON.parse(atob(token.split(".")[1])); // Decode JWT
+    console.log("🛠️ Decoded user:", user);
+    const user_email = user?.email;
+  
+    if (!user_email) {
+      setMessage("Invalid user session.");
+      return;
+    }
+  
     const formData = new FormData();
-    formData.append("music", file);
-
+    formData.append("files", file);
+    formData.append("user_email", user_email); // ✅ Include user_email in request
+  
     setUploading(true);
+  
     try {
-      const response = await axiosInstance.post("/upload-music", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const response = await axiosInstance.post("/uploads", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
-
+  
       setMessage(response.data.message);
     } catch (error) {
-      console.error("Upload error:", error);
-      setMessage("Failed to upload file.");
+      console.error("🚨 Token decoding error:", error);
+      setMessage("Failed to upload file.", "Invalid authentication token.");
     } finally {
       setUploading(false);
       setFile(null);
     }
   };
+  
 
   return (
     <div className="container mt-4">
