@@ -65,9 +65,8 @@ const handleUpload = async (e) => {
 };
 
 
-
-return {
-	div className="container mt-4">
+return (
+	<div className="container mt-4">
       <h3>Upload Music</h3>
       <form onSubmit={handleUpload}>
         <input type="file" accept="audio/*" onChange={handleFileChange} />
