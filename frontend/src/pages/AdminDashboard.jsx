@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { useUser } from "../context/UserContext";
+import MusicUpload from "../components/MusicUpload";
 
 const AdminDashboard = () => {
   const { userData, loading } = useUser();
@@ -922,6 +923,10 @@ const AdminDashboard = () => {
           </tbody>
         </table>
       </div>
+       <div className="my-3">
+        <h5>Music Uploader</h5>
+        <MusicUpload />
+        </div>
     </div>
   );
 };

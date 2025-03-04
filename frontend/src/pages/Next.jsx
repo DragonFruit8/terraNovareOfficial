@@ -1,5 +1,6 @@
 import React from 'react';
 import '../index.css';
+import MusicPlayer from "../components/MusicPlayer"
 // import { Link } from 'react-router-dom';
 // Who we are, change-makers
 export default function Next() {
@@ -82,6 +83,10 @@ export default function Next() {
         />
       </div>
     </div>
+    <div className="m-3">
+        <h3> Here is how I'm fundraising </h3>
+        <MusicPlayer />
+      </div>
 
   </div>
 </div>
