@@ -83,7 +83,9 @@ body {
 p.lead {
     font-weight: 400;
 }
-
+p {
+	white-space: pre-line !important;
+}
 .dark-mode h1, 
 .dark-mode h2,
 .dark-mode h3,

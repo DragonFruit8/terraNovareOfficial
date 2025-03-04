@@ -1,4 +1,3 @@
-
 import { HelmetProvider } from "react-helmet-async";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -34,7 +33,7 @@ import ReactGA from "react-ga4";
 import Register from "./pages/Register";
 import Shop from "./pages/Shop";
 import Sidebar from "./components/Sidebar";
-//import Success from "./pages/Success"
+// import Success from "./pages/Success"
 import Terms from "./pages/Terms";
 import TermConditions from "./pages/TermConditions";
 import UnderConstruction from "./components/UnderConstruction";
