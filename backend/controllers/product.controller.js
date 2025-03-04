@@ -346,7 +346,7 @@ export const requestProduct = async (req, res) => {
   const { user_email, user_id, product_id } = req.body;
 
   try {
-    // console.log(
+    console.log(
       "📩 Incoming product request from:",
       user_email,
       "for product:",
@@ -374,7 +374,7 @@ export const requestProduct = async (req, res) => {
     );
 
     if (existingRequest.rowCount > 0) {
-      // console.log(
+      console.log(
         "⚠️ Product already requested by this user. Sending confirmation email anyway..."
       );
 
