@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { promisify } from "util";
 import pool from "../config/db.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { isAdmin } from "../middleware/auth.middleware.js";
@@ -11,29 +12,39 @@ const uploadDir = path.resolve("/var/www/terraNovareOfficial/backend/uploads/mus
 
 // ✅ Ensure upload directory exists
 if (!fs.existsSync(uploadDir)) {
+  console.log("📁 Creating upload directory:", uploadDir);
   fs.mkdirSync(uploadDir, { recursive: true });
 }
+
+// ✅ Async version of unlink for better performance
+const unlinkAsync = promisify(fs.unlink);
+
+// ✅ Helper function: Sanitize filenames
+const sanitizeFilename = (filename) => {
+  return filename.replace(/[^a-zA-Z0-9._-]/g, "_"); // ✅ Replace special characters with "_"
+};
 
 // ✅ Multer configuration for uploading files
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, file.originalname), // ✅ Keep original filename
+  filename: (req, file, cb) => {
+    const safeFilename = `${Date.now()}_${sanitizeFilename(file.originalname)}`;
+    cb(null, safeFilename);
+  },
 });
+
 const upload = multer({ storage });
 
 // ✅ Get the list of available music files
-router.get("/music-list", (req, res) => {
-  console.log("📂 Checking files in:", uploadDir);
-  
-  fs.readdir(uploadDir, (err, files) => {
-    if (err) {
-      console.error("❌ Error reading directory:", err);
-      return res.status(500).json({ error: "Unable to read music files." });
-    }
-
-    console.log("🧐 Found files:", files);
+router.get("/music-list", async (req, res) => {
+  try {
+    console.log("📂 Checking files in:", uploadDir);
+    const files = await fs.promises.readdir(uploadDir);
     res.json({ files });
-  });
+  } catch (err) {
+    console.error("❌ Error reading directory:", err);
+    res.status(500).json({ error: "Unable to read music files." });
+  }
 });
 
 // ✅ Upload music (Admins only)
@@ -43,7 +54,6 @@ router.post("/upload-music", verifyToken, isAdmin, upload.single("music"), async
   }
 
   console.log("📂 File uploaded successfully:", req.file.path);
-
   res.json({ message: "File uploaded successfully!", fileUrl: `/uploads/music/${req.file.filename}` });
 });
 
@@ -51,11 +61,12 @@ router.post("/upload-music", verifyToken, isAdmin, upload.single("music"), async
 router.put("/rename-music", verifyToken, isAdmin, async (req, res) => {
   let { oldName, newName } = req.body;
 
-  // ✅ Ensure file extension is preserved
   const oldExt = path.extname(oldName);
   if (!path.extname(newName)) {
     newName = `${newName}${oldExt}`;
   }
+
+  newName = sanitizeFilename(newName);
 
   console.log("📝 Rename Request:", { oldName, newName });
 
@@ -64,10 +75,10 @@ router.put("/rename-music", verifyToken, isAdmin, async (req, res) => {
     const newPath = path.join(uploadDir, newName);
 
     if (!fs.existsSync(oldPath)) {
-      return res.status(404).json({ error: `File not found: ${oldPath}` });
+      return res.status(404).json({ error: `File not found: ${oldName}` });
     }
 
-    fs.renameSync(oldPath, newPath);
+    await fs.promises.rename(oldPath, newPath);
 
     // ✅ Update database
     const result = await pool.query(
@@ -103,11 +114,12 @@ router.delete("/delete-music/:filename", verifyToken, isAdmin, async (req, res) 
   }
 
   try {
-    fs.unlinkSync(filePath);
+    await unlinkAsync(filePath);
 
     // ✅ Remove from database
     const result = await pool.query(
-      `DELETE FROM user_files WHERE LOWER(file_name) = LOWER($1) RETURNING *`, [filename]
+      `DELETE FROM user_files WHERE LOWER(file_name) = LOWER($1) RETURNING *`,
+      [filename]
     );
 
     if (result.rowCount === 0) {

@@ -17,7 +17,7 @@ import productRoutes from "./routes/product.routes.js";
 import inquiryRoutes from "./routes/inquiry.routes.js";
 import musicRoutes from "./routes/music.routes.js";
 import verifyRecaptcha from "./routes/verify-recaptcha.js";
-import { authenticateUser } from "./middleware/auth.middleware.js"; 
+import { authenticateUser } from "./middleware/auth.middleware.js";
 import { syncAllProducts } from "./services/stripe.service.js";
 import uploadRoutes from "./routes/upload.js";
 import fs from "fs";
@@ -27,7 +27,7 @@ import path from "path";
 
 import checkoutRoutes from "./routes/checkout.routes.js";
 import "./config/passport.js";
-dotenv.config({path: "./.env"});
+dotenv.config({ path: "./.env" });
 
 const app = express();
 
@@ -35,19 +35,19 @@ const app = express();
 
 const isProduction = process.env.NODE_ENV === "production";
 const corsOptions = {
-  origin: ["http://localhost:3000","https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
+  origin: ["http://localhost:3000", "https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
   methods: "GET,POST,PUT,DELETE,OPTIONS",
   allowedHeaders: "Content-Type, Authorization",
   credentials: true,
 };
-const uploadDir = path.resolve("/var/www/terraNovareOfficial/backend/uploads/music");
-console.log("🎵 Serving music from:", uploadDir);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, file.originalname), // ✅ Keep original filename
+  filename: (req, file, cb) => {
+    const safeFilename = sanitizeFilename(file.originalname);
+    cb(null, safeFilename);
+  },
 });
-
 // ✅ Use `express.json()` for all routes EXCEPT webhook
 app.use((req, res, next) => {
   if (req.originalUrl === "/api/stripe/webhook") {
@@ -65,7 +65,12 @@ app.use((req, res, next) => {
 //   next();
 // });
 
-// ✅ Print all routes when server starts
+const uploadDir = path.resolve("/var/www/terraNovareOfficial/backend/uploads/music");
+
+// ✅ Sanitize filenames
+const sanitizeFilename = (filename) => {
+  return filename.replace(/[^a-zA-Z0-9._-]/g, "_"); // ✅ Replaces unsafe characters
+};
 
 app.use(session({
   secret: process.env.SESSION_SECRET || "your_secret_key",
@@ -74,8 +79,6 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.static(path.join(path.resolve(), "public")));
-// app.use(express.static(path.join(path.resolve(), "uploads/music")));
 app.use(cors(corsOptions));
 app.use(express.json());
 // app.disable("x-powered-by");
@@ -89,22 +92,30 @@ app.use(cookieParser());
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhookRouter);
 // ✅ Register other routes
 
-// Music API
-
+// ✅ Ensure upload directory exists
 if (!fs.existsSync(uploadDir)) {
   console.error("❌ Upload directory does not exist:", uploadDir);
+  console.log("📁 Creating upload directory...");
+  fs.mkdirSync(uploadDir, { recursive: true });
 } else {
   console.log("✅ Serving music from:", uploadDir);
 }
+
 // ✅ Serve music files
-app.use("/uploads/music", express.static(uploadDir, {
-  setHeaders: (res, filePath) => {
-    const mimeType = mime.lookup(filePath) || "audio/mpeg";
-    res.setHeader("Content-Type", mimeType);
-    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-  }
-}));
+app.use(
+  "/uploads/music",
+  express.static(uploadDir, {
+    setHeaders: (res, filePath) => {
+      const mimeType = mime.lookup(filePath) || "application/octet-stream"; // Safer fallback
+      res.setHeader("Content-Type", mimeType);
+      res.setHeader("Cache-Control", "public, max-age=3600, must-revalidate"); // Adjust caching if needed
+    },
+  })
+);
+
 console.log("🎵 Serving music files from:", uploadDir);
+
+// ✅ Mount API routes
 app.use("/api/music", musicRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api", authRoutes);
@@ -135,12 +146,12 @@ app.use((req, res, next) => {
   next();
 });
 
-
-app.get('/api/health', (req, res) =>{
- console.log(printRoutes(app));
-	res.status(200).json({status: 'Server is running! Check you Console...'})
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'Server is running! Check you Console...' })
 });
 
+// ✅ Print all routes when server starts
+//printRoutes(app)
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
   // console.log(`🚀 Server running on port ${PORT}`);

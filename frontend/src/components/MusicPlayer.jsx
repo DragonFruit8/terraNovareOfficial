@@ -50,16 +50,23 @@ const MusicPlayer = () => {
   const fetchMusicFiles = async () => {
     try {
       const response = await axiosInstance.get("/music/music-list");
+  
+      if (!response.data || !Array.isArray(response.data.files)) {
+        console.error("❌ Unexpected response structure:", response.data);
+        return;
+      }
+  
       const formattedFiles = response.data.files.map((file) => ({
         name: file,
-        url: `https://terranovare.tech/api/music/${file}`,
+        url: `https://terranovare.tech/api/music/${encodeURIComponent(file)}`,
       }));
+  
       setMusicFiles(formattedFiles);
     } catch (error) {
       console.error("❌ Error fetching music:", error);
     }
   };
-
+  
   const checkAdminStatus = async () => {
     try {
       const token = sessionStorage.getItem("token");
@@ -115,17 +122,35 @@ const MusicPlayer = () => {
   };
 
   const deleteMusic = async (filename) => {
-    if (!window.confirm(`Delete ${filename}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${filename}"?`)) return;
+  
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      console.error("❌ Authentication Error: No token found.");
+      return;
+    }
+  
     try {
-      const token = sessionStorage.getItem("token");
-      await axiosInstance.delete(`/music/delete-music/${filename}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMusicFiles(musicFiles.filter((file) => file.name !== filename));
+      const response = await axiosInstance.delete(
+        `/music/delete-music/${encodeURIComponent(filename)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      if (response.status === 200) {
+        console.log(`✅ Successfully deleted: ${filename}`);
+        setMusicFiles((prevFiles) =>
+          prevFiles ? prevFiles.filter((file) => file.name !== filename) : []
+        );
+      } else {
+        console.warn("⚠️ Unexpected response:", response);
+      }
     } catch (error) {
       console.error("❌ Delete Error:", error);
     }
   };
+  
 
   return (
     <div className="music-player-container">
