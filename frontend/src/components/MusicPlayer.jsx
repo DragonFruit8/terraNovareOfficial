@@ -203,7 +203,7 @@ const MusicPlayer = () => {
                         />
                         <button onClick={() => renameMusic(file.name)}>
                           ✅
-                        </button>{" "}
+                        </button>
                         {/* ✅ Rename button FIXED */}
                         <button onClick={() => setEditingFile(null)}>❌</button>
                       </>
@@ -212,7 +212,7 @@ const MusicPlayer = () => {
                         ✏️
                       </button>
                     )}
-                    <button onClick={() => deleteMusic(file.name)}>🗑</button>{" "}
+                    <button onClick={() => deleteMusic(file.name)}>🗑</button>
                     {/* ✅ Delete button kept separate */}
                   </>
                 )}

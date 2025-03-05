@@ -69,16 +69,16 @@ export default function Next() {
         id="titleHeader"
         className="row bg-dark text-white text-center py-5"
       >
-        <h1 className="fw-light">
+        <h1 className="fw-light m-0">
           <em>
-            Believe <strong>AND YOU CAN</strong>{" "}
+            Believe <strong>AND YOU CAN</strong>
             <strong>
               <br />
               IMAGINE
             </strong>
           </em>
         </h1>
-        <p className="text-light">A Vision for Sustainable Growth</p>
+        <p className="text-light m-0">A Vision for Sustainable Growth</p>
       </section>
 
       <div className="container pt-5 mt-2">
@@ -91,7 +91,7 @@ export default function Next() {
             <h2 className="featurette-heading">
               Terra'Novare stands as the guiding force behind E-Finity
               <span className="text-muted">
-                {" "}
+                
                 ensuring its mission stays true while forging financial pathways
                 and enterprise connections.
               </span>
@@ -119,7 +119,7 @@ export default function Next() {
         <div className="row featurette align-items-center">
           <div className="col-md-8 order-md-2">
             <h2 className="featurette-heading">
-              More Than a Seat—A Role in{" "}
+              More Than a Seat—A Role in
               <span className="text-muted">the Revolution.</span>
             </h2>
             <p className="lead">
@@ -148,7 +148,7 @@ export default function Next() {
         <div className="row featurette align-items-center">
           <div className="col-md-7">
             <h2 className="featurette-heading">
-              Have Hope{" "}
+              Have Hope
               <span className="text-muted">This is just the beginning.</span>
             </h2>
             <p className="lead">
@@ -174,8 +174,10 @@ export default function Next() {
             <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
           </>
         ) : (
-          <div className="alert alert-warning my-2">
-            HAHA... Excuse me... No songs available. Please check back later.
+          <div className="alert alert-warning my-1">
+            Whoops! That was almost cool. <br />
+             No songs available now! The show MUST go on! <br />
+             Come back soon...
           </div>
         )}
 
