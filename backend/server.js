@@ -1,15 +1,13 @@
 import express from "express";
-import multer from "multer";
-import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import session from "express-session";
 import passport from "./config/passport.js";
-import printRoutes from "./utils/printRoutes.js"; // ✅ Import the route printer
+import printRoutes from "./utils/printRoutes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import webhookRouter from "./routes/webhook.routes.js";
 import orderRoutes from "./routes/orders.routes.js";
-import stripeRoutes from "./routes/stripe.routes.js"
+import stripeRoutes from "./routes/stripe.routes.js";
 import adminRoutes from "./routes/admin.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
@@ -19,59 +17,93 @@ import musicRoutes from "./routes/music.routes.js";
 import verifyRecaptcha from "./routes/verify-recaptcha.js";
 import { authenticateUser } from "./middleware/auth.middleware.js";
 import { syncAllProducts } from "./services/stripe.service.js";
-import uploadRoutes from "./routes/upload.js";
-import fs from "fs";
-import mime from "mime-types";
-import path from "path";
-
-
+import uploadRoutes from "./routes/upload.routes.js";
+import morgan from "morgan";
+import helmet from "helmet";
 import checkoutRoutes from "./routes/checkout.routes.js";
 import "./config/passport.js";
+import path from "path";
+import limiter from "./utils/rateLimit.js";
+import cors from "cors";
+import fs from "fs";
+import multer from "multer";
+
 dotenv.config({ path: "./.env" });
 
 const app = express();
 
-
-
-const isProduction = process.env.NODE_ENV === "production";
-const corsOptions = {
-  origin: ["http://localhost:3000", "https://terranovare.tech", "http://terranovare.tech"], // Allow both HTTP & HTTPS
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
-  allowedHeaders: "Content-Type, Authorization",
+// ✅ CORS MUST BE APPLIED BEFORE ALL ROUTES
+app.use(cors({
+  origin: ["http://localhost:3000"], // ✅ Allow frontend access
+  methods: "GET, POST, PUT, DELETE, OPTIONS",
+  allowedHeaders: "Content-Type, Authorization, Range, Cache-Control", // ✅ Explicitly allow Cache-Control
   credentials: true,
-};
+  exposedHeaders: ["Accept-Ranges", "Content-Length", "Content-Range"]
+}));
+
+// ✅ Handle Preflight Requests
+app.options("*", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Range, Cache-Control"); // ✅ Allow Cache-Control
+  res.setHeader("Access-Control-Expose-Headers", "Accept-Ranges, Content-Length, Content-Range");
+  res.status(200).end();
+});
+
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy",
+    "default-src 'self' http://localhost:3000; " + 
+    "connect-src 'self' http://localhost:9000 http://localhost:3000; " + 
+    "img-src 'self' data:; media-src 'self' http://localhost:9000; " + 
+    "script-src 'self'; style-src 'self' 'unsafe-inline'; " + 
+    "frame-ancestors 'self';"
+  );
+  next();
+});
+
+const uploadDir = path.resolve("uploads/music");
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log("📂 Created upload directory:", uploadDir);
+}
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
   filename: (req, file, cb) => {
-    const safeFilename = sanitizeFilename(file.originalname);
-    cb(null, safeFilename);
+    const originalName = path.parse(file.originalname).name; // ✅ Extracts filename without extension
+    const extension = path.extname(file.originalname); // ✅ Extracts file extension (e.g., .mp3)
+    const safeFilename = originalName.replace(/[^a-zA-Z0-9._-]/g, "_"); // ✅ Sanitizes filename
+    cb(null, `${safeFilename}${extension}`); // ✅ Keeps original name and extension
   },
 });
-// ✅ Use `express.json()` for all routes EXCEPT webhook
-app.use((req, res, next) => {
-  if (req.originalUrl === "/api/stripe/webhook") {
-    next(); // Skip JSON parsing for webhooks
-  } else {
-    express.json()(req, res, next); // Parse JSON for other routes
+
+const upload = multer({ storage });
+
+app.post("/api/upload-music", upload.single("music"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded." });
   }
+  console.log("✅ Uploaded File:", req.file.filename);
+  res.json({
+    message: "✅ File uploaded successfully!",
+    filename: req.file.filename,
+    fileUrl: `/uploads/music/${req.file.filename}`,
+  });
 });
 
+// ✅ Serve Music Files
+app.use("/uploads/music", express.static(uploadDir));
+app.use("/api/music", musicRoutes);
+app.use("/api/uploads", uploadRoutes);
 
-// app.use((req, res, next) => {
-//   if (req.headers["x-forwarded-proto"] !== "https") {
-//     return res.redirect("https://" + req.headers.host + req.url);
-//   }
-//   next();
-// });
-
-const uploadDir = path.resolve("/var/www/terraNovareOfficial/backend/uploads/music");
-
-// ✅ Sanitize filenames
-const sanitizeFilename = (filename) => {
-  return filename.replace(/[^a-zA-Z0-9._-]/g, "_"); // ✅ Replaces unsafe characters
-};
-
+// ✅ Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(helmet());
+app.use(morgan("dev"));
 app.use(session({
   secret: process.env.SESSION_SECRET || "your_secret_key",
   resave: false,
@@ -79,80 +111,40 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(cors(corsOptions));
-app.use(express.json());
-// app.disable("x-powered-by");
-app.options("*", cors(corsOptions)); // ✅ Handle preflight requests globally
-// ✅ Tell Express to trust proxy headers
-app.set("trust proxy", 1);
-
-app.use(cookieParser());
-
-// ✅ Apply webhook route separately with raw body parsing
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhookRouter);
-// ✅ Register other routes
 
-// ✅ Ensure upload directory exists
-if (!fs.existsSync(uploadDir)) {
-  console.error("❌ Upload directory does not exist:", uploadDir);
-  console.log("📁 Creating upload directory...");
-  fs.mkdirSync(uploadDir, { recursive: true });
-} else {
-  console.log("✅ Serving music from:", uploadDir);
-}
-
-// ✅ Serve music files statically
-app.use("/api/music", express.static(uploadDir, {
-  setHeaders: (res, filePath) => {
-    const mimeType = mime.lookup(filePath) || "audio/mpeg";
-    res.setHeader("Content-Type", mimeType);
-    res.setHeader("Cache-Control", "public, max-age=3600, must-revalidate");
-  }
-}));
-
-console.log("🎵 Serving music files from:", uploadDir);
-
-// ✅ Mount API routes
-app.use("/api/music", musicRoutes);
-app.use("/api/uploads", uploadRoutes);
-app.use("/api", authRoutes);
-// ✅ Secure Admin Routes
+// ✅ API Routes
+app.use("/api", authRoutes, limiter);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/verify-recaptcha", verifyRecaptcha);
-
-// ✅ User Routes
 app.use("/api/stripe", checkoutRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
-app.use("/api/forms", inquiryRoutes)
-const upload = multer({ storage });
+app.use("/api/forms", inquiryRoutes);
 
-// File upload endpoint
-app.post('/upload', upload.array('files'), (req, res) => {
-  res.json({ message: 'Files uploaded successfully!', files: req.files });
-});
-app.use("/api", webhookRouter);
 
-app.use((req, res, next) => {
-  console.time(`⏳ Request to ${req.originalUrl}`);
-  res.on("finish", () => console.timeEnd(`⏳ Request to ${req.originalUrl}`));
-  next();
+// ✅ Health Check Endpoint
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ status: "Server is running! Check your console..." });
 });
 
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'Server is running! Check you Console...' })
+// ✅ Global Error Handling
+app.use((err, req, res, next) => {
+  console.error("❌ Server Error:", err);
+  res.status(500).json({ error: "Internal server error" });
 });
 
 // ✅ Print all routes when server starts
-//printRoutes(app)
+printRoutes(app);
+
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-  // console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
   syncAllProducts();
-})
+});
 
-export default app; 
+export default app;

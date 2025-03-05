@@ -188,10 +188,24 @@ export const login = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); // ✅ Prevents caching
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+
+    res.json(users);
+  } catch (error) {
+    console.error("❌ Error fetching users:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 // ✅ Fetch User Profile
 export const getUserProfile = async (req, res) => {
   try {
-    // console.log("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
+    console.log("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
 
     if (!req.user || !req.user.user_id) {
       console.error("🚫 Missing user ID in request!");
@@ -219,19 +233,19 @@ export const getUserProfile = async (req, res) => {
 };
 export const getCurrentUser = async (req, res) => {
   try {
-    // console.log("🔍 Incoming User ID:", req.user?.id); // ✅ Debug log
-
-    if (!req.user?.id) {
-      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
-    const user = await User.findById(req.user.id).select("-password"); // ✅ Exclude password
-    if (!user) return res.status(404).json({ message: "User not found" });
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate"); // ✅ Prevents caching
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
 
     res.json(user);
   } catch (error) {
-    console.error("❌ Error fetching user:", error.message);
-    res.status(500).json({ message: "Server error" });
+    console.error("❌ Error fetching user:", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 // ✅ Update User Profile

@@ -75,25 +75,28 @@ const Register = () => {
   const onSubmit = async (data) => {
     // console.log("📡 Sending signup request...");
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  
+
     // 🔹 Validate Username Status
     if (usernameStatus === "checking") return toast.error("Please wait for username validation.");
     if (usernameStatus === "taken") return toast.error("Username is already taken.");
-  
+
     // 🔹 Validate Passwords
     if (password !== confirmPassword) return toast.error("Passwords do not match.");
     if (!passwordRegex.test(password)) {
       return toast.error("Password must be at least 8 characters, include a number and a special character.");
     }
-  
+
     try {
       // 🔹 Get reCAPTCHA Token
       setIsLoading(true);
       // console.log("⚡ Getting reCAPTCHA token...");
-      const token = await recaptchaRef.current.executeAsync();
+      const token = recaptchaRef?.current?.executeAsync
+      ? await recaptchaRef.current.executeAsync()
+      : null;
+
       // console.log("✅ Got reCAPTCHA token:", token);
       recaptchaRef.current.reset();
-  
+
       // 🔹 Construct User Data
       const userData = {
         username: data.username,
@@ -102,7 +105,7 @@ const Register = () => {
         password: data.password,
         recaptchaToken: token,
       };
-  
+
       // 🔹 API Call
       setServerError("");
       await axiosInstance.post("/auth/signup", userData);
@@ -111,7 +114,7 @@ const Register = () => {
       navigate("/login");
     } catch (error) {
       console.error("❌ Signup error:", error.response?.data || error.message);
-      
+
       const errorMsg = error.response?.data?.error || "Signup failed. Please try again.";
       setServerError(errorMsg);
       toast.error(errorMsg);
@@ -119,7 +122,7 @@ const Register = () => {
       setIsLoading(false);
     }
   };
-  
+
 
   return (
     <div className="container d-flex col align-items-center justify-content-center my-5">
@@ -129,6 +132,32 @@ const Register = () => {
       >
         <h2 className="text-center">Create an Account</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
+
+          {/* ✅ First Name */}
+          <div className="mb-3">
+            <label className="form-label">First Name</label>
+            <input
+              type="text"
+              className="form-control"
+              {...register("firstName", { required: "First name is required" })}
+            />
+            {errors.firstName && (
+              <small className="text-danger">{errors.firstName.message}</small>
+            )}
+          </div>
+
+          {/* ✅ Last Name */}
+          <div className="mb-3">
+            <label className="form-label">Last Name</label>
+            <input
+              type="text"
+              className="form-control"
+              {...register("lastName", { required: "Last name is required" })}
+            />
+            {errors.lastName && (
+              <small className="text-danger">{errors.lastName.message}</small>
+            )}
+          </div>
           {/* ✅ Username Field */}
           <div className="mb-3">
             <label className="form-label">Username</label>
@@ -156,32 +185,6 @@ const Register = () => {
             )}
           </div>
 
-          {/* ✅ First Name */}
-          <div className="mb-3">
-            <label className="form-label">First Name</label>
-            <input
-              type="text"
-              className="form-control"
-              {...register("firstName", { required: "First name is required" })}
-            />
-            {errors.firstName && (
-              <small className="text-danger">{errors.firstName.message}</small>
-            )}
-          </div>
-
-          {/* ✅ Last Name */}
-          <div className="mb-3">
-            <label className="form-label">Last Name</label>
-            <input
-              type="text"
-              className="form-control"
-              {...register("lastName", { required: "Last name is required" })}
-            />
-            {errors.lastName && (
-              <small className="text-danger">{errors.lastName.message}</small>
-            )}
-          </div>
-
           {/* ✅ Email */}
           <div className="mb-3">
             <label className="form-label">Email</label>
@@ -204,6 +207,7 @@ const Register = () => {
               </div>
             )}
           </div>
+
 
           {/* ✅ Password */}
           <div className="mb-3">
@@ -240,7 +244,7 @@ const Register = () => {
             ) : confirmPassword ? (
               <small className="text-danger">❌ Passwords do not match</small>
             ) : null}
-                      <ReCAPTCHA
+            <ReCAPTCHA
               sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
               size="invisible"
               ref={recaptchaRef}

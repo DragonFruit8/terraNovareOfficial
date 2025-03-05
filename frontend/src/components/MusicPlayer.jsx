@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../api/axios.config";
-import "../MusicPlayer.css"; // CSS file for styling
+import "../MusicPlayer.css";
 
 const MusicPlayer = () => {
   const [musicFiles, setMusicFiles] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playbackError, setPlaybackError] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.2); // Starts low, fades to 45%
+  const [volume, setVolume] = useState(0.2);
   const [isAdmin, setIsAdmin] = useState(false);
   const [message, setMessage] = useState("");
   const [renameFields, setRenameFields] = useState({});
   const [editingFile, setEditingFile] = useState(null);
   const audioRef = useRef(null);
-  const BASE_URL = "https://terranovare.tech/api/music/";
+  const BASE_URL = "http://localhost:9000/";
 
   useEffect(() => {
     fetchMusicFiles();
@@ -21,34 +21,50 @@ const MusicPlayer = () => {
   }, []);
 
   useEffect(() => {
-    if (isPlaying) audioRef.current.play();
-    else audioRef.current.pause();
-  }, [isPlaying, currentIndex]);
+    if (musicFiles.length > 0) {
+      setCurrentIndex(0);
+      setIsPlaying(true);
+    }
+  }, [musicFiles]);
 
   useEffect(() => {
-    if (audioRef.current) audioRef.current.volume = volume;
-  }, [volume]);
+    if (
+      musicFiles.length > 0 &&
+      currentIndex < musicFiles.length &&
+      audioRef.current
+    ) {
+      console.log("🎧 Setting audio src to:", musicFiles[currentIndex].url);
+      audioRef.current.src = musicFiles[currentIndex].url;
+      audioRef.current.load();
+      if (isPlaying) {
+        audioRef.current.play().catch(() => {
+          console.warn("⚠️ Autoplay blocked, waiting for user interaction.");
+        });
+      }
+    }
+  }, [musicFiles, currentIndex, isPlaying]);
 
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume = 0.1;
-      const fadeInterval = setInterval(() => {
-        if (audioRef.current.volume < 0.45) audioRef.current.volume += 0.05;
-        else clearInterval(fadeInterval);
-      }, 300);
+      audioRef.current.volume = volume;
     }
-  }, [currentIndex]);
+  }, [volume]);
 
   const fetchMusicFiles = async () => {
     try {
-      const { data } = await axiosInstance.get("/music/music-list");
-
-      if (!data || !Array.isArray(data.files)) throw new Error("Invalid API response format.");
-
-      setMusicFiles(data.files.map((file) => ({
-        name: file,
-        url: `${BASE_URL}${encodeURIComponent(file)}`,
-      })));
+      const { data } = await axiosInstance.get("/music/music-list", {
+        headers: { "Cache-Control": "no-store" },
+        params: { timestamp: new Date().getTime() },
+      });
+      console.log("🎵 API Response:", data);
+      if (!data.files || !Array.isArray(data.files))
+        throw new Error("Invalid API response format.");
+      setMusicFiles(
+        data.files.map((file) => ({
+          name: file,
+          url: `${BASE_URL}uploads/music/${encodeURIComponent(file)}`,
+        }))
+      );
     } catch (error) {
       console.error("❌ Error fetching songs:", error);
       setMessage("Failed to fetch music files. Please try again.");
@@ -64,38 +80,52 @@ const MusicPlayer = () => {
     }
   };
 
-  const togglePlayPause = () => setIsPlaying((prev) => !prev);
-  const playNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % musicFiles.length);
-    setIsPlaying(true);
-  };
-  const playPrev = () => {
-    setCurrentIndex((prev) => (prev === 0 ? musicFiles.length - 1 : prev - 1));
-    setIsPlaying(true);
-  };
-
-  const changeVolume = (e) => setVolume(parseFloat(e.target.value));
-
   const renameMusic = async (oldName) => {
-    const newName = renameFields[oldName]?.trim();
+    let newName = renameFields[oldName]?.trim();
     if (!newName) return;
-
+  
+    // ✅ Ensure filename includes ".mp3" extension
+    if (!newName.endsWith(".mp3")) {
+      newName += ".mp3";
+    }
+  
+    const payload = { oldName, newName };
+  
+    console.log("📤 Sending Rename Request:", payload);
+  
     try {
-      await axiosInstance.put("/music/rename-music", { oldName, newName });
-      await fetchMusicFiles();
-      setEditingFile(null);
+      const { data } = await axiosInstance.put("/music/rename-music", payload, {
+        headers: { "Content-Type": "application/json" }, // ✅ Ensure JSON format
+      });
+  
+      console.log("🎵 Rename Response:", data);
+  
+      if (data.success) {
+        setEditingFile(null);
+        setRenameFields({});
+        fetchMusicFiles(); // ✅ Refresh song list after renaming
+      } else {
+        console.error("❌ Rename Error:", data.error);
+        setMessage("Failed to rename file. Please try again.");
+      }
     } catch (error) {
-      console.error("❌ Rename Error:", error);
-      setMessage("Failed to rename music. Try again.");
+      console.error("❌ Rename Request Failed:", error.response?.data || error.message);
+      setMessage("Failed to rename file. Please try again.");
     }
   };
+  
 
   const deleteMusic = async (filename) => {
-    if (!window.confirm(`Are you sure you want to delete "${filename}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${filename}"?`))
+      return;
 
     try {
-      await axiosInstance.delete(`/music/delete-music/${encodeURIComponent(filename)}`);
-      setMusicFiles((prevFiles) => prevFiles.filter((file) => file.name !== filename));
+      await axiosInstance.delete(
+        `/music/delete-music/${encodeURIComponent(filename)}`
+      );
+      setMusicFiles((prevFiles) =>
+        prevFiles.filter((file) => file.name !== filename)
+      );
       setMessage(`✅ "${filename}" deleted successfully.`);
     } catch (error) {
       console.error("❌ Delete Error:", error);
@@ -103,23 +133,50 @@ const MusicPlayer = () => {
     }
   };
 
+  const togglePlayPause = () => {
+    if (musicFiles.length === 0) return;
+    setIsPlaying((prev) => !prev);
+    if (audioRef.current) {
+      isPlaying ? audioRef.current.pause() : audioRef.current.play();
+    }
+  };
+
   return (
     <div className="music-player-container">
       <h3>🎵 Music Player</h3>
+      {message && <p className="message">{message}</p>}
       {musicFiles.length === 0 ? (
         <p>No music available.</p>
       ) : (
         <ul className="playlist">
           {musicFiles.map((file, index) => (
-            <li key={index} className={`track ${index === currentIndex ? "playing" : ""}`}>
-              <span className="font-weight-bold mr-3">
-                {file.name.replace(/\.[^/.]+$/, "")}
-              </span>
+            <li
+              key={index}
+              className={`track ${index === currentIndex ? "playing" : ""}`}
+            >
+              {editingFile === file.name ? (
+                <>
+                  <input
+                    type="text"
+                    value={renameFields[file.name] || ""}
+                    onChange={(e) =>
+                      setRenameFields((prev) => ({
+                        ...prev,
+                        [file.name]: e.target.value,
+                      }))
+                    }
+                  />
+                  <button onClick={() => renameMusic(file.name)}>✅</button>
+                  <button onClick={() => setEditingFile(null)}>❌</button>
+                </>
+              ) : (
+                <span>{file.name.replace(/\.[^/.]+$/, "")}</span>
+              )}
               <div className="controls">
                 <button
                   onClick={() => {
                     if (currentIndex === index) {
-                      setIsPlaying(!isPlaying);
+                      togglePlayPause();
                     } else {
                       setCurrentIndex(index);
                       setIsPlaying(true);
@@ -128,24 +185,35 @@ const MusicPlayer = () => {
                 >
                   {currentIndex === index && isPlaying ? "⏸ Pause" : "▶ Play"}
                 </button>
-
                 {isAdmin && (
                   <>
-                    <button onClick={() => deleteMusic(file.name)}>🗑</button>
                     {editingFile === file.name ? (
-                      <input
-                        type="text"
-                        value={renameFields[file.name] || ""}
-                        onChange={(e) =>
-                          setRenameFields((prev) => ({ ...prev, [file.name]: e.target.value }))
-                        }
-                      />
+                      <>
+                        <input
+                          type="text"
+                          value={
+                            renameFields[file.name]?.replace(".mp3", "") || ""
+                          }
+                          onChange={(e) =>
+                            setRenameFields((prev) => ({
+                              ...prev,
+                              [file.name]: e.target.value,
+                            }))
+                          }
+                        />
+                        <button onClick={() => renameMusic(file.name)}>
+                          ✅
+                        </button>{" "}
+                        {/* ✅ Rename button FIXED */}
+                        <button onClick={() => setEditingFile(null)}>❌</button>
+                      </>
                     ) : (
-                      <button onClick={() => setEditingFile(file.name)}>✏️</button>
+                      <button onClick={() => setEditingFile(file.name)}>
+                        ✏️
+                      </button>
                     )}
-                    {editingFile === file.name && (
-                      <button onClick={() => renameMusic(file.name)}>✅</button>
-                    )}
+                    <button onClick={() => deleteMusic(file.name)}>🗑</button>{" "}
+                    {/* ✅ Delete button kept separate */}
                   </>
                 )}
               </div>
@@ -153,49 +221,51 @@ const MusicPlayer = () => {
           ))}
         </ul>
       )}
-
       <audio
         ref={audioRef}
         src={musicFiles[currentIndex]?.url}
-        onEnded={playNext}
+        onEnded={() =>
+          setCurrentIndex((prev) => (prev + 1) % musicFiles.length)
+        }
         onError={() => {
-          console.error("❌ Audio Playback Error:", musicFiles[currentIndex]?.url);
-          setPlaybackError(`⚠️ Unable to play "${musicFiles[currentIndex]?.name}".`);
+          console.error(
+            "❌ Audio Playback Error:",
+            musicFiles[currentIndex]?.url
+          );
+          setPlaybackError(
+            `⚠️ Unable to play "${musicFiles[currentIndex]?.name}".`
+          );
         }}
       />
-
+      {playbackError && <p className="error">{playbackError}</p>}
       <div className="music-controls">
-        <button onClick={playPrev}>⏮</button>
+        <button
+          onClick={() =>
+            setCurrentIndex((prev) =>
+              prev === 0 ? musicFiles.length - 1 : prev - 1
+            )
+          }
+        >
+          ⏮
+        </button>
         <button onClick={togglePlayPause}>{isPlaying ? "⏸" : "▶️"}</button>
-        <button onClick={playNext}>⏭</button>
+        <button
+          onClick={() =>
+            setCurrentIndex((prev) => (prev + 1) % musicFiles.length)
+          }
+        >
+          ⏭
+        </button>
         <input
           type="range"
           min="0"
           max="1"
           step="0.01"
           value={volume}
-          onChange={changeVolume}
+          onChange={(e) => setVolume(parseFloat(e.target.value))}
           className="volume-slider"
         />
       </div>
-
-      {playbackError && (
-        <div className="alert alert-danger mt-3">
-          {playbackError}
-          <button
-            className="btn btn-sm btn-secondary ml-2"
-            onClick={() => {
-              setPlaybackError("");
-              audioRef.current.load();
-              audioRef.current.play();
-            }}
-          >
-            🔄 Retry
-          </button>
-        </div>
-      )}
-
-      {message && <p className="mt-3">{message}</p>}
     </div>
   );
 };

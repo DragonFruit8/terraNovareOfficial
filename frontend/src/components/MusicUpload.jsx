@@ -1,55 +1,54 @@
 import React, { useState } from "react";
 import axiosInstance from "../api/axios.config";
 
-const MusicUpload = () => {
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState("");
+const MusicUpload = ({ fetchMusicFiles }) => { // ✅ Ensure fetchMusicFiles is passed as a prop
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null); // ✅ Track selected file
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+  // ✅ Capture file selection and reset message
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedFile(file); // ✅ Store the selected file
+      setUploadMessage(""); // ✅ Reset upload message
+    }
   };
 
-  const handleUpload = async (e) => {
-    e.preventDefault();
-  
-    if (!file) {
-      setMessage("❌ Please select a file to upload.");
-      return;
-    }
-  
-    const token = sessionStorage.getItem("token");
-    if (!token) {
-      setMessage("⚠️ You must be logged in to upload.");
+  // ✅ Handle Upload
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      setUploadMessage("❌ Please select a file before uploading.");
       return;
     }
   
     const formData = new FormData();
-    formData.append("files", file);
-  
-    setUploading(true);
-    setMessage("");
+    formData.append("music", selectedFile);
   
     try {
-      const response = await axiosInstance.post("/uploads", formData);
-      setMessage(response.data.message || "✅ Upload successful!");
+      const { data } = await axiosInstance.post("/upload-music", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+  
+      if (data.success) { // ✅ Checks if response has { success: true }
+        console.log("✅ Upload Success:", data);
+        setUploadMessage("✅ Upload successful!");
+        fetchMusicFiles(); // ✅ Refresh song list after upload
+        setSelectedFile(null);
+      } else {
+        console.error("❌ Upload Error:", data.error);
+        setUploadMessage(`❌ Upload failed: ${data.error}`);
+      }
     } catch (error) {
-      console.error("🚨 Upload error:", error);
-      setMessage("❌ Failed to upload file. Please try again.");
-    } finally {
-      setUploading(false);
+      console.error("❌ Upload Error:", error.response?.data || error.message);
+      setUploadMessage("❌ Upload failed. Please try again.");
     }
   };
+  
   return (
-    <div className="container mt-4">
-      <h3>Upload Music</h3>
-      <form onSubmit={handleUpload}>
-        <input type="file" accept="audio/*" onChange={handleFileChange} />
-        <button type="submit" className="btn btn-primary mt-2" disabled={uploading}>
-          {uploading ? "Uploading..." : "Upload"}
-        </button>
-      </form>
-      {message && <p className="mt-3">{message}</p>}
+    <div className="upload-container">
+      <input type="file" accept="audio/*" onChange={handleFileChange} /> {/* ✅ Handles file selection */}
+      <button onClick={handleUpload} disabled={!selectedFile}>📤 Upload</button> {/* ✅ Upload only if file is selected */}
+      {uploadMessage && <p className="message">{uploadMessage}</p>}
     </div>
   );
 };

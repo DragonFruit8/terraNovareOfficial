@@ -1,12 +1,12 @@
 import axios from "axios";
 
+// Use environment variables for base URL
 const API_BASE_URL =
   process.env.REACT_APP_CLIENT_URL_PROD || "https://terranovare.tech/api"; // Production
 const DEV_BASE_URL =
   process.env.REACT_APP_CLIENT_URL_DEV || "http://localhost:9000/api"; // Development
 
-const isProduction = process.env.NODE_ENV === "production";
-const baseURL = isProduction ? API_BASE_URL : DEV_BASE_URL;
+const baseURL = process.env.NODE_ENV === "production" ? API_BASE_URL : DEV_BASE_URL;
 
 // ✅ Create Axios instance
 const axiosInstance = axios.create({
@@ -18,16 +18,11 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem("token");
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
 
-    // ✅ Ensure proper headers for media uploads
-    if (config.data instanceof FormData) {
-      config.headers["Content-Type"] = "multipart/form-data";
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("⚠️ No token found. Some requests may be unauthorized.");
     }
 
     return config;
@@ -35,5 +30,18 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Export Axios instance
+axiosInstance.interceptors.response.use(
+  (response) => response, // ✅ Return response normally
+  (error) => {
+    console.error("🚨 API Error Intercepted:", error.response?.data || error.message);
+
+    if (error.response?.status === 401) {
+      alert("Session expired. Please log in again.");
+      sessionStorage.removeItem("token");
+      window.location.href = "/login"; // ✅ Redirect to login
+    }
+
+    return Promise.reject(error);
+  }
+);
 export default axiosInstance;

@@ -5,6 +5,7 @@
     padding: 1rem;
     border-radius: 10px;
     width: 100%;
+    min-width: fit-content;
     max-width: 400px;
     text-align: center;
     font-family: 'Arial', sans-serif;

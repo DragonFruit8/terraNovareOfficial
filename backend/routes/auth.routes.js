@@ -25,11 +25,12 @@ router.get("/me", authenticateUser, getCurrentUser);
 router.get("/check-admin", verifyToken, (req, res) => {
   console.log("🔍 Checking admin status:", req.user.roles); // Debugging
 
-  if (req.user?.roles?.includes("admin")) {
+  if (req.user.roles.includes("admin")) {
     return res.json({ isAdmin: true });
   }
-  
-  res.json({ isAdmin: false });
+
+  return res.json({ isAdmin: false });
+
 });
 // ✅ Apply rate limiting to login & signup routes
 router.post("/signup", limiter, signup); // ⏳ Protect signup
