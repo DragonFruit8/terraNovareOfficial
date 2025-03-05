@@ -101,17 +101,14 @@ if (!fs.existsSync(uploadDir)) {
   console.log("✅ Serving music from:", uploadDir);
 }
 
-// ✅ Serve music files
-app.use(
-  "/uploads/music",
-  express.static(uploadDir, {
-    setHeaders: (res, filePath) => {
-      const mimeType = mime.lookup(filePath) || "application/octet-stream"; // Safer fallback
-      res.setHeader("Content-Type", mimeType);
-      res.setHeader("Cache-Control", "public, max-age=3600, must-revalidate"); // Adjust caching if needed
-    },
-  })
-);
+// ✅ Serve music files statically
+app.use("/api/music", express.static(uploadDir, {
+  setHeaders: (res, filePath) => {
+    const mimeType = mime.lookup(filePath) || "audio/mpeg";
+    res.setHeader("Content-Type", mimeType);
+    res.setHeader("Cache-Control", "public, max-age=3600, must-revalidate");
+  }
+}));
 
 console.log("🎵 Serving music files from:", uploadDir);
 
