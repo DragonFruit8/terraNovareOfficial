@@ -14,10 +14,11 @@ const baseURL = isProduction ? API_BASE_URL : DEV_BASE_URL;
 // ✅ Create Axios instance
 const axiosInstance = axios.create({
   baseURL: baseURL,
+  timeout: 60000, // ⏳ Set timeout to 60 seconds (60000ms)
   headers: {
+    "Content-Type": "multipart/form-data",
     "Content-Type": "application/json",
   },
-  timeout: 20000,
 });
 
 // ✅ Automatically attach token to every request

@@ -50,10 +50,9 @@ const MusicPlayer = () => {
   const fetchMusicFiles = async () => {
     try {
       const response = await axiosInstance.get("/music/music-list");
-  
+      
       if (!response.data || !Array.isArray(response.data.files)) {
-        console.error("❌ Unexpected response structure:", response.data);
-        return;
+        throw new Error("Invalid API response format.");
       }
   
       const formattedFiles = response.data.files.map((file) => ({
@@ -63,7 +62,8 @@ const MusicPlayer = () => {
   
       setMusicFiles(formattedFiles);
     } catch (error) {
-      console.error("❌ Error fetching music:", error);
+      console.error("❌ Error fetching songs:", error);
+      setMessage("Failed to fetch music files. Please try again.");
     }
   };
   
