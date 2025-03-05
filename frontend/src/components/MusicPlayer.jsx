@@ -58,7 +58,7 @@ const MusicPlayer = () => {
   
       const formattedFiles = response.data.files.map((file) => ({
         name: file,
-        url: `https://terranovare.tech/api/music/${encodeURIComponent(file)}`,
+        url: `http://localhost:9000/api/music/${encodeURIComponent(file)}`,
       }));
   
       setMusicFiles(formattedFiles);
