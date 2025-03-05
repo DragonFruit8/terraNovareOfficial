@@ -12,40 +12,34 @@ const MusicUpload = () => {
 
   const handleUpload = async (e) => {
     e.preventDefault();
+  
     if (!file) {
-      setMessage("Please select a file to upload.");
+      setMessage("❌ Please select a file to upload.");
       return;
     }
-
+  
     const token = sessionStorage.getItem("token");
     if (!token) {
-      setMessage("You must be logged in to upload.");
+      setMessage("⚠️ You must be logged in to upload.");
       return;
     }
-
+  
     const formData = new FormData();
     formData.append("files", file);
-
+  
     setUploading(true);
     setMessage("");
-
+  
     try {
-      const response = await axiosInstance.post("/uploads", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setMessage(response.data.message || "Upload successful!");
+      const response = await axiosInstance.post("/uploads", formData);
+      setMessage(response.data.message || "✅ Upload successful!");
     } catch (error) {
       console.error("🚨 Upload error:", error);
-      setMessage("Failed to upload file. Please try again.");
+      setMessage("❌ Failed to upload file. Please try again.");
     } finally {
       setUploading(false);
     }
   };
-
   return (
     <div className="container mt-4">
       <h3>Upload Music</h3>

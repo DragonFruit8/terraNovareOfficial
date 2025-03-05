@@ -7,58 +7,57 @@ const DEV_BASE_URL =
   process.env.REACT_APP_CLIENT_URL_DEV || "http://localhost:9000/api"; // Development
 
 const isProduction = process.env.NODE_ENV === "production";
-// ✅ Use fallback URL in case env vars are missing
 const baseURL = isProduction ? API_BASE_URL : DEV_BASE_URL;
-// ✅ Debugging logs
-// console.log(`✅ Axios Base URL: ${baseURL} (Mode: ${process.env.NODE_ENV})`);
 
-// ✅ Create Axios instance
+// ✅ Create Axios instance with default settings
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL,
   timeout: 60000, // ⏳ Set timeout to 60 seconds (60000ms)
 });
 
-// ✅ Use the correct Content-Type dynamically
-const getHeaders = (type) => {
+// ✅ Function to get headers dynamically
+const getHeaders = (contentType = "application/json") => {
+  const token = sessionStorage.getItem("token");
   return {
-    "Content-Type": type,
-    Authorization: `Bearer ${sessionStorage.getItem("token")}`, // ✅ Include token if logged in
+    "Content-Type": contentType,
+    ...(token && { Authorization: `Bearer ${token}` }), // ✅ Attach token if available
   };
-};
-
-// ✅ Upload music file (multipart request)
-const uploadMusicFile = async (file) => {
-  try {
-    const formData = new FormData();
-    formData.append("music", file);
-
-    const response = await axiosInstance.post("/uploads", formData, {
-      headers: getHeaders("multipart/form-data"),
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error("❌ Upload Error:", error);
-  }
 };
 
 // ✅ Automatically attach token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem("token");
-
-    if (token) {
-      config.headers = {
-        ...config.headers, // ✅ Preserve existing headers (important!)
-        Authorization: `Bearer ${token}`, // ✅ Attach token properly
-      };
-    }
-    
+    config.headers = {
+      ...getHeaders(config.headers["Content-Type"] || "application/json"),
+      ...config.headers, // Preserve existing headers
+    };
     return config;
   },
-  (error) => {
-    return Promise.reject(error); // ✅ Ensure errors are properly forwarded
-  }
+  (error) => Promise.reject(error)
 );
 
-export default axiosInstance;
+// ✅ Generic API request function
+const request = async (method, url, data = null, contentType = "application/json") => {
+  try {
+    const response = await axiosInstance({
+      method,
+      url,
+      data,
+      headers: getHeaders(contentType),
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`❌ API Error (${method.toUpperCase()} ${url}):`, error);
+    throw error;
+  }
+};
+
+// ✅ Upload music file (multipart request)
+const uploadMusicFile = (file) => {
+  const formData = new FormData();
+  formData.append("music", file);
+
+  return request("post", "/uploads", formData, "multipart/form-data");
+};
+
+export { axiosInstance, request, uploadMusicFile };
