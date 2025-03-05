@@ -38,15 +38,15 @@ const DJServiceForm = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleGenreChange = (e) => {
-    const { value, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      genres: checked
-        ? [...prev.genres, value]
-        : prev.genres.filter((genre) => genre !== value),
-    }));
-  };
+  // const handleGenreChange = (e) => {
+  //   const { value, checked } = e.target;
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     genres: checked
+  //       ? [...prev.genres, value]
+  //       : prev.genres.filter((genre) => genre !== value),
+  //   }));
+  // };
 
   const calculateQuote = () => {
     const hourlyRate = 50.0;
@@ -133,7 +133,12 @@ const DJServiceForm = () => {
         {/* Genres */}
         <label>Preferred Music Genres</label>
         <div className="form-group">
-          {genresList.map((genre) => (
+        {genresList.map((genre) => (
+            <button id="featureBtn" type="button" key={genre} className={`btn m-1 ${formData.features.includes(feature) ? "btn-success" : "btn-outline-danger"}`} onClick={() => handleFeatureToggle(feature)}>
+              {feature}
+            </button>
+          ))}
+          {/* {genresList.map((genre) => (
             <div key={genre} className="form-check">
               <input
                 type="checkbox"
@@ -144,7 +149,7 @@ const DJServiceForm = () => {
               />
               <label className="form-check-label">{genre}</label>
             </div>
-          ))}
+          ))} */}
         </div>
 
         {/* Hours */}

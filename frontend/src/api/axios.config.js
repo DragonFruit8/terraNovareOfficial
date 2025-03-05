@@ -10,7 +10,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // ✅ Use fallback URL in case env vars are missing
 const baseURL = isProduction ? API_BASE_URL : DEV_BASE_URL;
 // ✅ Debugging logs
-// console.log(✅ Axios Base URL: ${baseURL} (Mode: ${process.env.NODE_ENV}));
+// console.log(`✅ Axios Base URL: ${baseURL} (Mode: ${process.env.NODE_ENV})`);
 
 // ✅ Create Axios instance
 const axiosInstance = axios.create({
@@ -26,29 +26,6 @@ const getHeaders = (type) => {
   };
 };
 
-// ✅ Fetch music files (JSON request)
-const fetchMusicFiles = async () => {
-  try {
-    const response = await axiosInstance.get("/music/music-list", {
-      headers: getHeaders("application/json"),
-    });
-
-    if (!response.data || !Array.isArray(response.data.files)) {
-      throw new Error("Invalid API response format.");
-    }
-
-    setMusicFiles(
-      response.data.files.map((file) => ({
-        name: file,
-        url: `https://terranovare.tech/api/music/${encodeURIComponent(file)}`,
-      }))
-    );
-
-  } catch (error) {
-    console.error("❌ Error fetching songs:", error);
-  }
-};
-
 // ✅ Upload music file (multipart request)
 const uploadMusicFile = async (file) => {
   try {
@@ -60,7 +37,6 @@ const uploadMusicFile = async (file) => {
     });
 
     return response.data;
-
   } catch (error) {
     console.error("❌ Upload Error:", error);
   }
@@ -77,9 +53,8 @@ axiosInstance.interceptors.request.use(
         Authorization: `Bearer ${token}`, // ✅ Attach token properly
       };
     }
-
+    
     return config;
-
   },
   (error) => {
     return Promise.reject(error); // ✅ Ensure errors are properly forwarded
