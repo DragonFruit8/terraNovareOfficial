@@ -16,7 +16,7 @@ const axiosInstance = axios.create({
   baseURL: baseURL,
   timeout: 60000, // ⏳ Set timeout to 60 seconds (60000ms)
   headers: {
-    "Content-Type": "multipart/form-data",
+    "Content-Type": "application/json",
   },
 });
 
