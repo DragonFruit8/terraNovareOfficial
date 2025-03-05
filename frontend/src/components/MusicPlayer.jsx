@@ -59,7 +59,7 @@ const MusicPlayer = () => {
   
       const formattedFiles = response.data.files.map((file) => ({
         name: file,
-        url: `S{BASE_URL}${encodeURIComponent(file)}`,
+        url: `${BASE_URL}${encodeURIComponent(file)}`,
       }));
   
       setMusicFiles(formattedFiles);
