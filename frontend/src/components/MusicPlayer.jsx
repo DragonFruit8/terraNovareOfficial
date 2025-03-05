@@ -9,6 +9,7 @@ const MusicPlayer = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(0.2); // Starts low, fades to 45%
   const [isAdmin, setIsAdmin] = useState(false);
+  const [message, setMessage] = useState("");
   const [renameFields, setRenameFields] = useState({});
   const [editingFile, setEditingFile] = useState(null);
   const audioRef = useRef(null);
@@ -263,7 +264,11 @@ const MusicPlayer = () => {
           </button>
         </div>
       )}
+      {
+        message && <p className="mt-3">{message}</p>
+      }
     </div>
+
   );
 };
 
