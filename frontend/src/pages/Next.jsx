@@ -11,6 +11,7 @@ export default function Next() {
   const [user, setUser] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const BASE_URL = "https://terranovare.tech/api/";
 
   useEffect(() => {
     if (location.state?.scrollToBottom) {
@@ -31,7 +32,7 @@ export default function Next() {
         setSongList(
           response.data.files.map((file) => ({
             name: file,
-            url: `http://localhost:9000/api/${file}`,
+            url: `${BASE_URL}${file}`,
           }))
         );
       } catch (error) {

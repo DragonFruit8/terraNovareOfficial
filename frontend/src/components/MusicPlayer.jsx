@@ -13,6 +13,7 @@ const MusicPlayer = () => {
   const [renameFields, setRenameFields] = useState({});
   const [editingFile, setEditingFile] = useState(null);
   const audioRef = useRef(null);
+  const BASE_URL = "https://terranovare.tech/api/music/";
 
   useEffect(() => {
     fetchMusicFiles();
@@ -58,7 +59,7 @@ const MusicPlayer = () => {
   
       const formattedFiles = response.data.files.map((file) => ({
         name: file,
-        url: `http://localhost:9000/api/music/${encodeURIComponent(file)}`,
+        url: `S{BASE_URL}${encodeURIComponent(file)}`,
       }));
   
       setMusicFiles(formattedFiles);
