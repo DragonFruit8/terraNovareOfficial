@@ -126,14 +126,14 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
         {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
         
         <label>Company</label>
-        <input type="tel" className={`form-control ${errors.company ? "is-invalid" : ""}`} name="company" value={formData.company} onChange={handleChange} required />
+        <input type="text" className={`form-control ${errors.company ? "is-invalid" : ""}`} name="company" value={formData.company} onChange={handleChange} required />
         {errors.company && <div className="invalid-feedback">{errors.company}</div>}
         <label>Industry</label>
-        <input type="tel" className={`form-control ${errors.industry ? "is-invalid" : ""}`} name="industry" value={formData.industry} onChange={handleChange} required />
+        <input type="text" className={`form-control ${errors.industry ? "is-invalid" : ""}`} name="industry" value={formData.industry} onChange={handleChange} required />
         {errors.industry && <div className="invalid-feedback">{errors.industry}</div>}
         
         <label>Website</label>
-        <input type="tel" className={`form-control ${errors.website ? "is-invalid" : ""}`} name="website" value={formData.website} onChange={handleChange} required />
+        <input type="text" className={`form-control ${errors.website ? "is-invalid" : ""}`} name="website" value={formData.website} onChange={handleChange} required />
         {errors.website && <div className="invalid-feedback">{errors.website}</div>}
 
         <label>Website Type</label>
