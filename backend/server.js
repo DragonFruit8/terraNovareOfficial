@@ -34,7 +34,7 @@ const app = express();
 
 // ✅ CORS MUST BE APPLIED BEFORE ALL ROUTES
 app.use(cors({
-  origin: ["http://localhost:3000"], // ✅ Allow frontend access
+  origin: ["http://localhost:3000", "https://terranovare.tech", "https://www.terranovare.tech"], // ✅ Allow frontend access
   methods: "GET, POST, PUT, DELETE, OPTIONS",
   allowedHeaders: "Content-Type, Authorization, Range, Cache-Control", // ✅ Explicitly allow Cache-Control
   credentials: true,
