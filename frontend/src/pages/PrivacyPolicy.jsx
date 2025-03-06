@@ -57,7 +57,7 @@ const PrivacyPolicy = () => {
 
     <Typography variant="h6">8. Contact Us</Typography>
     <Typography variant="body1">
-      If you have any questions, contact us at <Link href="mailto:support@yourdomain.com">support@yourdomain.com</Link>.
+      If you have any questions, contact us at <Link href="mailto:support@terranovare.tech">support@terranovare.tech</Link>.
     </Typography>
   </Container>
   );

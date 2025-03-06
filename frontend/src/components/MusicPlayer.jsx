@@ -13,7 +13,7 @@ const MusicPlayer = () => {
   const [renameFields, setRenameFields] = useState({});
   const [editingFile, setEditingFile] = useState(null);
   const audioRef = useRef(null);
-  const BASE_URL = "http://localhost:9000/";
+  const BASE_URL = "https://terranovare.tech/";
 
   useEffect(() => {
     fetchMusicFiles();

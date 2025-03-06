@@ -43,22 +43,11 @@ app.use(cors({
 
 // ✅ Handle Preflight Requests
 app.options("*", (req, res) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.setHeader("Access-Control-Allow-Origin", "https://terranovare.tech");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Range, Cache-Control"); // ✅ Allow Cache-Control
   res.setHeader("Access-Control-Expose-Headers", "Accept-Ranges, Content-Length, Content-Range");
   res.status(200).end();
-});
-
-app.use((req, res, next) => {
-  res.setHeader("Content-Security-Policy",
-    "default-src 'self' http://localhost:3000; " + 
-    "connect-src 'self' http://localhost:9000 http://localhost:3000; " + 
-    "img-src 'self' data:; media-src 'self' http://localhost:9000; " + 
-    "script-src 'self'; style-src 'self' 'unsafe-inline'; " + 
-    "frame-ancestors 'self';"
-  );
-  next();
 });
 
 const uploadDir = path.resolve("uploads/music");
@@ -99,8 +88,10 @@ app.use("/api/music", musicRoutes);
 app.use("/api/uploads", uploadRoutes);
 
 // ✅ Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({
+	limit: "100mb"
+}));
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
 app.use(cookieParser());
 app.use(helmet());
 app.use(morgan("dev"));
