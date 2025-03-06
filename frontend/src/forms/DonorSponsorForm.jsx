@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "@mui/material";
+// import { Button } from "@mui/material";
 import axiosInstance from "../api/axios.config";
 import { loadStripe } from "@stripe/stripe-js";
 import Spinner from "../components/Spinner";
@@ -15,9 +15,12 @@ export default function DonorSponsorForm({ onSuccess }) {
     organization: "",
     contributionType: "default",
     involvement: [],
+    impacts: [], // ✅ FIXED: Added `impacts` to the formData
     message: "",
     amount: "",
   });
+
+  const impactList = ["Environmental Impact", "Community Growth", "Tech Innovation", "Education"];
 
   // ✅ Fix: Correctly handle checkboxes & inputs
   const handleChange = (e) => {
@@ -40,6 +43,16 @@ export default function DonorSponsorForm({ onSuccess }) {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
+  // ✅ Fixed Impact Toggle
+  const handleImpactToggle = (impact) => {
+    setFormData((prev) => ({
+      ...prev,
+      impacts: prev.impacts.includes(impact)
+        ? prev.impacts.filter((g) => g !== impact)
+        : [...prev.impacts, impact],
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
@@ -60,8 +73,6 @@ export default function DonorSponsorForm({ onSuccess }) {
       const stripe = await stripePromise;
       if (!stripe) throw new Error("Stripe failed to initialize");
 
-      // console.log("Submitting form data:", formData);
-
       if (formData.contributionType === "donation" && formData.amount) {
         alert("Thank you for your support! Redirecting to checkout...");
 
@@ -70,14 +81,11 @@ export default function DonorSponsorForm({ onSuccess }) {
           email: formData.email,
         });
 
-        // console.log("Stripe session response:", response.data);
-
         if (response.data.id) {
           onSuccess();
           setTimeout(() => stripe.redirectToCheckout({ sessionId: response.data.id }), 3000);
         }
       } else {
-        // console.log("Form Submitted (Non-Donation):", formData);
         onSuccess();
         alert("Form submitted successfully!");
       }
@@ -91,11 +99,11 @@ export default function DonorSponsorForm({ onSuccess }) {
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="row justify-content-center align-items-center text-start gap-2 fw-bold mx-auto">
-        <h2 className="mb-4">Get Involved</h2>
+      <div className="container mt-3">
+        <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
+          <h2 className="mb-3 text-center">Get Involved</h2>
 
-        {/* Name */}
-        <div className="py-1">
+          {/* Name */}
           <label>Name</label>
           <input
             type="text"
@@ -107,10 +115,8 @@ export default function DonorSponsorForm({ onSuccess }) {
             className={`form-control ${errors.name ? "is-invalid" : ""}`}
           />
           {errors.name && <div className="invalid-feedback">{errors.name}</div>}
-        </div>
 
-        {/* Email */}
-        <div className="py-1">
+          {/* Email */}
           <label>Email</label>
           <input
             type="email"
@@ -122,10 +128,8 @@ export default function DonorSponsorForm({ onSuccess }) {
             className={`form-control ${errors.email ? "is-invalid" : ""}`}
           />
           {errors.email && <div className="invalid-feedback">{errors.email}</div>}
-        </div>
 
-        {/* Organization */}
-        <div className="py-1">
+          {/* Organization */}
           <label>Organization</label>
           <input
             type="text"
@@ -135,10 +139,8 @@ export default function DonorSponsorForm({ onSuccess }) {
             onChange={handleChange}
             className="form-control"
           />
-        </div>
 
-        {/* Contribution Type */}
-        <div className="py-1">
+          {/* Contribution Type */}
           <label>How would you like to contribute?</label>
           <select
             name="contributionType"
@@ -154,39 +156,39 @@ export default function DonorSponsorForm({ onSuccess }) {
             <option value="web_developer">Web Developer</option>
           </select>
           {errors.contributionType && <div className="invalid-feedback">{errors.contributionType}</div>}
-        </div>
 
-        {/* Interests (Checkboxes) */}
-        <div className="py-1">
+          {/* Interests (Checkboxes) */}
           <label>What areas interest you?</label>
-          <div className="form-control row">
-            {["Environmental Impact", "Community Growth", "Tech Innovation", "Education"].map((area) => (
-              <label key={area}>
-                <input type="checkbox" name="involvement" value={area} onChange={handleChange} className="mr-2" />
-                {area}
-              </label>
+          <div className="row">
+            {impactList.map((impact) => (
+              <button
+                type="button"
+                key={impact}
+                className={`btn m-1 ${formData.impacts.includes(impact) ? "btn-success" : "btn-outline-danger"}`}
+                onClick={() => handleImpactToggle(impact)}
+              >
+                {impact}
+              </button>
             ))}
           </div>
-        </div>
 
-        {/* Donation Amount (Only if "Donation" is Selected) */}
-        {formData.contributionType === "donation" && (
-          <div className="py-1">
-            <label>Donation Amount</label>
-            <input
-              type="number"
-              name="amount"
-              placeholder="Donation Amount ($)"
-              value={formData.amount}
-              onChange={handleChange}
-              className={`form-control ${errors.amount ? "is-invalid" : ""}`}
-            />
-            {errors.amount && <div className="invalid-feedback">{errors.amount}</div>}
-          </div>
-        )}
+          {/* Donation Amount (Only if "Donation" is Selected) */}
+          {formData.contributionType === "donation" && (
+            <>
+              <label>Donation Amount</label>
+              <input
+                type="number"
+                name="amount"
+                placeholder="Donation Amount ($)"
+                value={formData.amount}
+                onChange={handleChange}
+                className={`form-control ${errors.amount ? "is-invalid" : ""}`}
+              />
+              {errors.amount && <div className="invalid-feedback">{errors.amount}</div>}
+            </>
+          )}
 
-        {/* Message */}
-        <div className="py-1">
+          {/* Message */}
           <label>Message</label>
           <textarea
             name="message"
@@ -195,13 +197,13 @@ export default function DonorSponsorForm({ onSuccess }) {
             onChange={handleChange}
             className="form-control"
           ></textarea>
-        </div>
 
-        {/* Submit Button */}
-        <Button type="submit" className="btn btn-success mt-3">
-          {loading ? <><Spinner /> Submitting Form...</> : "Submit Form"}
-        </Button>
-      </form>
+          {/* Submit Button */}
+          <button type="submit" className="btn btn-success mt-3">
+            {loading ? <><Spinner /> Submitting Form...</> : "Submit Form"}
+          </button>
+        </form>
+      </div>
     </>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axiosInstance from "../api/axios.config";
+import { Link } from "react-router-dom";
 
 const DJServiceForm = () => {
   const [formData, setFormData] = useState({
@@ -15,12 +16,13 @@ const DJServiceForm = () => {
     hours: "",
     distance: "",
   });
+  
 
   const [artistInput, setArtistInput] = useState("");
 
   const genresList = [
-    "Hip-Hop", "EDM", "Rock", "Pop", "Jazz", "House", "Techno", "Reggae", "R&B", "Classical"
-  ];
+    "Hip-Hop", "EDM", "Rock", "Pop", "House", "Techno", "Reggae", "R&B"
+];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,9 +94,12 @@ const DJServiceForm = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <h2>🎧 Book DJ Services</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="container mt-3">
+      <h2 className="mb-4">🎧 Book DJ Services</h2>
+      <Link to={"/next#bottom"} className="btn btn-primary my-1">
+      Preview music before booking
+    </Link>
+      <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
         <label>Event Type</label>
         <select className="form-control" name="eventType" value={formData.eventType} onChange={handleChange} required>
           <option value="">Select an Event Type</option>

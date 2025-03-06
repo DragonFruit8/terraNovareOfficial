@@ -34,11 +34,17 @@ export default function TVModal() {
       <AnimatePresence>
         {isOpen && (
           <Dialog
-            open={isOpen}
+          open={isOpen}
             onClose={() => setIsOpen(false)}
             fullWidth
             maxWidth="sm"
           >
+          {/* Close Button */}
+          <DialogActions>
+               <button onClick={() => setIsOpen(false)} color="error" className="btn btn-danger">
+                 Close
+               </button>
+             </DialogActions>
             <DialogContent className="modal-content">
               <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
@@ -51,7 +57,7 @@ export default function TVModal() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-                  className="p-4"
+                  className="py-2"
                 >
                   {showThankYou ? (
                     // ✅ "Thank You" Screen
@@ -67,7 +73,7 @@ export default function TVModal() {
                       <h2 className="modal-title">Choose Form</h2>
 
                       {/* Tab Buttons */}
-                      <div className="col gap-2 d-flex justify-content-center">
+                      <div className="row gap-2 d-flex justify-content-center mt-2">
                         <Button
                           className={`btn fw-bold ${
                             activeForm === "A"
@@ -120,12 +126,7 @@ export default function TVModal() {
               </motion.div>
             </DialogContent>
 
-            {/* Close Button */}
-            <DialogActions>
-              <Button onClick={() => setIsOpen(false)} color="error" className="btn btn-danger">
-                Close
-              </Button>
-            </DialogActions>
+           
           </Dialog>
         )}
       </AnimatePresence>

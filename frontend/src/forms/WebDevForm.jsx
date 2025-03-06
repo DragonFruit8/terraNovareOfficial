@@ -111,7 +111,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
 
   return (
     <div className="container mt-3">
-      <h2 className="mb-5">Website Development Inquiry</h2>
+      <h2 className="mb-4">Website Development Inquiry</h2>
       <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
         <label>Name</label>
         <input type="text" className={`form-control ${errors.name ? "is-invalid" : ""}`} name="name" value={formData.name} onChange={handleChange} required />
