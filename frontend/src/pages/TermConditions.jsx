@@ -44,7 +44,7 @@ const TermsConditions = () => {
 
       <Typography variant="h6">7. Contact Us</Typography>
       <Typography variant="body1">
-        For questions, contact us at <Link href="mailto:support@yourdomain.com">support@yourdomain.com</Link>.
+        For questions, contact us at <Link href="mailto:support@terrnovare.tech">support@terrnovare.tech</Link>
       </Typography>
     </Container>
   );
