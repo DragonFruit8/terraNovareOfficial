@@ -16,7 +16,7 @@ export default function DonorSponsorForm({ onSuccess }) {
     organization: "",
     contributionType: "default",
     involvement: [],
-    impacts: [], // ✅ FIXED: Added `impacts` to the formData
+    impacts: [],
     message: "",
     amount: "",
   });
