@@ -87,7 +87,7 @@ export default function DonorSponsorForm({ onSuccess }) {
           setTimeout(() => stripe.redirectToCheckout({ sessionId: response.data.id }), 3000);
         }
       } else {
-        const response = await axiosInstance.post("/inquiry/donor-sponsor", formData);
+        const response = await axiosInstance.post("/forms/inquiry/donor-sponsor", formData);
         if (response.status === 200) {
         onSuccess();
         alert("Form submitted successfully!");
