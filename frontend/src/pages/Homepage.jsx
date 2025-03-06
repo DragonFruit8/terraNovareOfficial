@@ -56,7 +56,7 @@ export default function Homepage() {
             <div className="container">
                 <div className="carousel-caption">
                     <h1>A Brand made with the <br/> Human Experience in mind</h1>
-                    <p>Some representative placeholder content for the second slide of the carousel.</p>
+                    <p>Putting the environment and humanity first</p>
                     <p><Link className="btn btn-lg btn-primary" to="brand">Learn More</Link></p>
                 </div>
             </div>
@@ -73,7 +73,7 @@ export default function Homepage() {
             <div className="container">
                 <div className="carousel-caption text-end">
                     <h1>Products you would love.</h1>
-                    <p>Some representative placeholder content for the third slide of this carousel.</p>
+                    <p>A product line that puts their customsers first</p>
                     <p><Link className="btn btn-lg btn-primary" to="/shop">Shop Now</Link></p>
                 </div>
             </div>
@@ -94,7 +94,7 @@ export default function Homepage() {
       <div className="container-fluid justify-items-center mt-5">
 
       <section className="mission-section py-5">
-        <div className="container text-center">
+        <div className="container text-start">
           <h2 className="fw-bold">Our Mission</h2>
           <p className="lead">
             Terra'Novare stands as the guiding force behind E-Finity, ensuring its mission stays true while
@@ -107,26 +107,26 @@ export default function Homepage() {
         <hr className="featurette-divider" />
 
         <section className="impact-section py-5">
-        <div className="container-fluid container-md text-center">
+        <div className="container-fluid container-md text-center px-1">
           <h3 className="fw-bold">The Impact We're Creating</h3>
           <p className="lead">
             We empower startups, drive local initiatives, and promote environmental stewardship. 
             Through strong community ties, we enable businesses and individuals to invest in meaningful change.
           </p>
-          <div className="row mt-3">
+          <div className="row mt-5">
             <div className="col-md-4">
               <img src="images/Golden Compass.png" alt="Guidance" className="img-fluid rounded mb-3" />
-              <h4>Strategic Guidance</h4>
+              <h4 className="mt-2">Strategic Guidance</h4>
               <p>We provide a structured path for startups and sustainable enterprises.</p>
             </div>
             <div className="col-md-4">
               <img src="images/Gold.png" alt="Support" className="img-fluid rounded mb-3" />
-              <h4>Community Support</h4>
+              <h4 className="mt-2">Community Support</h4>
               <p>Connecting businesses and individuals to create a thriving, interconnected world.</p>
             </div>
             <div className="col-md-4">
               <img src="images/Golden Door.png" alt="Opportunities" className="img-fluid rounded mb-3" />
-              <h4>Endless Opportunities</h4>
+              <h4 className="mt-2">Endless Opportunities</h4>
               <p>Opening doors for those who are ready to take an active role in meaningful change.</p>
             </div>
           </div>

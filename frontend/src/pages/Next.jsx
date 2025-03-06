@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import "../index.css";
 import axiosInstance from "../api/axios.config";
 import MusicPlayer from "../components/MusicPlayer";
@@ -91,7 +91,7 @@ export default function Next() {
             <h2 className="featurette-heading">
               Terra'Novare stands as the guiding force behind E-Finity
               <span className="text-muted">
-                
+
                 ensuring its mission stays true while forging financial pathways
                 and enterprise connections.
               </span>
@@ -168,26 +168,33 @@ export default function Next() {
           </div>
         </div>
         <div className="m-3" id="bottom">
-        {songList.length > 0 ? (
-          <>
-            <h2 className="my-4">How I'm Fundraising</h2>
-            <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
-          </>
-        ) : (
-          <div className="alert alert-warning my-1">
-            Whoops! That was almost cool. <br />
-             No songs available now! The show MUST go on! <br />
-             Come back soon...
-          </div>
-        )}
+          {songList.length > 0 ? (
+            <>
+              <h2 className="my-4">How I'm Fundraising</h2>
+              <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
+              <div className="mt-4">
+                <button className="btn btn-secondary" onClick={() => navigate("/#bottom")}>
+                  Book Now
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="alert alert-warning my-1">
+                Whoops! That was almost cool. <br />
+                No songs available now! The show MUST go on! <br />
+                Come back soon...
+              </div>
+              <div className="my-2">
+                <p className="my-1"> For now... </p>
+                <Link className="btn btn-primary" to="/shop">
+                  Preview the Shop
+                </Link>
+              </div>
+            </>
+          )}
 
-        {/* 🔙 Back to Book Section Button */}
-        <div className="mt-4">
-          <button className="btn btn-secondary" onClick={() => navigate("/")}>
-            Back to Book
-          </button>
         </div>
-      </div>
       </div>
     </div>
   );
