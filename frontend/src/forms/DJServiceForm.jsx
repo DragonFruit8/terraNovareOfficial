@@ -23,7 +23,18 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
   const [artistInput, setArtistInput] = useState("");
   const zipTimeoutRef = useRef(null); // ✅ Prevents timeout overwrites
 
-  const genresList = ["Hip-Hop", "EDM", "Rock", "Pop", "House", "Techno", "Reggae", "R&B"];
+  const genresList = [
+    "Dubstep",
+    "EDM", 
+    "Hip-Hop", 
+    "House", 
+    "Pop", 
+    "R&B",
+    "Reggae", 
+    "Rock", 
+    "Techno", 
+    "Trance"
+  ];
 
   // ✅ Calculate distance from `48197` (your location) to `zip2` (user's input)
   const handleCalculateDistance = async (zip2) => {
