@@ -1,207 +1,201 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
+import "../index.css";
 import axiosInstance from "../api/axios.config";
-import { Link } from "react-router-dom";
-import { getZipDistance } from "../utils/getLatLng"; // Ensure this utility exists
+import MusicPlayer from "../components/MusicPlayer";
+import "../MusicPlayer.css";
+// import { Link } from 'react-router-dom';
+// Who we are, change-makers
+export default function Next() {
+  const [songList, setSongList] = useState([]);
+  const [user, setUser] = useState(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const BASE_URL = "https://terranovare.tech/api/";
 
-const DJServiceForm = () => {
-  const [formData, setFormData] = useState({
-    eventType: "",
-    eventDate: "",
-    genres: [], // ✅ Used for genre selection
-    artists: [], // ✅ Used for artist selection
-    venue: "",
-    organizer: "",
-    email: "",
-    phone: "",
-    notes: "",
-    hours: "",
-    zip1: "", // User's ZIP
-    zip2: "", // Event ZIP
-    distance: "", // Auto-calculated
-  });
-
-  const [artistInput, setArtistInput] = useState("");
-  const [calculatingDistance, setCalculatingDistance] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const genresList = ["Hip-Hop", "EDM", "Rock", "Pop", "House", "Techno", "Reggae", "R&B"];
-
-  // ✅ Calculate distance based on ZIP codes
-  const handleCalculateDistance = async () => {
-    if (!formData.zip1 || !formData.zip2) {
-      setErrorMessage("Please enter both ZIP codes.");
-      return;
+  useEffect(() => {
+    if (location.state?.scrollToBottom) {
+      setTimeout(() => {
+        const bottomElement = document.getElementById("bottom");
+        if (bottomElement) {
+          bottomElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }, 500);
     }
+  }, [location]);
 
-    setCalculatingDistance(true);
-    setErrorMessage("");
-
-    try {
-      const result = await getZipDistance(formData.zip1, formData.zip2);
-      if (result) {
-        setFormData((prev) => ({ ...prev, distance: result }));
-      } else {
-        setErrorMessage("Error calculating distance. Please try again.");
+  useEffect(() => {
+    // Fetch song list from backend
+    const fetchSongs = async () => {
+      try {
+        const response = await axiosInstance.get("/music/music-list");
+        setSongList(
+          response.data.files.map((file) => ({
+            name: file,
+            url: `${BASE_URL}${file}`,
+          }))
+        );
+      } catch (error) {
+        console.error("❌ Error fetching songs:", error);
       }
-    } catch (error) {
-      console.error("❌ Distance Calculation Error:", error);
-      setErrorMessage("Failed to calculate distance.");
-    } finally {
-      setCalculatingDistance(false);
-    }
-  };
+    };
 
-  // ✅ Handle input change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // ✅ Handle genre selection
-  const toggleGenre = (genre) => {
-    setFormData((prev) => ({
-      ...prev,
-      genres: prev.genres.includes(genre)
-        ? prev.genres.filter((g) => g !== genre)
-        : [...prev.genres, genre],
-    }));
-  };
-
-  // ✅ Handle artist input
-  const handleArtistAdd = (e) => {
-    if (e.key === "Enter" && artistInput.trim() !== "") {
-      setFormData((prev) => ({
-        ...prev,
-        artists: [...prev.artists, artistInput.trim()],
-      }));
-      setArtistInput("");
-      e.preventDefault();
-    }
-  };
-
-  const handleArtistRemove = (artist) => {
-    setFormData((prev) => ({
-      ...prev,
-      artists: prev.artists.filter((a) => a !== artist),
-    }));
-  };
-
-  // ✅ Calculate the quote based on distance & hours
-  const calculateQuote = () => {
-    const hourlyRate = 50.0;
-    const mileageRate = 0.7;
-    const setupFee = 50.0;
-    const hours = parseFloat(formData.hours) || 0;
-    const distance = parseFloat(formData.distance) || 0;
-
-    return (hourlyRate * hours + mileageRate * distance + setupFee).toFixed(2);
-  };
-
-  // ✅ Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!formData.distance) {
-      alert("Please calculate distance before submitting.");
-      return;
+    // Fetch user info from session storage (assuming token contains user data)
+    const token = sessionStorage.getItem("token");
+    if (token) {
+      try {
+        const userData = JSON.parse(atob(token.split(".")[1])); // Decode JWT
+        setUser(userData);
+      } catch (error) {
+        console.error("❌ Error decoding user token:", error);
+      }
     }
 
-    const estimatedQuote = calculateQuote();
+    fetchSongs();
+  }, []);
 
-    try {
-      await axiosInstance.post("/forms/dj", { ...formData, estimatedQuote });
-      alert("🎵 Booking request sent successfully!");
-
-      setFormData({
-        eventType: "",
-        eventDate: "",
-        genres: [],
-        artists: [],
-        venue: "",
-        organizer: "",
-        email: "",
-        phone: "",
-        notes: "",
-        hours: "",
-        zip1: "",
-        zip2: "",
-        distance: "",
-      });
-    } catch (error) {
-      console.error("❌ Error sending request:", error);
-      alert("Failed to send request.");
+  useEffect(() => {
+    if (location.state?.scrollToBottom) {
+      const bottomElement = document.getElementById("bottom");
+      if (bottomElement) {
+        bottomElement.scrollIntoView({ behavior: "smooth" });
+      }
     }
-  };
+  }, [location]);
 
   return (
-    <div className="container mt-3">
-      <h2 className="mb-4">🎧 Book DJ Services</h2>
-      <Link to={"/next#bottom"} className="btn btn-primary my-1">
-        Preview music before booking
-      </Link>
+    <div>
+      <section
+        id="titleHeader"
+        className="row bg-dark text-white text-center py-5"
+      >
+        <h1 className="fw-light m-0">
+          <em>
+            Believe <strong>AND YOU CAN</strong>
+            <strong>
+              <br />
+              IMAGINE
+            </strong>
+          </em>
+        </h1>
+        <p className="text-light m-0">A Vision for Sustainable Growth</p>
+      </section>
 
-      <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
-        <label>Event Type</label>
-        <select className="form-control" name="eventType" value={formData.eventType} onChange={handleChange} required>
-          <option value="">Select an Event Type</option>
-          <option value="Wedding">Wedding</option>
-          <option value="Club">Club</option>
-          <option value="Private Party">Private Party</option>
-          <option value="Corporate Event">Corporate Event</option>
-        </select>
+      <div className="container pt-5 mt-2">
+        {/* First Featurette */}
+        <div id="next" className="row featurette align-items-center">
+          <h1>
+            <span className="fw-bold fs-5">What's</span> <em>Next?</em>
+          </h1>
+          <div className="col-md-8">
+            <h2 className="featurette-heading">
+              Terra'Novare stands as the guiding force behind E-Finity
+              <span className="text-muted">
 
-        <label>Event Date</label>
-        <input type="date" className="form-control" name="eventDate" value={formData.eventDate} onChange={handleChange} required />
-
-        <label>Your ZIP Code</label>
-        <input type="text" className="form-control" name="zip1" value={formData.zip1} onChange={handleChange} required />
-
-        <label>Event ZIP Code</label>
-        <input type="text" className="form-control" name="zip2" value={formData.zip2} onChange={handleChange} required />
-
-        <button type="button" className="btn btn-info mt-2" onClick={handleCalculateDistance}>
-          {calculatingDistance ? "Calculating..." : "Calculate Distance"}
-        </button>
-
-        {errorMessage && <p className="text-danger mt-2">{errorMessage}</p>}
-        {formData.distance && <p className="text-success mt-2">Estimated Distance: {formData.distance} miles</p>}
-
-        <label>Preferred Music Genres</label>
-        <div className="d-flex flex-wrap">
-          {genresList.map((genre) => (
-            <button
-              type="button"
-              key={genre}
-              className={`btn m-1 ${formData.genres.includes(genre) ? "btn-success" : "btn-outline-danger"}`}
-              onClick={() => toggleGenre(genre)}
-            >
-              {genre}
-            </button>
-          ))}
+                ensuring its mission stays true while forging financial pathways
+                and enterprise connections.
+              </span>
+            </h2>
+            <p className="lead">
+              As an entity dedicated to sustainability and progress,
+              Terra'Novare oversees E-Finity's direction, providing the
+              resources and strategic insight needed to make lasting change. We
+              believe in building a future where businesses, communities, and
+              individuals collaborate to shape a thriving, interconnected world.
+            </p>
+          </div>
+          <div className="col-md-4">
+            <img
+              className="img-fluid w-100 rounded mb-2"
+              src="images/Golden Compass.png"
+              alt="Gold Compass"
+            />
+          </div>
         </div>
 
-        <label>Preferred Artists</label>
-        <input type="text" className="form-control" value={artistInput} onKeyPress={handleArtistAdd} placeholder="Type artist name and press Enter" />
-        <div className="d-flex flex-wrap mt-2">
-          {formData.artists.map((artist, index) => (
-            <span key={index} className="badge bg-primary m-1 p-2">
-              {artist}{" "}
-              <button type="button" className="btn btn-sm btn-danger ms-2" onClick={() => handleArtistRemove(artist)}>
-                x
-              </button>
-            </span>
-          ))}
+        <hr className="featurette-divider" />
+
+        {/* Second Featurette */}
+        <div className="row featurette align-items-center">
+          <div className="col-md-8 order-md-2">
+            <h2 className="featurette-heading">
+              More Than a Seat—A Role in
+              <span className="text-muted">the Revolution.</span>
+            </h2>
+            <p className="lead">
+              For those looking to support this movement, we invite businesses
+              and entities to become long-term partners through our sponsorship
+              program. More than just donors, our sponsors become invested
+              stakeholders, with a voice in the initiatives they help bring to
+              life. Our membership model ensures that those who align with our
+              vision have the opportunity to participate in shaping the
+              direction of our efforts, creating an ecosystem where investment
+              flows both ways.
+            </p>
+          </div>
+          <div className="col-md-4 order-md-1">
+            <img
+              className="img-fluid w-100 rounded mb-2"
+              src="images/Gold.png"
+              alt="Gold Medal"
+            />
+          </div>
         </div>
 
-        <label>Estimated Performance Hours</label>
-        <input type="number" className="form-control" name="hours" value={formData.hours} onChange={handleChange} required />
+        <hr className="featurette-divider" />
 
-        <p className="fw-bold mt-3">💰 Estimated Quote: <span className="text-success">${calculateQuote()}</span></p>
+        {/* Third Featurette */}
+        <div className="row featurette align-items-center">
+          <div className="col-md-7">
+            <h2 className="featurette-heading">
+              Have Hope
+              <span className="text-muted">This is just the beginning.</span>
+            </h2>
+            <p className="lead">
+              As we grow, we will unveil deeper levels of involvement, exclusive
+              opportunities, and structured membership tiers tailored for those
+              who want to take an active role in this journey. Early supporters
+              will not just witness change—they will help define it. The future
+              belongs to those who build it with us. Will you be one of them?
+            </p>
+          </div>
+          <div className="col-md-5">
+            <img
+              className="img-fluid w-100 rounded mb-2"
+              src="images/Golden Door.png"
+              alt="Gold Door"
+            />
+          </div>
+        </div>
+        <div className="m-3" id="bottom">
+          {songList.length > 0 ? (
+            <>
+              <h2 className="my-4">How I'm Fundraising</h2>
+              <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
+              <div className="mt-4">
+                <button className="btn btn-secondary" onClick={() => navigate("/#bottom")}>
+                  Book Now
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="alert alert-warning my-1">
+                Whoops! That was almost cool. <br />
+                No songs available now! The show MUST go on! <br />
+                Come back soon...
+              </div>
+              <div className="my-2">
+                <p className="my-1"> For now... </p>
+                <Link className="btn btn-primary" to="/shop">
+                  Preview the Shop
+                </Link>
+              </div>
+            </>
+          )}
 
-        <button type="submit" className="btn btn-success mt-3">🎶 Submit Booking Request</button>
-      </form>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default DJServiceForm;
+}
