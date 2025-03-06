@@ -12,6 +12,8 @@
 /backend/.env
 /frontend/.env
 
+#Music Uploads
+/backend/uploads/music/
 # Logs & Debug
 *.log
 *.lock
