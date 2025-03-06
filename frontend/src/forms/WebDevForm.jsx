@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axiosInstance from "../api/axios.config";
+import { toast } from "react-toastify";
 
 const WebDevForm = ({ setIsOpen, onSuccess }) => {
   const [loading, setLoading] = useState(false);
@@ -56,35 +57,42 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
-
-    // ✅ Improved Validation
+  
+    // ✅ Improved Validation with User Feedback
     if (!formData.name.trim()) newErrors.name = "Name is required.";
     if (!formData.email.trim()) newErrors.email = "Email is required.";
     if (!formData.phone.trim()) newErrors.phone = "Phone number is required.";
-    if (!formData.websiteType) newErrors.websiteType = "Please select a website type.";
-    if (!formData.techStack) newErrors.techStack = "Please select a technology stack.";
-    if (!formData.budget) newErrors.budget = "Please select a budget range.";
-
+    if (!formData.websiteType.trim()) newErrors.websiteType = "Please select a website type.";
+    if (!formData.techStack.trim()) newErrors.techStack = "Please select a technology stack.";
+    if (!formData.budget.trim()) newErrors.budget = "Please select a budget range.";
+  
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-
+  
     try {
       setLoading(true);
-      // console.log("Submitting form data:", formData);
+      setErrors({}); // ✅ Reset errors on new submission attempt
+  
+      console.log("🚀 Submitting form data:", formData);
       const response = await axiosInstance.post("/forms/webdev", formData);
-
-      // console.log("Server response:", response.data);
-      if (!response.data || response.status !== 200) {
+  
+      if (!response || response.status !== 200) {
         throw new Error("Invalid response from server.");
       }
-
-      alert("Inquiry submitted successfully!");
-      onSuccess(); // ✅ Show Thank You message
-      setTimeout(() => setIsOpen(false), 1500); // ✅ Close modal after 1.5 sec
-
-      // ✅ Clear form AFTER successful submission
+  
+      console.log("✅ Server response:", response.data);
+  
+      // ✅ Show Thank You Message
+      if (typeof onSuccess === "function") {
+        onSuccess();
+      }
+      toast.success("🚀 Inquiry submitted successfully!");
+      // ✅ Close modal after 1.5 sec
+      setTimeout(() => setIsOpen(false), 1500);
+  
+      // ✅ Clear form AFTER modal closes
       setTimeout(() => {
         setFormData({
           name: "",
@@ -102,12 +110,15 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
         });
       }, 2000);
     } catch (error) {
-      console.error("Submission failed:", error.response?.data || error.message);
-      alert("Failed to send inquiry. Please try again.");
+      console.error("❌ Submission failed:", error.response?.data || error.message);
+      
+      // ✅ Provide User Feedback on Failure
+      setErrors({ form: "Failed to send inquiry. Please try again." });
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="container mt-3">

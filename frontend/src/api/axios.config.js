@@ -30,6 +30,15 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+axiosInstance.interceptors.request.use(
+  (config) => {
+    console.log(`🚀 Axios Request: ${config.method.toUpperCase()} ${config.url}`, config);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+
 axiosInstance.interceptors.response.use(
   (response) => response, // ✅ Return response normally
   (error) => {

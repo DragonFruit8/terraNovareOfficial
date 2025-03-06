@@ -27,10 +27,13 @@ import limiter from "./utils/rateLimit.js";
 import cors from "cors";
 import fs from "fs";
 import multer from "multer";
+import axios from "axios";
+import { getLatLng } from "./utils/getLatLng.js"; 
 
 dotenv.config({ path: "./.env" });
 
 const app = express();
+const ORS_API_KEY = process.env.ORS_API_KEY;
 
 // ✅ CORS MUST BE APPLIED BEFORE ALL ROUTES
 app.use(cors({
@@ -125,7 +128,58 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
 app.use("/api/forms", inquiryRoutes);
+// app.post("/api/forms/dj", (req, res) => {
+//   console.log("📩 Received Form Submission:", req.body);
+//   res.json({ message: "Form received!", data: req.body });
+// });
 
+if (!getLatLng) {
+  console.error("❌ getLatLng is not imported correctly.");
+}
+
+// ✅ Proxy API for calculating distance between ZIP codes
+app.post("/api/distance", async (req, res) => {
+  try {
+    const { zip1, zip2 } = req.body;
+    if (!zip1 || !zip2) return res.status(400).json({ error: "ZIP codes are required" });
+
+    console.log(`📌 Received ZIP codes: zip1=${zip1}, zip2=${zip2}`);
+
+    // ✅ Fetch latitude/longitude for both ZIPs
+    const coords1 = await getLatLng(zip1);
+    const coords2 = await getLatLng(zip2);
+
+    console.log(`📍 Coordinates: ${zip1} → ${coords1}, ${zip2} → ${coords2}`);
+
+    if (!coords1 || !coords2) {
+      console.error("❌ Geocoding failed! Invalid ZIP codes.");
+      return res.status(400).json({ error: `Invalid ZIP Code(s): ${zip2}` });
+    }
+
+    // ✅ Call OpenRouteService API
+    const response = await axios.post(
+      "https://api.openrouteservice.org/v2/matrix/driving-car",
+      {
+        locations: [coords1, coords2],
+        metrics: ["distance"],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${ORS_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("🛰 Distance API Response:", response.data);
+
+    const distanceInMiles = (response.data.distances[0][1] / 1609.34).toFixed(2);
+    res.json({ distance: distanceInMiles });
+  } catch (error) {
+    console.error("❌ Distance API Error:", error.response?.data || error.message);
+    res.status(500).json({ error: "Failed to fetch distance" });
+  }
+});
 
 // ✅ Health Check Endpoint
 app.get("/api/health", (req, res) => {

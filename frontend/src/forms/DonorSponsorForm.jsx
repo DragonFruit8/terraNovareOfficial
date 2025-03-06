@@ -2,6 +2,7 @@ import { useState } from "react";
 // import { Button } from "@mui/material";
 import axiosInstance from "../api/axios.config";
 import { loadStripe } from "@stripe/stripe-js";
+import { toast } from "react-toastify";
 import Spinner from "../components/Spinner";
 
 const stripePromise = loadStripe("pk_live_51H9yaJCJsM5FOXWHe4MYqZdeoHiRQHmwDkmXuvs1qqprojx7p2kJq4QiDZOjTp7bhWjWi9VroFyPgQuSr9rwLOmT00fjHhiTva");
@@ -89,6 +90,7 @@ export default function DonorSponsorForm({ onSuccess }) {
         onSuccess();
         alert("Form submitted successfully!");
       }
+      toast.success("🚀 Inquiry submitted successfully!");
     } catch (error) {
       console.error("Error processing donation:", error.message);
       alert("Failed to process donation.");
