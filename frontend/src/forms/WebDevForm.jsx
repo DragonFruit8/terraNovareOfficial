@@ -6,8 +6,8 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [estimatedPrice, setEstimatedPrice] = useState(0);
-  
-  // ✅ Ensuring `addOns` and `features` are always arrays to avoid `.includes()` errors
+
+  // Ensuring `addOns` and `features` are always arrays to avoid `.includes()` errors
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,14 +15,14 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     company: "",
     industry: "",
     packageType: "",
-    addOns: [],  // ✅ Always initialize as an array
+    addOns: [],  // Always initialize as an array
     maintenancePlan: "",
     budget: "",
     deadline: "",
     notes: "",
   });
 
-  // 📦 Package-Based Pricing
+  // Package-Based Pricing
   const packagesPricing = useMemo(() => ({
     "Starter Package": 1000,
     "Business Package": 2500,
@@ -30,7 +30,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     "Custom MVP": 4500,
   }), []);
 
-  // 🔧 Add-Ons Pricing
+  // Add-Ons Pricing
   const addOnsPricing = useMemo(() => ({
     "Additional Page": 150,
     "Advanced SEO Optimization": 300,
@@ -44,14 +44,14 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     "Ongoing Maintenance (Premium)": 150,
   }), []);
 
-  // 🛠 Maintenance Plan Pricing
+  // Maintenance Plan Pricing
   const maintenancePricing = useMemo(() => ({
     "Basic": 50,
     "Standard": 150,
     "Pro": 300,
   }), []);
 
-  // 🔥 Dynamic Price Calculation
+  // Dynamic Price Calculation
   useEffect(() => {
     let total = packagesPricing[formData.packageType] || 0;
 
@@ -66,7 +66,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     setEstimatedPrice(total);
   }, [formData.packageType, formData.addOns, formData.maintenancePlan, packagesPricing, addOnsPricing, maintenancePricing]);
 
-  // 📌 Handles Input Changes
+  // Handles Input Changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -77,7 +77,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  // 🔄 Toggle Features and Add-Ons
+  // Toggle Features and Add-Ons
   const handleFeatureToggle = (type, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -87,7 +87,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     }));
   };
 
-  // 🚀 Form Submission
+  // Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
@@ -101,12 +101,6 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
       setErrors(newErrors);
       return;
     }
-
-    // console.log("🧮 Estimated Price Breakdown:");
-    // console.log("Package:", formData.packageType, "-", packagesPricing[formData.packageType] || 0);
-    // console.log("Add-Ons:", formData.addOns.map(addOn => `${addOn}: $${addOnsPricing[addOn] || 0}`).join(", "));
-    // console.log("Maintenance Plan:", formData.maintenancePlan || "None", "-", maintenancePricing[formData.maintenancePlan] || 0);
-    // console.log("📊 Total Estimated Cost:", estimatedPrice.toLocaleString());
 
     try {
       setLoading(true);
@@ -127,17 +121,18 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
       setTimeout(() => setIsOpen(false), 1500);
       setTimeout(() => {
         setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          company: "",
-          industry: "",
-          packageType: "",
+          name: '',
+          email: '',
+          phone: '',
+          company: '',
+          industry: '',
+          packageType: '',
           addOns: [],
-          maintenancePlan: "",
-          budget: "",
-          deadline: "",
-          notes: "",
+          maintenancePlan: '',
+          budget: '',
+          deadline: '',
+          notes: '',
+          estimatedPrice: 0,
         });
       }, 2000);
     } catch (error) {
@@ -149,12 +144,12 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     }
   };
 
-  // 🔥 UI Form
+  // UI Form
   return (
     <div className="container mt-3">
       <h2 className="mb-4">Website Development Inquiry</h2>
       <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
-        
+
         <label>Name</label>
         <input type="text" className={`form-control ${errors.name ? "is-invalid" : ""}`} name="name" value={formData.name} onChange={handleChange} required />
         {errors.name && <div className="invalid-feedback">{errors.name}</div>}
