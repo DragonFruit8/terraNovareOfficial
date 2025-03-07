@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { 
   // FaInstagram, 
-  FaLinkedin, 
+  FaSoundcloud, 
   FaTiktok } from "react-icons/fa";
 import { FaBluesky } from "react-icons/fa6";
 import Phone from "../security/PhoneReveal";
@@ -29,7 +29,7 @@ const Footer = () => {
           <div className="col-md-4 pb-2">
             <h5 aria-hidden="false" >Follow Us</h5>
             <div className="d-flex justify-content-center gap-3">
-              <Link aria-hidden="false" className="nav-link" to="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer">
+              <Link aria-hidden="false" className="nav-link" to="https://www.tiktok.com/@etherialphoenix" target="_blank" rel="noopener noreferrer">
                 <FaTiktok />
               </Link>
               <Link aria-hidden="false" className="nav-link" to="https://bsky.app/profile/terranovare.bsky.social" target="_blank" rel="noopener noreferrer">
@@ -38,8 +38,8 @@ const Footer = () => {
               {/* <Link aria-hidden="false" className="nav-link" to="/" target="_blank" rel="noopener noreferrer">
                 <FaInstagram />
               </Link> */}
-              <Link aria-hidden="false" className="nav-link" to="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
-                <FaLinkedin />
+              <Link aria-hidden="false" className="nav-link" to="https://on.soundcloud.com/UeaT1vwgzEnxoptA8" target="_blank" rel="noopener noreferrer">
+                <FaSoundcloud />
               </Link>
             </div>
           </div>
