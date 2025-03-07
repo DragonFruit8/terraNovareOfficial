@@ -67,7 +67,7 @@ export default function Next() {
     <div>
       <section
         id="main-content"
-        className="row bg-dark text-white text-center py-5"
+        className="row bg-dark text-white text-center py-5 titleHeader"
       >
         <h1 aria-hidden="false" className="fw-light m-0">
           <em>
@@ -92,7 +92,7 @@ export default function Next() {
               Terra'Novare stands as the guiding force behind E-Finity
               <span className="text-muted">
 
-                ensuring its mission stays true while forging financial pathways
+                 ensuring its mission stays true while forging financial pathways
                 and enterprise connections.
               </span>
             </h2>
@@ -120,7 +120,7 @@ export default function Next() {
           <div className="col-md-8 order-md-2">
             <h2 aria-hidden="false" className="featurette-heading">
               More Than a Seat—A Role in
-              <span className="text-muted">the Revolution.</span>
+              <span className="text-muted"> the Revolution.</span>
             </h2>
             <p aria-hidden="false" className="lead">
               For those looking to support this movement, we invite businesses
@@ -149,7 +149,7 @@ export default function Next() {
           <div className="col-md-7">
             <h2 aria-hidden="false" className="featurette-heading">
               Have Hope
-              <span className="text-muted">This is just the beginning.</span>
+              <span className="text-muted"> This is just the beginning.</span>
             </h2>
             <p aria-hidden="false" className="lead">
               As we grow, we will unveil deeper levels of involvement, exclusive
