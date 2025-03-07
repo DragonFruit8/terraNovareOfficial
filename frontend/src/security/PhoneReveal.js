@@ -5,7 +5,7 @@ const PhoneReveal = () => {
   const phoneDomain = "889-2915"; // Second half of number
 
   return (
-    <a href={`tel:${phoneUser}${phoneDomain}`}>
+    <a aria-hidden="false" href={`tel:${phoneUser}${phoneDomain}`}>
       {phoneUser} {phoneDomain}
     </a>
   );

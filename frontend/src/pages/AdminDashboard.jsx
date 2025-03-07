@@ -447,12 +447,12 @@ const AdminDashboard = () => {
   return (
     <div className="container mt-5">
       <div className="my-3">
-        <h5>Music Uploader</h5>
+        <h5 aria-hidden="false" >Music Uploader</h5>
         <MusicUpload />
         </div>
-      <h2 className="p-2">Admin Dashboard</h2>
+      <h2 aria-hidden="false" className="p-2">Admin Dashboard</h2>
       <div className="card mb-3">
-        <h3 className="p-2">Admin Profile</h3>
+        <h3 aria-hidden="false" className="p-2">Admin Profile</h3>
         <div className="card-body">
           {editingAdmin ? (
             <>
@@ -531,7 +531,7 @@ const AdminDashboard = () => {
             </>
           ) : (
             <>
-              <h5 className="card-title">{adminProfile.fullname}</h5>
+              <h5 aria-hidden="false" className="card-title">{adminProfile.fullname}</h5>
               <p className="card-text">
                 <strong>Username:</strong> {adminProfile.username}
               </p>
@@ -559,7 +559,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
-      <h3 className="p-2">Manage Users</h3>
+      <h3 aria-hidden="false" className="p-2">Manage Users</h3>
       <div className="table-responsive">
         <table className="table table-bordered">
           <thead>
@@ -600,7 +600,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* ✅ Products Table with Delete Button */}
-      <h3 className="p-2">Products</h3>
+      <h3 aria-hidden="false" className="p-2">Products</h3>
       <div className="table-responsive">
         <table className="table table-bordered">
           <thead>
@@ -648,7 +648,7 @@ const AdminDashboard = () => {
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">Edit Product</h5>
+                <h5 aria-hidden="false" className="modal-title">Edit Product</h5>
                 <button
                   className="btn-close"
                   onClick={() => setEditingProduct(null)}
@@ -768,7 +768,7 @@ const AdminDashboard = () => {
       )}
 
       <div className="card p-3 mb-4 mt-5">
-        <h3>Add New Product</h3>
+        <h3 aria-hidden="false" >Add New Product</h3>
 
         <label className="form-label">Product Name</label>
         <input
@@ -860,7 +860,7 @@ const AdminDashboard = () => {
         </button>
       </div>
 
-      <h3 className="py-3">Product Requests</h3>
+      <h3 aria-hidden="false" className="py-3">Product Requests</h3>
       <div className="my-3">
         <button className="btn btn-success mb-3" onClick={handleDownloadPDF}>
           📄 Download Product Requests (PDF)

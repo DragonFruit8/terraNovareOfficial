@@ -33,7 +33,7 @@ const MusicPlayer = () => {
       currentIndex < musicFiles.length &&
       audioRef.current
     ) {
-      console.log("🎧 Setting audio src to:", musicFiles[currentIndex].url);
+    // console.log("🎧 Setting audio src to:", musicFiles[currentIndex].url);
       audioRef.current.src = musicFiles[currentIndex].url;
       audioRef.current.load();
       if (isPlaying) {
@@ -56,7 +56,7 @@ const MusicPlayer = () => {
         headers: { "Cache-Control": "no-store" },
         params: { timestamp: new Date().getTime() },
       });
-      console.log("🎵 API Response:", data);
+    // console.log("🎵 API Response:", data);
       if (!data.files || !Array.isArray(data.files))
         throw new Error("Invalid API response format.");
       setMusicFiles(
@@ -91,14 +91,14 @@ const MusicPlayer = () => {
   
     const payload = { oldName, newName };
   
-    console.log("📤 Sending Rename Request:", payload);
+  // console.log("📤 Sending Rename Request:", payload);
   
     try {
       const { data } = await axiosInstance.put("/music/rename-music", payload, {
         headers: { "Content-Type": "application/json" }, // ✅ Ensure JSON format
       });
   
-      console.log("🎵 Rename Response:", data);
+    // console.log("🎵 Rename Response:", data);
   
       if (data.success) {
         setEditingFile(null);
@@ -142,15 +142,15 @@ const MusicPlayer = () => {
   };
 
   return (
-    <div className="music-player-container">
-      <h3>🎵 Music Player</h3>
-      {message && <p className="message">{message}</p>}
+    <div className="music-player-container" role="group" aria-label="Music Player Controls">
+      <h3 aria-hidden="false" >🎵 Music Player</h3>
+      {message && <p aria-hidden="false" className="message">{message}</p>}
       {musicFiles.length === 0 ? (
         <p>No music available.</p>
       ) : (
         <ul className="playlist">
           {musicFiles.map((file, index) => (
-            <li
+            <li aria-hidden="false"
               key={index}
               className={`track ${index === currentIndex ? "playing" : ""}`}
             >
@@ -237,7 +237,7 @@ const MusicPlayer = () => {
           );
         }}
       />
-      {playbackError && <p className="error">{playbackError}</p>}
+      {playbackError && <p aria-hidden="false" className="error">{playbackError}</p>}
       <div className="music-controls">
         <button
           onClick={() =>

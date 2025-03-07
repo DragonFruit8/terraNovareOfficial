@@ -37,7 +37,7 @@ const DonateButton = () => {
         src="https://www.paypalobjects.com/images/Debit_Credit_APM.svg"
         alt="cards"
       />
-      <section>
+      <section aria-hidden="false">
         Powered by{" "}
         <img 
           src="https://www.paypalobjects.com/paypal-ui/logos/svg/paypal-wordmark-color.svg"

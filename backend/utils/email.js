@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 
+
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -38,21 +39,21 @@ export const sendProductRequestEmail = async (to, product) => {
       <body>
         <div class="email-container">
           <div class="header">
-            <h2>Terra'Novare 🌍</h2>
+            <h2 aria-hidden="false" >Terra'Novare 🌍</h2>
           </div>
           <div class="content">
-            <h3>🌟 Thank You for Your Product Request!</h3>
+            <h3 aria-hidden="false" >🌟 Thank You for Your Product Request!</h3>
             <p>Dear Valued Supporter,</p>
             <p>You have successfully requested <strong>${productName}</strong>. We appreciate your interest and will notify you as soon as it's available.</p>
             <p><strong>Requested On:</strong> ${requestDate}</p>
             <p>If you have any questions, feel free to reach out to our support team.</p>
-            <p style="text-align:center;">
-              <a href="https://www.terranovare.tech" target="_blank">Visit Terra'Novare</a>
+            <p aria-hidden="false" style="text-align:center;">
+              <a aria-hidden="false" href="https://www.terranovare.tech" target="_blank">Visit Terra'Novare</a>
             </p>
           </div>
           <div class="footer">
             <p>🌱 Together, we rise. | Terra’Novare Team</p>
-            <p><a href="mailto:support@terranovare.tech">Contact Support</a></p>
+            <p><a aria-hidden="false" href="mailto:support@terranovare.tech">Contact Support</a></p>
           </div>
         </div>
       </body>
@@ -61,8 +62,8 @@ export const sendProductRequestEmail = async (to, product) => {
 
   try {
     await transporter.sendMail(mailOptions);
-    // console.log("📩 Confirmation email sent to:", to);
+    // logger.info("📩 Confirmation email sent to:", to);
   } catch (error) {
-    console.error("❌ Error sending email:", error);
+    logger.error("❌ Error sending email:", error);
   }
 };

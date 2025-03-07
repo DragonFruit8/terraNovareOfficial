@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import logger from '../logger.js';
 
 // ✅ Always create a new transporter instance
 const transporter = nodemailer.createTransport({
@@ -46,21 +47,21 @@ export const sendProductRequestEmail = async (to, productName) => {
         <body>
           <div class="email-container">
             <div class="header">
-              <h2>Terra'Novare 🌍</h2>
+              <h2 aria-hidden="false" >Terra'Novare 🌍</h2>
             </div>
             <div class="content">
-              <h3>🌟 Thank You for Your Product Request!</h3>
+              <h3 aria-hidden="false" >🌟 Thank You for Your Product Request!</h3>
               <p>Dear Valued Supporter,</p>
               <p>You have successfully requested <strong>${productName}</strong>. We appreciate your interest and will notify you as soon as it's available.</p>
               <p><strong>Requested On:</strong> ${requestDate}</p>
               <p>If you have any questions, feel free to reach out to our support team.</p>
-              <p style="text-align:center;">
-                <a href="https://www.terranovare.tech" target="_blank">Visit Terra'Novare</a>
+              <p aria-hidden="false" style="text-align:center;">
+                <a aria-hidden="false" href="https://www.terranovare.tech" target="_blank">Visit Terra'Novare</a>
               </p>
             </div>
             <div class="footer">
               <p>🌱 Together, we rise. | Terra’Novare Team</p>
-              <p><a href="mailto:support@terranovare.tech">Contact Support</a></p>
+              <p><a aria-hidden="false" href="mailto:support@terranovare.tech">Contact Support</a></p>
             </div>
           </div>
         </body>
@@ -68,12 +69,12 @@ export const sendProductRequestEmail = async (to, productName) => {
   };
 
   try {
-    // console.log("📧 Sending email to:", to);
+    // logger.info("📧 Sending email to:", to);
     const info = await transporter.sendMail(mailOptions);
-    // console.log("✅ Email sent successfully:", info.response);
+    // logger.info("✅ Email sent successfully:", info.response);
     return info;
   } catch (error) {
-    console.error("❌ Error sending email:", error);
+    logger.error("❌ Error sending email:", error);
     throw new Error("Failed to send email");
   }
 };

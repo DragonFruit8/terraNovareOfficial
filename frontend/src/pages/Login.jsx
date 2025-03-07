@@ -76,13 +76,13 @@ const Login = () => {
   
 
   return (
-    <div className="container d-flex col align-items-center justify-content-center my-5">
+    <div className="container d-flex col align-items-center justify-content-center my-5" id="main-content">
       <div
         className="card p-4 shadow-sm"
         style={{ maxWidth: "500px", width: "100%" }}
       >
-        <h2>Login</h2>
-        <form onSubmit={handleLogin} className="">
+        <h2 aria-hidden="false">Login</h2>
+        <form onSubmit={handleLogin}>
           <div className="mb-3">
             <label className="form-label">Email</label>
             <input
@@ -130,12 +130,12 @@ const Login = () => {
         </form>
         <div className="d-flex text-center justify-content-center mt-2 gap-3">
           <p>
-            <Link to="/register" className="text-primary">
+            <Link aria-hidden="false" to="/register" className="text-primary">
               Register
             </Link>
             </p>
             <p>
-            <Link to="/forgot" className="text-danger">
+            <Link aria-hidden="false" to="/forgot" className="text-danger">
               Forgot Password?
             </Link>
           </p>

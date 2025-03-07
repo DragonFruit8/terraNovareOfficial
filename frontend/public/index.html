@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <Link aria-hidden="false" rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -10,18 +10,34 @@
       content="Welcome to Terra'Novare, where innovation, well-being, and human connection converge to shape the future we all deserve. At Terra'Novare, we believe that the world of tomorrow is built today through sustainable technology, balanced living, and meaningful collaboration. Our mission is to bridge the gap between humanity and nature, crafting solutions that foster harmony, growth, and a deeper understanding of our shared environment. By combining cutting-edge technology with holistic wellness principles, we are paving the way for a brighter, more harmonious world—one where innovation is in perfect balance with the earth, and every individual has the opportunity to thrive."
     />
     
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <Link aria-hidden="false" rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <Link aria-hidden="false" rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
       integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Terra'Novare",
+        "url": "https://terranovare.tech",
+        "logo": "https://terranovare.tech/images/logo.png",
+        "description": "A movement empowering startups, promoting sustainability, and fostering community innovation.",
+        "sameAs": [
+          "https://twitter.com/terranovare",
+          "https://www.linkedin.com/company/terranovare",
+          "https://www.instagram.com/terranovare"
+        ]
+      }
+      </script>
+      
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -34,6 +50,7 @@
     <title>Terra'Novare</title>
   </head>
   <body>
+    <a href="#main-content" class="skip-link">Skip to Content</a>
     <div id="root"></div>
     <!--
       This HTML file is a template.

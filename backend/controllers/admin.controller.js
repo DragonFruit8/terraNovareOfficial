@@ -1,6 +1,7 @@
 import slugify from "slugify"; // ✅ Import slugify package
 import Stripe from 'stripe';
 import dotenv from "dotenv";
+import logger from '../logger.js';
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -19,10 +20,10 @@ export const getAllProducts = async (req, res) => {
        FROM products`
     );
 
-    // console.log("✅ Fetched all products:", products.rows);
+    // logger.info("✅ Fetched all products:", products.rows);
     res.json(products.rows);
   } catch (error) {
-    console.error("❌ Error fetching products:", error.message);
+    logger.error("❌ Error fetching products:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -50,7 +51,7 @@ export const updateUserProfileByAdmin = async (req, res) => {
 
     res.json(updatedUser.rows[0]);
   } catch (error) {
-    console.error("❌ Error updating user profile:", error.message);
+    logger.error("❌ Error updating user profile:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -78,7 +79,7 @@ export const updateAdminProfile = async (req, res) => {
 
     res.json(updatedUser.rows[0]);
   } catch (error) {
-    console.error("❌ Error updating profile:", error);
+    logger.error("❌ Error updating profile:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -150,7 +151,7 @@ export const addProduct = async (req, res) => {
     res.status(201).json(result.rows[0]);
 
   } catch (error) {
-    console.error("❌ Error adding product:", error);
+    logger.error("❌ Error adding product:", error);
     res.status(500).json({ error: "Failed to add product" });
   }
 };
@@ -169,10 +170,10 @@ export const getProductById = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // console.log("✅ Product Fetched:", product.rows[0]);
+    // logger.info("✅ Product Fetched:", product.rows[0]);
     res.json(product.rows[0]);
   } catch (error) {
-    console.error("❌ Error fetching product by ID:", error.message);
+    logger.error("❌ Error fetching product by ID:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -186,7 +187,7 @@ export const updateProduct = async (req, res) => {
       return res.status(400).json({ error: "Product ID is required." });
     }
 
-    // console.log("🔍 Updating Product:", { product_id, name, price, stock, is_presale, release_date, description, image_url, stripe_product_id, stripe_price_id });
+    // logger.info("🔍 Updating Product:", { product_id, name, price, stock, is_presale, release_date, description, image_url, stripe_product_id, stripe_price_id });
 
     const formattedReleaseDate = release_date ? new Date(release_date).toISOString() : null;
 
@@ -210,10 +211,10 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // console.log("✅ Product updated:", updatedProduct.rows[0]);
+    // logger.info("✅ Product updated:", updatedProduct.rows[0]);
     res.json({ message: "Product updated successfully!", product: updatedProduct.rows[0] });
   } catch (error) {
-    console.error("❌ Error updating product:", error.message);
+    logger.error("❌ Error updating product:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -222,7 +223,7 @@ export const deleteProduct = async (req, res) => {
   try {
     const { product_id } = req.params;
 
-    // console.log("🔍 Deleting product with ID:", product_id);
+    // logger.info("🔍 Deleting product with ID:", product_id);
 
     // ✅ Check if product exists
     const productExists = await pool.query(
@@ -240,11 +241,11 @@ export const deleteProduct = async (req, res) => {
       [product_id]
     );
 
-    // console.log(`✅ Product with ID ${product_id} deleted.`);
+    // logger.info(`✅ Product with ID ${product_id} deleted.`);
     res.json({ message: "Product deleted successfully!" });
 
   } catch (error) {
-    console.error("❌ Error deleting product:", error.message);
+    logger.error("❌ Error deleting product:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -255,7 +256,7 @@ export const makeAdmin = async (req, res) => {
     const { user_id } = req.params;
 
     // ✅ Debugging: Log user_id before proceeding
-    // console.log("🔍 Received user_id:", user_id);
+    // logger.info("🔍 Received user_id:", user_id);
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
@@ -284,7 +285,7 @@ export const makeAdmin = async (req, res) => {
 
     res.status(200).json({ message: "User promoted to admin!", user: updateUser.rows[0] });
   } catch (error) {
-    console.error("❌ Error promoting user:", error);
+    logger.error("❌ Error promoting user:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -310,7 +311,7 @@ export const removeAdmin = async (req, res) => {
 
     res.status(200).json({ message: "Admin role removed!", user: updateUser.rows[0] });
   } catch (error) {
-    console.error("❌ Error removing admin role:", error);
+    logger.error("❌ Error removing admin role:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

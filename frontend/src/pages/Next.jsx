@@ -66,10 +66,10 @@ export default function Next() {
   return (
     <div>
       <section
-        id="titleHeader"
+        id="main-content"
         className="row bg-dark text-white text-center py-5"
       >
-        <h1 className="fw-light m-0">
+        <h1 aria-hidden="false" className="fw-light m-0">
           <em>
             Believe <strong>AND YOU CAN</strong>
             <strong>
@@ -78,7 +78,7 @@ export default function Next() {
             </strong>
           </em>
         </h1>
-        <p className="text-light m-0">A Vision for Sustainable Growth</p>
+        <p aria-hidden="false" className="text-light m-0">A Vision for Sustainable Growth</p>
       </section>
 
       <div className="container pt-5 mt-2">
@@ -88,7 +88,7 @@ export default function Next() {
             <span className="fw-bold fs-5">What's</span> <em>Next?</em>
           </h1>
           <div className="col-md-8">
-            <h2 className="featurette-heading">
+            <h2 aria-hidden="false" className="featurette-heading">
               Terra'Novare stands as the guiding force behind E-Finity
               <span className="text-muted">
 
@@ -96,7 +96,7 @@ export default function Next() {
                 and enterprise connections.
               </span>
             </h2>
-            <p className="lead">
+            <p aria-hidden="false" className="lead">
               As an entity dedicated to sustainability and progress,
               Terra'Novare oversees E-Finity's direction, providing the
               resources and strategic insight needed to make lasting change. We
@@ -118,11 +118,11 @@ export default function Next() {
         {/* Second Featurette */}
         <div className="row featurette align-items-center">
           <div className="col-md-8 order-md-2">
-            <h2 className="featurette-heading">
+            <h2 aria-hidden="false" className="featurette-heading">
               More Than a Seat—A Role in
               <span className="text-muted">the Revolution.</span>
             </h2>
-            <p className="lead">
+            <p aria-hidden="false" className="lead">
               For those looking to support this movement, we invite businesses
               and entities to become long-term partners through our sponsorship
               program. More than just donors, our sponsors become invested
@@ -147,11 +147,11 @@ export default function Next() {
         {/* Third Featurette */}
         <div className="row featurette align-items-center">
           <div className="col-md-7">
-            <h2 className="featurette-heading">
+            <h2 aria-hidden="false" className="featurette-heading">
               Have Hope
               <span className="text-muted">This is just the beginning.</span>
             </h2>
-            <p className="lead">
+            <p aria-hidden="false" className="lead">
               As we grow, we will unveil deeper levels of involvement, exclusive
               opportunities, and structured membership tiers tailored for those
               who want to take an active role in this journey. Early supporters
@@ -170,7 +170,7 @@ export default function Next() {
         <div className="m-3" id="bottom">
           {songList.length > 0 ? (
             <>
-              <h2 className="my-4">How I'm Fundraising</h2>
+              <h2 aria-hidden="false" className="my-4">How I'm Fundraising</h2>
               <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
               <div className="mt-4">
                 <button className="btn btn-secondary" onClick={() => navigate("/#bottom")}>
@@ -186,8 +186,8 @@ export default function Next() {
                 Come back soon...
               </div>
               <div className="my-2">
-                <p className="my-1"> For now... </p>
-                <Link className="btn btn-primary" to="/shop">
+                <p aria-hidden="false" className="my-1"> For now... </p>
+                <Link aria-hidden="false" className="btn btn-primary" to="/shop">
                   Preview the Shop
                 </Link>
               </div>

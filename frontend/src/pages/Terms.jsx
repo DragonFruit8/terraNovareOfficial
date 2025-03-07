@@ -21,16 +21,16 @@ const Terms = () => {
       <Typography variant="body1" paragraph>
         Users must not:
         <ul>
-          <li>Engage in illegal activities or violate any laws.</li>
-          <li>Attempt to hack, disrupt, or abuse the platform.</li>
-          <li>Use content from our website without permission.</li>
+          <li aria-hidden="false">Engage in illegal activities or violate any laws.</li>
+          <li aria-hidden="false">Attempt to hack, disrupt, or abuse the platform.</li>
+          <li aria-hidden="false">Use content from our website without permission.</li>
         </ul>
       </Typography>
 
       <Typography variant="h6">3. Payments & Refund Policy</Typography>
       <Typography variant="body1" paragraph>
         If you purchase a product or service, you agree to our payment terms. Refunds may be granted on a case-by-case basis. For refund inquiries, contact us at{" "}
-        <Link href="mailto:support@yourdomain.com">support@yourdomain.com</Link>.
+        <Link aria-hidden="false" href="mailto:support@yourdomain.com">support@yourdomain.com</Link>.
       </Typography>
 
       <Typography variant="h6">4. Intellectual Property</Typography>
@@ -61,7 +61,7 @@ const Terms = () => {
       <Typography variant="h6">9. Contact Us</Typography>
       <Typography variant="body1">
         If you have any questions, please contact us at{" "}
-        <Link href="mailto:support@yourdomain.com">support@yourdomain.com</Link>.
+        <Link aria-hidden="false" href="mailto:support@yourdomain.com">support@yourdomain.com</Link>.
       </Typography>
     </Container>
   );

@@ -68,33 +68,33 @@ const Profile = () => {
   if (loading) return <p>Loading profile...</p>;
 
   return (
-    <div className="container mt-5">
-      <h2>User Profile</h2>
+    <div id="main-content" className="container mt-5">
+      <h2 aria-hidden="false" >User Profile</h2>
 
       {/* ✅ View Mode */}
       {!editMode ? (
         <div className="card">
           <div className="card-body">
-            <h4 className="card-title">{userData?.fullname}</h4>
-            <p className="card-text">
+            <h4 aria-hidden="false" className="card-title">{userData?.fullname}</h4>
+            <p aria-hidden="false" className="card-text">
               <strong>Username:</strong> {userData?.username}
             </p>
-            <p className="card-text">
+            <p aria-hidden="false" className="card-text">
               <strong>Email:</strong> {userData?.email}
             </p>
-            <p className="card-text">
+            <p aria-hidden="false" className="card-text">
               <strong>Address:</strong> {userData?.address}
             </p>
-            <p className="card-text">
+            <p aria-hidden="false" className="card-text">
               <strong>City:</strong> {userData?.city}
             </p>
-            <p className="card-text">
+            <p aria-hidden="false" className="card-text">
               <strong>State:</strong> {userData?.state}
             </p>
-            <p className="card-text">
+            <p aria-hidden="false" className="card-text">
               <strong>Country:</strong> {userData?.country}
             </p>
-            <p className="card-text">
+            <p aria-hidden="false" className="card-text">
               <strong>Role:</strong> {Array.isArray(userData?.roles) ? userData.roles.join(", ") : "user"}
             </p>
             <button

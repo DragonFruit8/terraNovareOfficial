@@ -14,9 +14,9 @@ const Success = () => {
   }, [clearCart, navigate]);
 
   return (
-    <div className="text-center mt-5">
-      <h2>Payment Successful! 🎉</h2>
-      <p>Redirecting to home...</p>
+    <div className="text-center mt-5" role="success message">
+      <h2 aria-hidden="false" >Payment Successful! 🎉</h2>
+      <p aria-hidden="false">Redirecting to home...</p>
     </div>
   );
 };

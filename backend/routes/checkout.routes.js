@@ -1,6 +1,7 @@
 import express from "express";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import logger from '../logger.js';
 
 dotenv.config();
 const router = express.Router();
@@ -19,7 +20,7 @@ router.post("/create-payment-intent", async (req, res) => {
 
     res.json({ clientSecret: paymentIntent.client_secret }); // ✅ Send to frontend
   } catch (error) {
-    console.error("❌ Stripe error:", error);
+    logger.error("❌ Stripe error:", error);
     res.status(500).json({ error: "Payment processing failed." });
   }
 });
@@ -30,11 +31,11 @@ router.post("/checkout", async (req, res) => {
 
     // Validate input
     if (!price_id || !userEmail) {
-      console.error("⚠️ Missing price ID or user email:", { price_id, userEmail });
+      logger.error("⚠️ Missing price ID or user email:", { price_id, userEmail });
       return res.status(400).json({ error: "Missing price ID or user email" });
     }
 
-    // console.log("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
+    // logger.info("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
 
     // Create the Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
@@ -54,7 +55,7 @@ router.post("/checkout", async (req, res) => {
     res.json({ url: session.url }); // ✅ Return the checkout URL
 
   } catch (error) {
-    console.error("❌ Stripe Checkout Error:", error);
+    logger.error("❌ Stripe Checkout Error:", error);
     res.status(500).json({ error: error.message });
   }
 });

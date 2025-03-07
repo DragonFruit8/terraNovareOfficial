@@ -23,7 +23,7 @@ const Layout = ({ children, title }) => {
   >
     <div className="offcanvas-header pt-1 ps-3">
       
-      <h1 className="offcanvas-title" id="offcanvasDarkNavbarLabel" to="/">
+      <h1 aria-hidden="false" className="offcanvas-title" id="offcanvasDarkNavbarLabel" to="/">
         Terra'Novare
       </h1>
         
@@ -37,10 +37,10 @@ const Layout = ({ children, title }) => {
     </div>
     <div className="offcanvas-body">
       <ul className="navbar-nav">
-        <li className="nav-item">
-          <a className="nav-link" href="/shop">Shop</a>
+        <li aria-hidden="false" className="nav-item">
+          <a aria-hidden="false" className="nav-link" href="/shop">Shop</a>
         </li>
-        <li className="nav-item dropdown">
+        <li aria-hidden="false" className="nav-item dropdown">
           <a
             className="nav-link dropdown-toggle"
             href="/"
@@ -50,8 +50,8 @@ const Layout = ({ children, title }) => {
             Connect
           </a>
           <ul className="dropdown-menu dropdown-menu-dark">
-            <li><a className="dropdown-item" href="/">Apps</a></li>
-            <li><a className="dropdown-item" href="/">Web3.0</a></li>
+            <li aria-hidden="false"><a aria-hidden="false" className="dropdown-item" href="/">Apps</a></li>
+            <li aria-hidden="false"><a aria-hidden="false" className="dropdown-item" href="/">Web3.0</a></li>
           </ul>
         </li>
       </ul>

@@ -53,7 +53,7 @@ const ForgotPassword = () => {
   return (
     <div className="container d-flex col justify-content-center align-items-center">
       <div className="card p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
-    <h2>Forgot Password</h2>
+    <h2 aria-hidden="false" >Forgot Password</h2>
 
     {!emailSent ? (
       // ✅ Show the "Forgot Password" form
@@ -73,7 +73,7 @@ const ForgotPassword = () => {
     ) : (
       // ✅ Show "Email Sent" Confirmation
       <div className="alert alert-success mt-4">
-        <h5>Reset Email Sent! 📩</h5>
+        <h5 aria-hidden="false" >Reset Email Sent! 📩</h5>
         <p>
           If an account exists with <strong>{email}</strong>, you will receive a reset link shortly.
           Be sure to check your spam folder!

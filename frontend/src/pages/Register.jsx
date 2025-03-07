@@ -125,12 +125,12 @@ const Register = () => {
 
 
   return (
-    <div className="container d-flex col align-items-center justify-content-center my-5">
+    <div id="main-content" className="container d-flex col align-items-center justify-content-center my-5">
       <div
         className="card p-4 shadow-sm"
         style={{ maxWidth: "500px", width: "100%" }}
       >
-        <h2 className="text-center">Create an Account</h2>
+        <h2 aria-hidden="false" className="text-center">Create an Account</h2>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4">
 
           {/* ✅ First Name */}
@@ -260,8 +260,8 @@ const Register = () => {
             {isLoading ? "Creating Account..." : "Sign Up"}
           </button>
 
-          <p className="mt-3 text-center">
-            Already have an account? <Link to="/login">Login</Link>
+          <p aria-hidden="false" className="mt-3 text-center">
+            Already have an account? <Link aria-hidden="false" to="/login">Login</Link>
           </p>
         </form>
       </div>

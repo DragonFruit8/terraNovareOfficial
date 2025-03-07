@@ -3,13 +3,14 @@ import express from "express";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import pool from "../config/db.js";
+import logger from '../logger.js';
 
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const router = express.Router();
-// console.log("✅ STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Loaded" : "MISSING!");
+// logger.info("✅ STRIPE_SECRET_KEY:", process.env.STRIPE_SECRET_KEY ? "Loaded" : "MISSING!");
 if (!process.env.STRIPE_SECRET_KEY) {
-    console.error("❌ Stripe API key is missing! Check your .env file.");
+    logger.error("❌ Stripe API key is missing! Check your .env file.");
     process.exit(1); // Stop the server if key is missing
 }
 
@@ -18,24 +19,24 @@ router.post("/stripe/webhook", express.raw({ type: "application/json" }), async 
 
   try {
     const event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    // console.log("✅ Webhook Event Received:", event);
+    // logger.info("✅ Webhook Event Received:", event);
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      // console.log("💰 Payment Successful:", session);
+      // logger.info("💰 Payment Successful:", session);
 
       const userEmail = session.customer_email; // 🔍 Get user email from Stripe
-      // console.log("🔍 User Email from Stripe:", userEmail);
+      // logger.info("🔍 User Email from Stripe:", userEmail);
 
       if (!userEmail) {
-        console.error("❌ No email found in session");
+        logger.error("❌ No email found in session");
         return res.status(400).json({ error: "No email found" });
       }
 
       // Find the user by email
       const user = await  pool.query(`SELECT user_id FROM users WHERE email = ${userEmail}`,[    ]);
       if (user.length === 0) {
-        console.error("❌ User not found for email:", userEmail);
+        logger.error("❌ User not found for email:", userEmail);
         return res.status(400).json({ error: "User not found" });
       }
 
@@ -46,13 +47,13 @@ router.post("/stripe/webhook", express.raw({ type: "application/json" }), async 
         RETURNING *;
       `,[    ]);
 
-      // console.log("📦 Order Created:", order[0]);
+      // logger.info("📦 Order Created:", order[0]);
       return res.json({ success: true, order: order[0] });
     }
 
     res.sendStatus(200);
   } catch (error) {
-    console.error("❌ Webhook Error:", error.message);
+    logger.error("❌ Webhook Error:", error.message);
     res.status(400).send(`Webhook Error: ${error.message}`);
   }
 });

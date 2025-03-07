@@ -28,17 +28,17 @@ const OrderDetails = () => {
 
   return (
     <div className="container mt-5">
-      <h2>Order Details</h2>
+      <h2 aria-hidden="false" >Order Details</h2>
       <p><strong>Status:</strong> {order.status}</p>
       <p><strong>Date:</strong> {new Date(order.date).toLocaleString()}</p>
       <p><strong>Payment Method:</strong> {order.payment_method}</p>
       <p><strong>Total:</strong> ${Number(order.total).toFixed(2)}</p>
 
-      <h3>Items</h3>
+      <h3 aria-hidden="false" >Items</h3>
       {order.items.length > 0 ? (
         <ul className="list-group">
           {order.items.map((item) => (
-            <li key={item.product_id} className="list-group-item">
+            <li aria-hidden="false" key={item.product_id} className="list-group-item">
               <strong>{item.name}</strong> - ${Number(item.price).toFixed(2)} x {item.quantity}
             </li>
           ))}

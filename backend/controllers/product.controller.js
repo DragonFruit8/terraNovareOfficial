@@ -3,6 +3,7 @@ import { sendProductRequestEmail } from "../services/email.service.js";
 import { validateStripePrice } from "../services/stripe.service.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import logger from '../logger.js';
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -35,7 +36,7 @@ export const getProducts = async (req, res) => {
 
     res.status(200).json(validatedProducts);
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
+    logger.error("❌ Error fetching products:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -87,7 +88,7 @@ export const updateProduct = async (req, res) => {
       product: updatedProduct.rows[0],
     });
   } catch (error) {
-    console.error("❌ Error updating product:", error);
+    logger.error("❌ Error updating product:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -105,7 +106,7 @@ export const getAllProducts = async (req, res) => {
     );
     res.status(200).json(products.rows);
   } catch (error) {
-    console.error("❌ Error fetching products:", error);
+    logger.error("❌ Error fetching products:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -137,7 +138,7 @@ export const updateProductRequest = async (req, res) => {
       request: updatedRequest.rows[0],
     });
   } catch (error) {
-    console.error("❌ Error updating product request:", error);
+    logger.error("❌ Error updating product request:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -169,7 +170,7 @@ export const getProductRequests = async (req, res) => {
     const result = await pool.query(query, params);
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("❌ Error fetching product requests:", error);
+    logger.error("❌ Error fetching product requests:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -177,7 +178,7 @@ export const deleteProductRequest = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // console.log("🛠 Deleting request with ID:", id);
+    // logger.info("🛠 Deleting request with ID:", id);
 
     if (!id) {
       return res.status(400).json({ error: "Request ID is required" });
@@ -194,7 +195,7 @@ export const deleteProductRequest = async (req, res) => {
 
     res.status(200).json({ message: "Product request deleted successfully!" });
   } catch (error) {
-    console.error("❌ Error deleting request:", error);
+    logger.error("❌ Error deleting request:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -230,7 +231,7 @@ export const updateRequestQuantity = async (req, res) => {
       request: updatedRequest.rows[0],
     });
   } catch (error) {
-    console.error("❌ Error updating product request quantity:", error);
+    logger.error("❌ Error updating product request quantity:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -256,7 +257,7 @@ export const deleteProduct = async (req, res) => {
 
     res.status(200).json({ message: "Product deleted successfully!" });
   } catch (error) {
-    console.error("❌ Error deleting product:", error);
+    logger.error("❌ Error deleting product:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -283,7 +284,7 @@ export const addProduct = async (req, res) => {
     }
 
     // ✅ Generate Stripe product
-    // console.log("🛒 Creating Stripe Product for:", name);
+    // logger.info("🛒 Creating Stripe Product for:", name);
 
     const stripeProduct = await stripe.products.create({
       name,
@@ -293,7 +294,7 @@ export const addProduct = async (req, res) => {
     const stripeProductId = stripeProduct.id;
 
     // ✅ Create Stripe price
-    // console.log("💲 Creating Stripe Price for:", name);
+    // logger.info("💲 Creating Stripe Price for:", name);
 
     const stripePrice = await stripe.prices.create({
       unit_amount: Math.round(price * 100), // Convert dollars to cents
@@ -328,7 +329,7 @@ export const addProduct = async (req, res) => {
       ]
     );
 
-    // console.log("✅ Product successfully added:", newProduct.rows[0]);
+    // logger.info("✅ Product successfully added:", newProduct.rows[0]);
 
     res.status(201).json({
       message: "Product added successfully!",
@@ -337,7 +338,7 @@ export const addProduct = async (req, res) => {
       stripe_price_id: stripePriceId,
     });
   } catch (error) {
-    console.error("❌ Error adding product:", error);
+    logger.error("❌ Error adding product:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -346,7 +347,7 @@ export const requestProduct = async (req, res) => {
   const { user_email, user_id, product_id } = req.body;
 
   try {
-    console.log(
+    logger.info(
       "📩 Incoming product request from:",
       user_email,
       "for product:",
@@ -360,12 +361,12 @@ export const requestProduct = async (req, res) => {
     );
 
     if (productQuery.rowCount === 0) {
-      console.error("❌ Product not found:", product_id);
+      logger.error("❌ Product not found:", product_id);
       return res.status(404).json({ error: "Product not found" });
     }
 
     const productName = productQuery.rows[0].name;
-    // console.log("✅ Product found:", productName);
+    // logger.info("✅ Product found:", productName);
 
     // ✅ Check if product is already requested
     const existingRequest = await pool.query(
@@ -374,7 +375,7 @@ export const requestProduct = async (req, res) => {
     );
 
     if (existingRequest.rowCount > 0) {
-      console.log(
+      logger.info(
         "⚠️ Product already requested by this user. Sending confirmation email anyway..."
       );
 
@@ -386,33 +387,33 @@ export const requestProduct = async (req, res) => {
     }
 
     // ✅ Insert new request
-    // console.log("📝 Inserting request into database...");
+    // logger.info("📝 Inserting request into database...");
     await pool.query(
       "INSERT INTO product_requests (user_id, user_email, product_id, product, requested_at, status) VALUES ($1, $2, $3, $4, NOW(), 'pending')",
       [user_id, user_email, product_id, productName]
     );
-    // console.log("✅ Request inserted successfully.");
+    // logger.info("✅ Request inserted successfully.");
 
     // ✅ Send confirmation email
-    // console.log("📧 Attempting to send email to:", user_email);
+    // logger.info("📧 Attempting to send email to:", user_email);
     await sendProductRequestEmail(user_email, productName);
-    // console.log("✅ Email successfully sent!");
+    // logger.info("✅ Email successfully sent!");
 
     res
       .status(201)
       .json({ message: "Product requested successfully and email sent." });
   } catch (error) {
-    console.error("❌ Error processing product request:", error);
+    logger.error("❌ Error processing product request:", error);
     res.status(500).json({ error: "Server error while requesting product." });
   }
 };
 export const deleteAllProductRequests = async (req, res) => {
   try {
-    // console.log("🔍 Checking user roles:", req.user); // Debugging log
+    // logger.info("🔍 Checking user roles:", req.user); // Debugging log
 
     // ✅ Ensure only admins can delete requests
     if (!req.user?.roles || !req.user.roles.includes("admin")) {
-      console.error("❌ Unauthorized: User is not an admin.");
+      logger.error("❌ Unauthorized: User is not an admin.");
       return res
         .status(403)
         .json({ error: "Unauthorized: Admin access required" });
@@ -420,10 +421,10 @@ export const deleteAllProductRequests = async (req, res) => {
 
     await pool.query("DELETE FROM product_requests");
 
-    // console.log("✅ All product requests deleted.");
+    // logger.info("✅ All product requests deleted.");
     res.status(200).json({ message: "All product requests deleted." });
   } catch (error) {
-    console.error("❌ Error deleting product requests:", error);
+    logger.error("❌ Error deleting product requests:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -452,7 +453,7 @@ export const getAllProductRequests = async (req, res) => {
     const result = await pool.query(query, params);
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error("❌ Error fetching product requests:", error);
+    logger.error("❌ Error fetching product requests:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

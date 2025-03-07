@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../api/axios.config";
 import { useUser } from "../context/UserContext";
+import Meta from "../components/Meta"
 import Spinner from "../components/Spinner";
 import { toast } from "react-toastify";
 
@@ -46,8 +47,7 @@ const Shop = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
-
-  /** ✅ Improved handleBuyNow */
+  /** handleBuyNow */
   const handleBuyNow = async (product) => {
     if (!product.stripe_price_id || !product.stripe_price_id.startsWith("price_")) {
       console.error("⚠️ Invalid Stripe Price ID:", product.stripe_price_id);
@@ -73,7 +73,6 @@ const Shop = () => {
       toast.error("❌ Payment failed. Try again.");
     }
   };
-  
   
   useEffect(() => {
     const fetchRequestedProducts = async () => {
@@ -133,7 +132,7 @@ const Shop = () => {
     return (
       <div key={product.product_id} className="col-md-6 mb-4 p-4">
         <div className={`card p-3 ${isPresale ? "border-warning" : ""}`}>
-          <h3 className={isPresale ? "text-warning" : ""}>
+          <h3 aria-hidden="false" className={isPresale ? "text-warning" : ""}>
             {product.name} {isPresale && "🔥 (Presale)"}
           </h3>
           <img
@@ -142,7 +141,7 @@ const Shop = () => {
             className="img-fluid rounded mb-2"
             style={{ maxHeight: "400px", objectFit: "cover" }} // ✅ Limits image height
             />
-            <p className="py-2"><small>{product.description}</small></p>
+            <p aria-hidden="false" className="py-2"><small>{product.description}</small></p>
 
           {/* Display price if userData exists */}
           {userData &&
@@ -156,7 +155,7 @@ const Shop = () => {
               }).format(product.price)}
             </p>
           ) : (
-            <p className="text-muted">Price not available</p>
+            <p aria-hidden="false" className="text-muted">Price not available</p>
           )}
 
           {userData ? (
@@ -174,7 +173,7 @@ const Shop = () => {
                 : "Request Product"}
             </button>
           ) : (
-            <p className="text-muted mt-2">🔒 Login to request this product</p>
+            <p aria-hidden="false" className="text-muted mt-2">🔒 Login to request this product</p>
           )}
 
           {/* "Buy Now" button only if stripe_price_id exists */}
@@ -192,8 +191,16 @@ const Shop = () => {
   };
 
   return (
-    <div className="container mt-5 min-vh-100">
-    <h2>Shop</h2>
+    <>
+          <Meta
+        title="Terra'Novare | Shop - Exclusive Products with Purpose"
+        description="Support sustainability & Human Empowerment with Terra'Novare's exclusive shop. Browse eco-friendly products and invest in a better future."
+        keywords="Reimagining eco-friendly products, sustainability, shop sustainable, ethical shopping"
+        url="https://terranovare.tech/shop"
+        image="/images/shop-preview.jpg"
+      />
+    <div id="main-content" className="container mt-5 min-vh-100">
+    <h2 aria-hidden="false" >Shop</h2>
 
     {/* ✅ Show Spinner While Loading */}
     {loading ? (
@@ -206,7 +213,7 @@ const Shop = () => {
         {/* ✅ Show Presale Section ONLY if at least one presale product exists */}
         {products.some((product) => product?.is_presale) && (
           <div>
-            <h3 className="mt-4 text-warning">🔥 Presale Products</h3>
+            <h3 aria-hidden="false" className="mt-4 text-warning">🔥 Presale Products</h3>
             <div className="row">
               {products
                 .filter((product) => product.is_presale)
@@ -216,7 +223,7 @@ const Shop = () => {
         )}
 
         {/* ✅ Regular Products Section */}
-        <h3 className="mt-4">All Products</h3>
+        <h3 aria-hidden="false" className="mt-4">All Products</h3>
         <div className="row">
           {products.filter((product) => !product.is_presale).length === 0 ? (
             <p>No products available.</p>
@@ -229,6 +236,7 @@ const Shop = () => {
       </>
     )}
   </div>
+  </>
   );
 };
 

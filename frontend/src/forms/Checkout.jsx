@@ -53,7 +53,7 @@ const Checkout = () => {
 
   return (
     <div className="container mt-5">
-      <h2>Checkout</h2>
+      <h2 aria-hidden="false" >Checkout</h2>
       {message && <div className="alert alert-info">{message}</div>}
 
       <form onSubmit={handleSubmit} className="border p-4 rounded">

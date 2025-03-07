@@ -1,10 +1,10 @@
 import expressListEndpoints from "express-list-endpoints";
-
+import logger from '../logger.js'
 
 const printRoutes = (app) => {
-    // console.log("📌 API Routes:");
+    logger.info("📌 API Routes:");
     expressListEndpoints(app).forEach((route) => {
-        // console.log(`➡️ ${route.methods.join(", ")} ${route.path}`);
+    logger.info(`➡️ ${route.methods.join(", ")} ${route.path}`);
     });
 };
 

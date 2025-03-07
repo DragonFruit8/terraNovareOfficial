@@ -33,11 +33,11 @@ const Sidebar = () => {
   return (
     <>
       {/* Navigation Bar */}
-      <nav className="navbar px-3 ps-2">
+      <nav className="navbar px-3 ps-2" role="complementary">
         <div id="menuText" className="navbar-title" onClick={toggleSidebar}>
           {isOpen ? <FaTimes /> : <FaBars />} Menu
         </div>
-        {/* <Link to="/" className="home-btn"><FaHome /> Home</Link> */}
+        {/* <Link aria-hidden="false" to="/" className="home-btn"><FaHome /> Home</Link> */}
       </nav>
 
       {/* Sidebar Drawer */}
@@ -46,10 +46,10 @@ const Sidebar = () => {
           <button id="sidebarClose" className="btn btn-close btn-close-white" onClick={()=> setIsOpen(false)}></button>
         </div>
         <ul>
-          <li className="nav-item"><Link className="nav-link" to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
-          <li className="nav-item"><Link className="nav-link" to="/mission" onClick={() => setIsOpen(false)}>Missions</Link></li>
-          <li className="nav-item"><Link className="nav-link" to="/brand" onClick={() => setIsOpen(false)}>Brand</Link></li>
-          <li className="nav-item"><Link className="nav-link" to="/next" onClick={() => setIsOpen(false)}>What's Next</Link></li>
+          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
+          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/mission" onClick={() => setIsOpen(false)}>Missions</Link></li>
+          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/brand" onClick={() => setIsOpen(false)}>Brand</Link></li>
+          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/next" onClick={() => setIsOpen(false)}>What's Next</Link></li>
         </ul>
       </div>
     </>

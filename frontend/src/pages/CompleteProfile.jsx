@@ -65,7 +65,7 @@ const CompleteProfile = () => {
 
   return (
     <div className="container mt-5">
-      <h2>Complete Your Profile</h2>
+      <h2 aria-hidden="false" >Complete Your Profile</h2>
       <form onSubmit={handleSubmit} className="mt-4">
         {["address", "city", "state", "country"].map((field) => (
           <div className="mb-3" key={field}>

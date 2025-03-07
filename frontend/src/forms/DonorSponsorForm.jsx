@@ -119,7 +119,7 @@ export default function DonorSponsorForm({ onSuccess }) {
     <>
       <div className="container mt-3">
         <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
-          <h2 className="mb-3 text-center">Get Involved</h2>
+          <h2 aria-hidden="false" className="mb-3 text-center">Get Involved</h2>
 
           {/* Name */}
           <label>Name</label>

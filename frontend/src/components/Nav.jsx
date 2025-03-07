@@ -58,7 +58,7 @@ const Nav = () => {
   return (
     <nav id="nav" className="navbar navbar-expand-lg">
       <div className="container-fluid">
-        <Link className="navbar-brand fs-1" to="/">
+        <Link aria-hidden="false" className="navbar-brand fs-1" to="/">
           Terra'Novare
         </Link>
         <button
@@ -74,18 +74,18 @@ const Nav = () => {
         {/* Collapsible Navigation */}
         <div ref={navbarRef} className="collapse navbar-collapse">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li className="nav-item">
-              <Link className="nav-link" to="/mission" onClick={toggleNav}>
+            <li aria-hidden="false" className="nav-item">
+              <Link aria-hidden="false" className="nav-link" to="/mission" onClick={toggleNav}>
                 Mission
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/brand" onClick={toggleNav}>
+            <li aria-hidden="false" className="nav-item">
+              <Link aria-hidden="false" className="nav-link" to="/brand" onClick={toggleNav}>
                 Brand
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/next" onClick={toggleNav}>
+            <li aria-hidden="false" className="nav-item">
+              <Link aria-hidden="false" className="nav-link" to="/next" onClick={toggleNav}>
                 What's Next
               </Link>
             </li>
@@ -97,14 +97,14 @@ const Nav = () => {
           <ul className="navbar-nav ms-auto d-flex flex-row justify-content-end">
             {userData ? (
               <>
-                <li className="nav-item me-3">
-                  <Link className="nav-link" to="/shop">
+                <li aria-hidden="false" className="nav-item me-3">
+                  <Link aria-hidden="false" className="nav-link" to="/shop">
                     Shop
                   </Link>
                 </li>
 
                 {/* Dropdown - Wrapped in a Relative Container */}
-                <li ref={dropdownRef} className="nav-item dropdown position-relative">
+                <li aria-hidden="false" ref={dropdownRef} className="nav-item dropdown position-relative">
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="btn btn-secondary dropdown-toggle"
@@ -160,8 +160,8 @@ const Nav = () => {
 
               </>
             ) : (
-              <li className="nav-item">
-                <Link className="btn btn-primary" to="/login">
+              <li aria-hidden="false" className="nav-item">
+                <Link aria-hidden="false" className="btn btn-primary" to="/login">
                   Login
                 </Link>
               </li>

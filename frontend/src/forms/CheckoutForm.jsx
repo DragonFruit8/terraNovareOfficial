@@ -41,13 +41,13 @@ const CheckoutForm = ({ productId, quantity }) => {
 
   return (
     <form onSubmit={handleSubmit} className="p-4 border rounded">
-      <h2>Complete Your Purchase</h2>
+      <h2 aria-hidden="false" >Complete Your Purchase</h2>
       <CardElement className="form-control mb-3" />
         <PaymentElement />
       <button className="btn btn-primary" disabled={isProcessing || !stripe}>
         {isProcessing ? "Processing..." : "Pay Now"}
       </button>
-      {message && <p className="mt-3 text-danger">{message}</p>}
+      {message && <p aria-hidden="false" className="mt-3 text-danger">{message}</p>}
     </form>
   );
 };

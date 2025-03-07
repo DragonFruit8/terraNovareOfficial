@@ -77,7 +77,7 @@ body {
     padding: 0;
     display: flex;
     flex-direction: column;
-    user-select: none;
+    /* user-select: none; */
     transition: background-color 2s ease, color 2s ease;
 }
 p.lead {
@@ -743,6 +743,17 @@ span.text-muted {
   
 .social-link .tikTok:hover { background: #ff0050; }
 .social-link .blueSky:hover { background: #0096ff; } 
-.social-link .instaGram:hover { background: #C13584; } 
+.social-link .discord:hover { background: #C13584; } 
 .social-link .soundCloud:hover { background: #ff8800; } 
   
+h1:focus,
+h2:focus,
+h3:focus,
+h4:focus,
+h5:focus,
+p:focus,
+a:focus 
+{
+  outline: var(--secondary-color);
+  border: var(--secondary-color) 2px solid;
+}

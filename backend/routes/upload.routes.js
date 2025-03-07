@@ -3,6 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 
+
 const router = express.Router();
 const uploadDir = path.resolve("uploads/music");
 
@@ -32,11 +33,11 @@ const upload = multer({
 // ✅ Upload Route with Proper Response
 router.post("/upload-music", upload.single("music"), (req, res) => {
   if (!req.file) {
-    console.error("❌ Upload Failed: No file received.");
+    logger.error("❌ Upload Failed: No file received.");
     return res.status(400).json({ success: false, error: "No file uploaded." });
   }
 
-  console.log("✅ Uploaded File:", req.file.filename);
+  logger.info("✅ Uploaded File:", req.file.filename);
   res.status(200).json({
     success: true, // ✅ Ensures frontend knows it's a success
     message: "✅ File uploaded successfully!",

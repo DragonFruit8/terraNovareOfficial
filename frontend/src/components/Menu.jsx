@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { FaTiktok, FaInstagram, FaCloud } from "react-icons/fa";
+import { FaTiktok, FaDiscord, FaCloud } from "react-icons/fa";
 import { SiBluesky } from "react-icons/si"; // BlueSky icon
 import "../App.css"
 
@@ -54,9 +54,9 @@ const Menu = () => {
             >
                 <ul style={styles.menuList}>
                           {/* TikTok */}
-      <li>
+      <li aria-hidden="false">
         <Link
-          to="https://www.tiktok.com/"
+          to="https://www.tiktok.com/@etherialphoenix"
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -70,6 +70,7 @@ const Menu = () => {
             height: "40px",
             borderRadius: "50%",
           }}
+          onClick={() => setIsOpen(false)}
           onMouseEnter={() => setHovered("tiktok")}
           onMouseLeave={() => setHovered(null)}
         >
@@ -78,14 +79,14 @@ const Menu = () => {
       </li>
 
       {/* Bluesky */}
-      <li>
+      <li aria-hidden="false">
         <Link
           to="https://bsky.app/profile/terranovare.bsky.social"
           target="_blank"
           rel="noopener noreferrer"
           style={{
             background: hovered === "bluesky" ? "#0085FF" : "#444",
-            color: hovered === "bluesky" ? "white" : "white",
+            color: hovered === "bluesky" ? "#444" : "white",
             transition: "background 0.3s ease, color 0.3s ease",
             display: "flex",
             alignItems: "center",
@@ -94,6 +95,7 @@ const Menu = () => {
             height: "40px",
             borderRadius: "50%",
           }}
+          onClick={() => setIsOpen(false)}
           onMouseEnter={() => setHovered("bluesky")}
           onMouseLeave={() => setHovered(null)}
         >
@@ -102,14 +104,14 @@ const Menu = () => {
       </li>
 
       {/* Instagram */}
-      <li>
+      <li aria-hidden="false">
         <Link
-          to="https://www.instagram.com/"
+          to="https://discord.gg/5Jvz3tU3WJ"
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            background: hovered === "instagram" ? "#E4405F" : "#444",
-            color: hovered === "instagram" ? "white" : "#E4405F",
+            background: hovered === "discord" ? "#7289DA" : "#444",
+            color: hovered === "discord" ? "#444" : "white",
             transition: "background 0.3s ease, color 0.3s ease",
             display: "flex",
             alignItems: "center",
@@ -118,22 +120,23 @@ const Menu = () => {
             height: "40px",
             borderRadius: "50%",
           }}
-          onMouseEnter={() => setHovered("instagram")}
+          onClick={() => setIsOpen(false)}
+          onMouseEnter={() => setHovered("discord")}
           onMouseLeave={() => setHovered(null)}
         >
-          <FaInstagram className="social-icon" />
+          <FaDiscord className="social-icon" />
         </Link>
       </li>
 
       {/* SoundCloud */}
-      <li>
+      <li aria-hidden="false">
         <Link
-          to="https://soundcloud.com/"
+          to="https://on.soundcloud.com/UeaT1vwgzEnxoptA8"
           target="_blank"
           rel="noopener noreferrer"
           style={{
             background: hovered === "soundcloud" ? "#ff8800" : "#444",
-            color: hovered === "soundcloud" ? "white" : "white",
+            color: hovered === "soundcloud" ? "#444" : "white",
             transition: "background 0.3s ease, color 0.3s ease",
             display: "flex",
             alignItems: "center",
@@ -142,6 +145,7 @@ const Menu = () => {
             height: "40px",
             borderRadius: "50%",
           }}
+          onClick={() => setIsOpen(false)}
           onMouseEnter={() => setHovered("soundcloud")}
           onMouseLeave={() => setHovered(null)}
         >

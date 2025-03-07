@@ -34,9 +34,9 @@ const ProductDetails = () => {
           <img src={product.image_url} alt={product.name} className="img-fluid" />
         </div>
         <div className="col-md-6">
-          <h2>{product.name}</h2>
-          <p className="text-muted">{product.description}</p>
-          <h4>${product.price.toFixed(2)}</h4>
+          <h2 aria-hidden="false" >{product.name}</h2>
+          <p aria-hidden="false" className="text-muted">{product.description}</p>
+          <h4 aria-hidden="false" >${product.price.toFixed(2)}</h4>
 
           {/* 🔹 Show Pre-Sale Message */}
           {product.is_presale && (

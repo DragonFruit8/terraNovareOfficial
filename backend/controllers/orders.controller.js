@@ -1,4 +1,5 @@
 import pool from "../config/db.js"; // Adjust based on your DB connection
+import logger from '../logger.js';
 
 export const getUserOrders = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ export const getUserOrders = async (req, res) => {
     );
     return res.json(orders.rows);
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error("Error fetching orders:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -24,7 +25,7 @@ export const getOrders = async (req, res) => {
     );
     res.json(orders.rows);
   } catch (error) {
-    console.error("Error fetching orders:", error);
+    logger.error("Error fetching orders:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -49,7 +50,7 @@ export const createOrder = async (req, res) => {
 
     res.json({ message: "Order placed successfully", order: order.rows[0] });
   } catch (error) {
-    console.error("Error creating order:", error);
+    logger.error("Error creating order:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -80,7 +81,7 @@ export const getOrderDetails = async (req, res) => {
 
     return res.json({ ...order.rows[0], items: items.rows });
   } catch (error) {
-    console.error("Error fetching order details:", error);
+    logger.error("Error fetching order details:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

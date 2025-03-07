@@ -57,10 +57,10 @@ const UnderConstruction = () => {
   return (
     <div className="under-construction-overlay d-flex align-items-center justify-content-center">
       <div className="under-construction-content text-center p-5 rounded">
-        <h1 className="display-4 fw-bold text-warning mb-3 animate-bounce">
+        <h1 aria-hidden="false" className="display-4 fw-bold text-warning mb-3 animate-bounce">
           🚧 Under Construction 🚧
         </h1>
-        <p className="lead text-light">
+        <p aria-hidden="false" className="lead text-light">
           This site is currently being built. Enter the password to proceed.
         </p>
        <Countdown />
@@ -80,7 +80,7 @@ const UnderConstruction = () => {
         </form>
 
         {/* ✅ Show error message if password is incorrect */}
-        {errorMessage && <p className="text-danger mt-3">{errorMessage}</p>}
+        {errorMessage && <p aria-hidden="false" className="text-danger mt-3">{errorMessage}</p>}
       </div>
     </div>
   );

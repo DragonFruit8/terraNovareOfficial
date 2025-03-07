@@ -75,7 +75,7 @@ const UploadComponent = () => {
       )}
 
       {/* Upload Feedback */}
-      {uploadSuccess && <p className="upload-message">{uploadSuccess}</p>}
+      {uploadSuccess && <p aria-hidden="false" className="upload-message">{uploadSuccess}</p>}
     </div>
   );
 };

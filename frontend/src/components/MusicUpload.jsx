@@ -30,7 +30,7 @@ const MusicUpload = ({ fetchMusicFiles }) => { // ✅ Ensure fetchMusicFiles is 
       });
   
       if (data.success) { // ✅ Checks if response has { success: true }
-        console.log("✅ Upload Success:", data);
+      // console.log("✅ Upload Success:", data);
         setUploadMessage("✅ Upload successful!");
         fetchMusicFiles(); // ✅ Refresh song list after upload
         setSelectedFile(null);
@@ -48,7 +48,7 @@ const MusicUpload = ({ fetchMusicFiles }) => { // ✅ Ensure fetchMusicFiles is 
     <div className="upload-container">
       <input type="file" accept="audio/*" onChange={handleFileChange} /> {/* ✅ Handles file selection */}
       <button onClick={handleUpload} disabled={!selectedFile}>📤 Upload</button> {/* ✅ Upload only if file is selected */}
-      {uploadMessage && <p className="message">{uploadMessage}</p>}
+      {uploadMessage && <p aria-hidden="false" className="message">{uploadMessage}</p>}
     </div>
   );
 };

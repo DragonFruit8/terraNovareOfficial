@@ -12,7 +12,7 @@ const CheckoutModal = ({ isOpen, onClose, product }) => {
   return (
     <div className="modal-overlay">
       <div className="modal-content">
-        <h2>Checkout for {product.name}</h2>
+        <h2 aria-hidden="false" >Checkout for {product.name}</h2>
         <Elements stripe={stripePromise}>
           <CheckoutForm productId={product.product_id} quantity={1} />
         </Elements>

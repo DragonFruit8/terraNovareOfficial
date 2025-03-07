@@ -30,7 +30,7 @@ export const getZipDistance = async (zip1, zip2) => {
     }
 
     const response = await axios.post("http://localhost:9000/api/distance", { zip1, zip2 });
-    console.log("🛰 API Response:", response.data);
+  // console.log("🛰 API Response:", response.data);
     return response.data.distance; // ✅ Now using the backend API
   } catch (error) {
     console.error("❌ Distance API Error:", error.response?.data || error.message);

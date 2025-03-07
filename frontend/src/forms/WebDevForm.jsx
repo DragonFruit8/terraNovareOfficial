@@ -187,7 +187,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
 
   return (
     <div className="container mt-3">
-      <h2 className="mb-4">Website Development Inquiry</h2>
+      <h2 aria-hidden="false" className="mb-4">Website Development Inquiry</h2>
       <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
         
         <label>Name</label>
@@ -304,7 +304,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
           <textarea name="notes" value={formData.notes} onChange={handleChange} className="form-control" placeholder="Any extra details you'd like to share..." />
     
 
-        <h4 className="mt-3 text-primary">Estimated Price: ${estimatedPrice.toLocaleString()}</h4>
+        <h4 aria-hidden="false" className="mt-3 text-primary">Estimated Price: ${estimatedPrice.toLocaleString()}</h4>
         <button type="submit" className="btn btn-success mt-3" disabled={loading}>{loading ? "Submitting..." : "Submit Inquiry"}</button>
       </form>
     </div>

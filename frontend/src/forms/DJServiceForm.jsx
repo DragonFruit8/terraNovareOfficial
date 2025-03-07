@@ -43,21 +43,21 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
     setErrorMessage("");
 
     try {
-      console.log("🚀 Sending distance request for ZIP:", zip2);
+    // console.log("🚀 Sending distance request for ZIP:", zip2);
 
       const response = await axiosInstance.post("/distance", {
         zip1: "48197",
         zip2: zip2,
       });
 
-      console.log("📡 Distance API Response:", response.data);
+    // console.log("📡 Distance API Response:", response.data);
 
       if (response.data.error) {
         setErrorMessage(response.data.error);
         setFormData((prev) => ({ ...prev, distance: "" })); // ✅ Reset distance on error
       } else if (response.data.distance) {
         setFormData((prev) => ({ ...prev, distance: response.data.distance }));
-        console.log("✅ Distance Set:", response.data.distance);
+      // console.log("✅ Distance Set:", response.data.distance);
       } else {
         throw new Error("Invalid API response");
       }
@@ -107,7 +107,7 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
     }
 
     try {
-      console.log("🚀 Submitting form with:", formData);
+    // console.log("🚀 Submitting form with:", formData);
 
       const estimatedQuote = calculateQuote();
 
@@ -147,8 +147,8 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
 
   return (
     <div className="container mt-3">
-      <h2 className="mb-4">🎧 Book DJ Services</h2>
-      <Link to={"/next#bottom"} className="btn btn-primary my-1">
+      <h2 aria-hidden="false" className="mb-4">🎧 Book DJ Services</h2>
+      <Link aria-hidden="false" to={"/next#bottom"} className="btn btn-primary my-1">
         Preview music before booking
       </Link>
 
@@ -229,11 +229,7 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
 
         <label>Estimated Performance Hours</label>
         <input type="number" className="form-control" name="hours" value={formData.hours} onChange={handleChange} required />
-
-          {/* DELETE AFTER IMPLEMENTATION */}
-        {/* <p className="fw-bold mt-3">💰 Estimated Quote: <span className="text-success">${calculateQuote()}</span></p> */}
-          {console.log(errorMessage)}
-          {console.log(formData.distance)}
+        
         <button type="submit" className="btn btn-success mt-3">🎶 Submit Booking Request</button>
       </form>
     </div>

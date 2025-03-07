@@ -29,6 +29,7 @@ import fs from "fs";
 import multer from "multer";
 import axios from "axios";
 import { getLatLng } from "./utils/getLatLng.js"; 
+import { createLogger, format, transports } from 'winston';
 
 dotenv.config({ path: "./.env" });
 
@@ -53,10 +54,23 @@ app.options("*", (req, res) => {
   res.status(200).end();
 });
 
+const logger = createLogger({
+  level: 'info', // Change to 'debug' for more details
+  format: format.combine(
+    format.timestamp(),
+    format.json()
+  ),
+  transports: [
+    new transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new transports.File({ filename: 'logs/combined.log' }),
+    new transports.Console({ format: format.simple() }) // Optional: Show logs in console too
+  ],
+});
+
 const uploadDir = path.resolve("uploads/music");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-  console.log("📂 Created upload directory:", uploadDir);
+  logger.info("📂 Created upload directory:", uploadDir);
 }
 
 const storage = multer.diskStorage({
@@ -77,7 +91,7 @@ app.post("/api/upload-music", upload.single("music"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded." });
   }
-  console.log("✅ Uploaded File:", req.file.filename);
+  logger.info("✅ Uploaded File:", req.file.filename);
   res.json({
     message: "✅ File uploaded successfully!",
     filename: req.file.filename,
@@ -119,13 +133,9 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/stripe", stripeRoutes);
 app.use("/api/user", authenticateUser, userRoutes);
 app.use("/api/forms", inquiryRoutes);
-// app.post("/api/forms/dj", (req, res) => {
-//   console.log("📩 Received Form Submission:", req.body);
-//   res.json({ message: "Form received!", data: req.body });
-// });
 
 if (!getLatLng) {
-  console.error("❌ getLatLng is not imported correctly.");
+  logger.error("❌ getLatLng is not imported correctly.");
 }
 
 // ✅ Proxy API for calculating distance between ZIP codes
@@ -134,16 +144,16 @@ app.post("/api/distance", async (req, res) => {
     const { zip1, zip2 } = req.body;
     if (!zip1 || !zip2) return res.status(400).json({ error: "ZIP codes are required" });
 
-    console.log(`📌 Received ZIP codes: zip1=${zip1}, zip2=${zip2}`);
+    logger.info(`📌 Received ZIP codes: zip1=${zip1}, zip2=${zip2}`);
 
     // ✅ Fetch latitude/longitude for both ZIPs
     const coords1 = await getLatLng(zip1);
     const coords2 = await getLatLng(zip2);
 
-    console.log(`📍 Coordinates: ${zip1} → ${coords1}, ${zip2} → ${coords2}`);
+    logger.info(`📍 Coordinates: ${zip1} → ${coords1}, ${zip2} → ${coords2}`);
 
     if (!coords1 || !coords2) {
-      console.error("❌ Geocoding failed! Invalid ZIP codes.");
+      logger.error("❌ Geocoding failed! Invalid ZIP codes.");
       return res.status(400).json({ error: `Invalid ZIP Code(s): ${zip2}` });
     }
 
@@ -162,12 +172,12 @@ app.post("/api/distance", async (req, res) => {
       }
     );
 
-    console.log("🛰 Distance API Response:", response.data);
+    logger.info("🛰 Distance API Response:", response.data);
 
     const distanceInMiles = (response.data.distances[0][1] / 1609.34).toFixed(2);
     res.json({ distance: distanceInMiles });
   } catch (error) {
-    console.error("❌ Distance API Error:", error.response?.data || error.message);
+    logger.error("❌ Distance API Error:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to fetch distance" });
   }
 });
@@ -179,7 +189,7 @@ app.get("/api/health", (req, res) => {
 
 // ✅ Global Error Handling
 app.use((err, req, res, next) => {
-  console.error("❌ Server Error:", err);
+  logger.error("❌ Server Error:", err);
   res.status(500).json({ error: "Internal server error" });
 });
 
@@ -188,7 +198,7 @@ printRoutes(app);
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  logger.info(`🚀 Server running on http://localhost:${PORT}`);
   syncAllProducts();
 });
 

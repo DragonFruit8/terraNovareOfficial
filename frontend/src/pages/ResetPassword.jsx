@@ -60,9 +60,9 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="container d-flex justify-content-center mt-5">
+    <div id="main-content" className="container d-flex justify-content-center mt-5">
       <div className="card p-4 shadow-sm" style={{ maxWidth: "500px", width: "100%" }}>
-      <h2>Reset Password</h2>
+      <h2 aria-hidden="false" >Reset Password</h2>
       <form onSubmit={handleSubmit}>
         {/* ✅ Password Field */}
         <div className="mb-3">

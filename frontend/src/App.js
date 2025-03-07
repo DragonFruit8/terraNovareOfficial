@@ -74,14 +74,16 @@ const App = () => {
         <ToastContainer position="top-center" autoClose={2000} />
         <ThemeProvider>
           {!shouldBlockFeature ? <UnderConstruction /> : (console.log("🚫 Production security feature is disabled on localhost."))}
+          <a href="#main-content" className="skip-link">
+        Skip to Content
+      </a>
           <Nav />
           <Sidebar />
-
-          <div className="app-container">
-            <div className="content">
              {userData ? (
                <Menu />
-             ):(null)}
+              ):(null)}
+          <div className="app-container">
+            <div className="content">
               <Routes>
                 <Route
                   path="/admin"

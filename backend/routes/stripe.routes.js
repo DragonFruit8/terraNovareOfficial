@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import express from "express";
 import dotenv from "dotenv";
+import logger from '../logger.js';
 
 dotenv.config();
 const router = express.Router();
@@ -10,22 +11,22 @@ router.post("/webhook", express.raw({ type: "application/json" }), (req, res) =>
   const sig = req.headers["stripe-signature"];
 
   if (!sig) {
-    console.error("⚠️ No stripe-signature header found.");
+    logger.error("⚠️ No stripe-signature header found.");
     return res.status(400).send("Stripe Signature Missing.");
   }
 
   let event;
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-    // console.log("✅ Webhook Event Received:", event);
+    // logger.info("✅ Webhook Event Received:", event);
   } catch (err) {
-    console.error("⚠️ Webhook Signature Verification Failed!", err.message);
+    logger.error("⚠️ Webhook Signature Verification Failed!", err.message);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   // Handle event types
   if (event.type === "checkout.session.completed") {
-    // console.log("💰 Payment Successful! Order should be processed.");
+    // logger.info("💰 Payment Successful! Order should be processed.");
   }
 
   res.status(200).json({ received: true });
@@ -36,11 +37,11 @@ router.post("/checkout", async (req, res) => {
 
     // Validate input
     if (!price_id || !userEmail) {
-      console.error("⚠️ Missing price ID or user email:", { price_id, userEmail });
+      logger.error("⚠️ Missing price ID or user email:", { price_id, userEmail });
       return res.status(400).json({ error: "Missing price ID or user email" });
     }
 
-    // console.log("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
+    // logger.info("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
 
     // Create the Stripe Checkout session
     const session = await stripe.checkout.sessions.create({
@@ -60,14 +61,14 @@ router.post("/checkout", async (req, res) => {
     res.json({ url: session.url }); // ✅ Return the checkout URL
 
   } catch (error) {
-    console.error("❌ Stripe Checkout Error:", error);
+    logger.error("❌ Stripe Checkout Error:", error);
     res.status(500).json({ error: error.message });
   }
 });
 
 export const createCheckoutSession = async (req, res) => {
   try {
-    // console.log("Received request body:", req.body); // Debugging
+    // logger.info("Received request body:", req.body); // Debugging
 
     let { amount, email } = req.body;
 
@@ -82,7 +83,7 @@ export const createCheckoutSession = async (req, res) => {
     }
 
     // ✅ Debugging: Log amount and email before making the Stripe request
-    // console.log("Creating Stripe session for amount:", amount, "and email:", email);
+    // logger.info("Creating Stripe session for amount:", amount, "and email:", email);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -105,10 +106,10 @@ export const createCheckoutSession = async (req, res) => {
       cancel_url: `${process.env.CLIENT_URL}/cancel`,
     });
 
-    // console.log("Stripe session created:", session.id); // ✅ Log successful session creation
+    // logger.info("Stripe session created:", session.id); // ✅ Log successful session creation
     res.json({ id: session.id });
   } catch (error) {
-    console.error("Stripe Checkout Error:", error);
+    logger.error("Stripe Checkout Error:", error);
     res.status(500).json({ error: error.message });
   }
 };

@@ -10,7 +10,7 @@ const EmailObfuscate = () => {
   }, []);
 
   return (
-    <a href={`mailto:${email}`}>
+    <a aria-hidden="false" href={`mailto:${email}`}>
       {email || "[Email Protected]"}
     </a>
   );

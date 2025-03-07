@@ -62,15 +62,15 @@ export default function TVModal() {
                   {showThankYou ? (
                     // ✅ "Thank You" Screen
                     <div className="text-center">
-                      <h2 className="modal-title">🎉 Thank You! 🎉</h2>
-                      <p className="lead">
+                      <h2 aria-hidden="false" className="modal-title">🎉 Thank You! 🎉</h2>
+                      <p aria-hidden="false" className="lead">
                         Your support means the world to us!
                       </p>
                     </div>
                   ) : (
                     // ✅ Form Selection Screen
                     <>
-                      <h2 className="modal-title">Choose Form</h2>
+                      <h2 aria-hidden="false" className="modal-title">Choose Form</h2>
 
                       {/* Tab Buttons */}
                       <div className="row gap-2 d-flex justify-content-center mt-2">

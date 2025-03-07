@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import logger from '../logger.js';
+
 
 dotenv.config();
 
@@ -9,11 +11,11 @@ export const handleSponsorInquiry = async (req, res) => {
 
     // ✅ Validate required fields
     if (!name || !email || !contributionType) {
-      console.error("❌ Missing required fields in sponsorship inquiry.");
+      logger.error("❌ Missing required fields in sponsorship inquiry.");
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    console.log("📩 Preparing to send sponsorship inquiry emails...");
+    logger.info("📩 Preparing to send sponsorship inquiry emails...");
 
     // ✅ Set up email transporter
     const transporter = nodemailer.createTransport({
@@ -30,9 +32,9 @@ export const handleSponsorInquiry = async (req, res) => {
       to: process.env.ADMIN_EMAIL,
       subject: `🌟 New Sponsorship Inquiry from ${name}`,
       html: `
-        <h2>🌟 New Sponsorship Inquiry</h2>
+        <h2 aria-hidden="false" >🌟 New Sponsorship Inquiry</h2>
         <p><strong>🧑 Name:</strong> ${name}</p>
-        <p><strong>📧 Email:</strong> <a href="mailto:${email}">${email}</a></p>
+        <p><strong>📧 Email:</strong> <a aria-hidden="false" href="mailto:${email}">${email}</a></p>
         <p><strong>🏢 Organization:</strong> ${organization || "Not specified"}</p>
         <p><strong>💡 Contribution Type:</strong> ${contributionType}</p>
         <p><strong>🤝 Ways They Want to Be Involved:</strong> ${involvement.length ? involvement.join(", ") : "Not specified"}</p>
@@ -45,7 +47,7 @@ export const handleSponsorInquiry = async (req, res) => {
     };
 
     await transporter.sendMail(adminMailOptions);
-    console.log("✅ Admin email sent successfully!");
+    logger.info("✅ Admin email sent successfully!");
 
     // ✅ Email to Sponsor
     const sponsorMailOptions = {
@@ -53,16 +55,16 @@ export const handleSponsorInquiry = async (req, res) => {
       to: email,
       subject: `🌟 Thank You for Your Sponsorship Inquiry, ${name}!`,
       html: `
-        <h2>Thank You for Your Interest in Sponsoring!</h2>
+        <h2 aria-hidden="false" >Thank You for Your Interest in Sponsoring!</h2>
         <p>Hello ${name},</p>
         <p>We have received your sponsorship inquiry and truly appreciate your support.</p>
         <p>Here’s a summary of your inquiry:</p>
         <ul>
-          <li><strong>🏢 Organization:</strong> ${organization || "Not specified"}</li>
-          <li><strong>💡 Contribution Type:</strong> ${contributionType}</li>
-          <li><strong>🤝 Involvement:</strong> ${involvement.length ? involvement.join(", ") : "Not specified"}</li>
-          <li><strong>🌍 Expected Impact:</strong> ${impacts.length ? impacts.join(", ") : "Not specified"}</li>
-          <li><strong>💰 Contribution Amount:</strong> ${amount ? `$${amount}` : "Not specified"}</li>
+          <li aria-hidden="false"><strong>🏢 Organization:</strong> ${organization || "Not specified"}</li>
+          <li aria-hidden="false"><strong>💡 Contribution Type:</strong> ${contributionType}</li>
+          <li aria-hidden="false"><strong>🤝 Involvement:</strong> ${involvement.length ? involvement.join(", ") : "Not specified"}</li>
+          <li aria-hidden="false"><strong>🌍 Expected Impact:</strong> ${impacts.length ? impacts.join(", ") : "Not specified"}</li>
+          <li aria-hidden="false"><strong>💰 Contribution Amount:</strong> ${amount ? `$${amount}` : "Not specified"}</li>
         </ul>
         <p>We will reach out to you soon to discuss how we can collaborate further.</p>
         <p>If you have any additional questions, feel free to reply to this email.</p>
@@ -73,12 +75,12 @@ export const handleSponsorInquiry = async (req, res) => {
     };
 
     await transporter.sendMail(sponsorMailOptions);
-    console.log("✅ Sponsor email sent successfully!");
+    logger.info("✅ Sponsor email sent successfully!");
 
     // ✅ Respond to frontend
     res.status(200).json({ message: "Sponsorship inquiry submitted successfully!" });
   } catch (error) {
-    console.error("❌ Error sending sponsorship inquiry:", error);
+    logger.error("❌ Error sending sponsorship inquiry:", error);
     res.status(500).json({ error: "Internal Server Error. Please try again later." });
   }
 };

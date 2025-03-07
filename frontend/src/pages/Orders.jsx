@@ -30,7 +30,7 @@ const Orders = () => {
 
   return (
     <div className="container mt-5">
-      <h2>Your Orders</h2>
+      <h2 aria-hidden="false" >Your Orders</h2>
       {loading ? (
         <p>Loading orders...</p>
       ) : orders.length === 0 ? (
@@ -38,13 +38,13 @@ const Orders = () => {
       ) : (
         <ul className="list-group">
           {orders.map((order) => (
-            <li key={order.order_id} className="list-group-item">
-              <h5>Order #{order.order_id}</h5>
+            <li aria-hidden="false" key={order.order_id} className="list-group-item">
+              <h5 aria-hidden="false" >Order #{order.order_id}</h5>
               <p>Status: {order.status}</p>
               <p>Total: ${order.total ? Number(order.total).toFixed(2) : "0.00"}</p>
               <p>Payment Method: {order.payment_method}</p>
               <p>Date: {new Date(order.date).toLocaleString()}</p>
-              <Link to={`/orders/${order.order_id}`} className="btn btn-primary">
+              <Link aria-hidden="false" to={`/orders/${order.order_id}`} className="btn btn-primary">
                 View Details
               </Link>
             </li>
