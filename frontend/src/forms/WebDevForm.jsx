@@ -7,7 +7,6 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [estimatedPrice, setEstimatedPrice] = useState(0);
 
-  // Ensuring `addOns` and `features` are always arrays to avoid `.includes()` errors
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -15,14 +14,30 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     company: "",
     industry: "",
     packageType: "",
-    addOns: [],  // Always initialize as an array
+    addOns: [],
     maintenancePlan: "",
     budget: "",
     deadline: "",
     notes: "",
+    websitePurpose: "",
+    preferredDesignStyle: "",
+    competitorWebsites: "",
+    additionalFeatures: "",
   });
+  const budgetOptions = [
+    "Under $1,000",
+    "$1,000 - $2,500",
+    "$2,500 - $5,000",
+    "$5,000 - $10,000",
+    "$10,000 - $25,000",
+    "$25,000+",
+  ];
 
-  // Package-Based Pricing
+  const industryOptions = [
+    "Technology", "Healthcare", "Finance", "Education", 
+    "Retail", "Real Estate", "Entertainment", "Other"
+  ];
+
   const packagesPricing = useMemo(() => ({
     "Starter Package": 1000,
     "Business Package": 2500,
@@ -30,7 +45,6 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     "Custom MVP": 4500,
   }), []);
 
-  // Add-Ons Pricing
   const addOnsPricing = useMemo(() => ({
     "Additional Page": 150,
     "Advanced SEO Optimization": 300,
@@ -44,14 +58,12 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     "Ongoing Maintenance (Premium)": 150,
   }), []);
 
-  // Maintenance Plan Pricing
   const maintenancePricing = useMemo(() => ({
     "Basic": 50,
     "Standard": 150,
     "Pro": 300,
   }), []);
 
-  // Dynamic Price Calculation
   useEffect(() => {
     let total = packagesPricing[formData.packageType] || 0;
 
@@ -66,18 +78,12 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     setEstimatedPrice(total);
   }, [formData.packageType, formData.addOns, formData.maintenancePlan, packagesPricing, addOnsPricing, maintenancePricing]);
 
-  // Handles Input Changes
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
+    setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prevErrors) => ({ ...prevErrors, [name]: "" }));
   };
 
-  // Toggle Features and Add-Ons
   const handleFeatureToggle = (type, value) => {
     setFormData((prev) => ({
       ...prev,
@@ -87,15 +93,13 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     }));
   };
 
-  // Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     let newErrors = {};
 
-    if (!formData.name.trim()) newErrors.name = "Name is required.";
-    if (!formData.email.trim()) newErrors.email = "Email is required.";
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required.";
-    if (!formData.packageType.trim()) newErrors.packageType = "Please select a package.";
+    ["name", "email", "phone", "company", "industry", "packageType", "budget"].forEach((field) => {
+      if (!formData[field].trim()) newErrors[field] = "This field is required.";
+    });
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -121,17 +125,21 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
       setTimeout(() => setIsOpen(false), 1500);
       setTimeout(() => {
         setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          company: '',
-          industry: '',
-          packageType: '',
+          name: "",
+          email: "",
+          phone: "",
+          company: "",
+          industry: "",
+          packageType: "",
           addOns: [],
-          maintenancePlan: '',
-          budget: '',
-          deadline: '',
-          notes: '',
+          maintenancePlan: "",
+          budget: "",
+          deadline: "",
+          notes: "",
+          websitePurpose: "",
+          preferredDesignStyle: "",
+          competitorWebsites: "",
+          additionalFeatures: "",
           estimatedPrice: 0,
         });
       }, 2000);
@@ -144,34 +152,55 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     }
   };
 
-  // UI Form
   return (
     <div className="container mt-3">
       <h2 className="mb-4">Website Development Inquiry</h2>
       <form onSubmit={handleSubmit} className="row text-start gap-2 fw-bold">
-
+        
         <label>Name</label>
-        <input type="text" className={`form-control ${errors.name ? "is-invalid" : ""}`} name="name" value={formData.name} onChange={handleChange} required />
-        {errors.name && <div className="invalid-feedback">{errors.name}</div>}
+        <input type="text" name="name" className="form-control" value={formData.name} onChange={handleChange} required />
+        {errors.name && <small className="text-danger">{errors.name}</small>}
 
         <label>Email</label>
-        <input type="email" className={`form-control ${errors.email ? "is-invalid" : ""}`} name="email" value={formData.email} onChange={handleChange} required />
-        {errors.email && <div className="invalid-feedback">{errors.email}</div>}
+        <input type="email" name="email" className="form-control" value={formData.email} onChange={handleChange} required />
+        {errors.email && <small className="text-danger">{errors.email}</small>}
 
         <label>Phone</label>
-        <input type="tel" className={`form-control ${errors.phone ? "is-invalid" : ""}`} name="phone" value={formData.phone} onChange={handleChange} required />
-        {errors.phone && <div className="invalid-feedback">{errors.phone}</div>}
+        <input type="tel" name="phone" className="form-control" value={formData.phone} onChange={handleChange} required />
+        {errors.phone && <small className="text-danger">{errors.phone}</small>}
+
+        <label>Company</label>
+        <input type="text" name="company" className="form-control" value={formData.company} onChange={handleChange} required />
+        {errors.company && <small className="text-danger">{errors.company}</small>}
+
+        <label>Industry</label>
+          <select name="industry" value={formData.industry} className="form-control" onChange={handleChange} required>
+            <option value="">Select Industry</option>
+            {industryOptions.map((ind) => (
+              <option key={ind} value={ind}>{ind}</option>
+            ))}
+          </select>
+          {errors.industry && <small className="text-danger">{errors.industry}</small>}
 
         <label>Website Package</label>
-        <select className={`form-control ${errors.packageType ? "is-invalid" : ""}`} name="packageType" value={formData.packageType} onChange={handleChange} required>
-          <option value="">Select a Package</option>
-          {Object.keys(packagesPricing).map((pkg) => (
-            <option key={pkg} value={pkg}>{pkg} - ${packagesPricing[pkg].toLocaleString()}</option>
-          ))}
-        </select>
-        {errors.packageType && <div className="invalid-feedback">{errors.packageType}</div>}
+          <select name="packageType" value={formData.packageType} className="form-control" onChange={handleChange} required>
+            <option value="">Select a Package</option>
+            {Object.keys(packagesPricing).map((pkg) => (
+              <option key={pkg} value={pkg}>{pkg} - ${packagesPricing[pkg].toLocaleString()}</option>
+            ))}
+          </select>
+          {errors.packageType && <small className="text-danger">{errors.packageType}</small>}
 
-        <label>Add-On Features</label>
+        <label>Budget</label>
+          <select name="budget" value={formData.budget} className="form-control" onChange={handleChange} required>
+            <option value="">Select Budget Range</option>
+              {budgetOptions.map((range) => (
+            <option key={range} value={range}>{range}</option>
+              ))}
+          </select>
+            {errors.budget && <small className="text-danger">{errors.budget}</small>}
+
+        <label>Add-On Features (Optional)</label>
         <div className="d-flex flex-wrap">
           {Object.keys(addOnsPricing).map((addOn) => (
             <button type="button" key={addOn} className={`btn m-1 ${formData.addOns.includes(addOn) ? "btn-success" : "btn-outline-danger"}`} onClick={() => handleFeatureToggle("addOns", addOn)}>
@@ -179,6 +208,7 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
             </button>
           ))}
         </div>
+    
 
         <h4 className="mt-3 text-primary">Estimated Price: ${estimatedPrice.toLocaleString()}</h4>
         <button type="submit" className="btn btn-success mt-3" disabled={loading}>{loading ? "Submitting..." : "Submit Inquiry"}</button>

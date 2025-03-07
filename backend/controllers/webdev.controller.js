@@ -7,18 +7,16 @@ export const handleWebDevInquiry = async (req, res) => {
   try {
     const {
       name, email, phone, company, industry, packageType,
-      addOns = [], maintenancePlan, budget, deadline, notes, estimatedPrice
+      addOns = [], maintenancePlan, budget, deadline, notes,
+      websitePurpose, preferredDesignStyle, competitorWebsites,
+      additionalFeatures, estimatedPrice
     } = req.body;
 
-    // ✅ Validate required fields before proceeding
     if (!name || !email || !phone || !packageType || !budget) {
       console.error("❌ Missing required fields in web development inquiry.");
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    console.log("📩 Preparing to send web development inquiry emails...");
-
-    // ✅ Set up email transporter
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       auth: {
@@ -27,67 +25,68 @@ export const handleWebDevInquiry = async (req, res) => {
       },
     });
 
-    // 📦 Package Descriptions (Frontend should send the name, backend adds more details)
-    const packageDescriptions = {
-      "Starter Package": "1-page Landing Page + Basic SEO.",
-      "Business Package": "5-page Business Site + Contact Form + SEO.",
-      "E-Commerce Package": "Shopify or Custom Store + 5 Products + Payment Setup.",
-      "Custom MVP": "React-based web app with login & database.",
-    };
-
-    // ✅ Email Content (Shared Between Admin & Client)
     const emailContent = `
-      <h3>Hello ${name},</h3>
-      <p>Thank you for your website development inquiry! Here’s a breakdown of your estimated cost:</p>
-      <ul>
-        <li><strong>📌 Package:</strong> ${packageType} - $${estimatedPrice.toLocaleString()}</li>
-        <li><strong>📦 Package Description:</strong> ${packageDescriptions[packageType] || "No description available."}</li>
-        <li><strong>⚙️ Add-Ons:</strong> ${addOns.length ? addOns.join(", ") : "None selected"}</li>
-        <li><strong>🔧 Maintenance Plan:</strong> ${maintenancePlan || "None"}</li>
-        <li><strong>💰 Budget:</strong> ${budget}</li>
-        <li><strong>⏳ Deadline:</strong> ${deadline || "Not specified"}</li>
-        <li><strong>📝 Additional Notes:</strong> ${notes || "None"}</li>
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+      <h2 style="color: #333;">📩 Website Development Inquiry Received</h2>
+      <p>Dear ${name},</p>
+  
+      <p>Thank you for reaching out regarding your website development needs! We have received your inquiry and appreciate the opportunity to assist you. Below is a summary of your request:</p>
+  
+      <h3 style="color: #444;">📌 Project Overview</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li><strong>👤 Name:</strong> ${name}</li>
+        <li><strong>📧 Email:</strong> ${email}</li>
+        <li><strong>📞 Phone:</strong> ${phone}</li>
+        <li><strong>🏢 Company:</strong> ${company}</li>
+        <li><strong>🏭 Industry:</strong> ${industry}</li>
+        <li><strong>💼 Package Selected:</strong> ${packageType} - $${estimatedPrice.toLocaleString()}</li>
+        <li><strong>💰 Budget Range:</strong> ${budget}</li>
+        <li><strong>⏳ Project Deadline:</strong> ${deadline || "Not specified"}</li>
       </ul>
-      <h2>Total Estimated Cost: <b>$${estimatedPrice.toLocaleString()}</b></h2>
-      <p>If you’d like to move forward, let me know! I'm happy to discuss further.</p>
-      <br />
-      <p>Best,</p>
-      <p>[Your Name]</p>
-      <p>[Your Contact Info]</p>
-      <p>[Your Business Name]</p>
-    `;
+  
+      <h3 style="color: #444;">⚙️ Additional Details</h3>
+      <ul style="list-style: none; padding: 0;">
+        <li><strong>🌍 Website Purpose:</strong> ${websitePurpose || "Not specified"}</li>
+        <li><strong>🎨 Preferred Design Style:</strong> ${preferredDesignStyle || "Not specified"}</li>
+        <li><strong>🏆 Competitor Websites:</strong> ${competitorWebsites || "None provided"}</li>
+        <li><strong>➕ Additional Features:</strong> ${additionalFeatures || "None"}</li>
+        <li><strong>🔧 Maintenance Plan:</strong> ${maintenancePlan || "None"}</li>
+        <li><strong>📝 Additional Notes:</strong> ${notes || "None provided"}</li>
+      </ul>
+  
+      <h3 style="color: #444;">💵 Estimated Cost: <span style="color: #27ae60;">$${estimatedPrice.toLocaleString()}</span></h3>
+  
+      <p style="margin-top: 20px;">Our team will review your request and reach out within the next 24-48 hours to discuss the next steps.</p>
+  
+      <h3 style="color: #444;">🚀 What's Next?</h3>
+      <p>If you'd like to expedite the process, feel free to reply to this email with any additional details or questions. We’re excited to bring your vision to life!</p>
+  
+      <p style="margin-top: 30px;">Best regards,</p>
+      <p><strong>Joshua T. Byers</strong></p>
+      <p><strong>Terra'Novare</strong></p>
+      <p><strong><a href="https://terranovare.tech">Terranovare Website</strong></p>
+    </div>
+  `;
+  
 
-    // ✅ Send Email to Admin
-    try {
-      await transporter.sendMail({
-        from: `"Web Dev Inquiry" <${process.env.EMAIL_USER}>`,
-        to: process.env.ADMIN_EMAIL,
-        subject: `🌐 New Website Development Inquiry from ${name}`,
-        html: emailContent,
-      });
-      console.log("✅ Admin email sent successfully!");
-    } catch (error) {
-      console.error("❌ Error sending admin email:", error);
-    }
+    await transporter.sendMail({
+      from: `"Web Dev Inquiry" <${process.env.EMAIL_USER}>`,
+      to: process.env.ADMIN_EMAIL,
+      subject: `🌐 New Inquiry from ${name}`,
+      html: emailContent,
+    });
 
-    // ✅ Send Email to Client
-    try {
-      await transporter.sendMail({
-        from: `"Web Dev Team" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: `🌐 Your Web Development Inquiry Confirmation`,
-        html: emailContent,
-      });
-      console.log("✅ Client email sent successfully!");
-    } catch (error) {
-      console.error("❌ Error sending client email:", error);
-    }
+    await transporter.sendMail({
+      from: `"Web Dev Team" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: `🌐 Your Inquiry Confirmation`,
+      html: emailContent,
+    });
 
-    // ✅ Respond to frontend
-    res.status(200).json({ message: "Web development inquiry submitted successfully!" });
+    res.status(200).json({ message: "Inquiry submitted successfully!" });
 
   } catch (error) {
-    console.error("❌ Error processing web development inquiry:", error);
-    res.status(500).json({ error: "Internal Server Error. Please try again later." });
+    console.error("❌ Error processing inquiry:", error);
+    res.status(500).json({ error: "Internal Server Error." });
   }
 };
