@@ -54,9 +54,21 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     "Live Chat Integration": 300,
     "Booking System": 1000,
     "E-Commerce Expansion": 800,
-    "Ongoing Maintenance (Basic)": 50,
-    "Ongoing Maintenance (Premium)": 150,
+    // "Ongoing Maintenance (Basic)": 50,
+    // "Ongoing Maintenance (Premium)": 150,
   }), []);
+
+  const additionalFeaturesOptions = [
+    "Blog Integration",
+    "Live Chat",
+    "Customer Portal",
+    "Multilingual Support",
+    "Advanced Analytics",
+    "Newsletter Signup",
+    "Custom Animations",
+    "Dark Mode Toggle",
+    "Other"
+  ];
 
   const maintenancePricing = useMemo(() => ({
     "Basic": 50,
@@ -64,6 +76,27 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
     "Pro": 300,
   }), []);
 
+  const websitePurposeOptions = [
+    "Business Website",
+    "E-Commerce Store",
+    "Portfolio",
+    "Blog/News",
+    "Non-Profit/Charity",
+    "Landing Page",
+    "Other"
+  ];
+
+  const designStyleOptions = [
+    "Minimalist",
+    "Modern & Sleek",
+    "Bold & High-Contrast",
+    "Corporate & Professional",
+    "Creative & Artsy",
+    "Fun & Playful",
+    "Dark Mode",
+    "Other"
+  ];
+  
   useEffect(() => {
     let total = packagesPricing[formData.packageType] || 0;
 
@@ -182,6 +215,26 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
           </select>
           {errors.industry && <small className="text-danger">{errors.industry}</small>}
 
+          <label>Website Purpose</label>
+            <select name="websitePurpose" value={formData.websitePurpose} className="form-control" onChange={handleChange}>
+              <option value="">Select Website Purpose</option>
+              {websitePurposeOptions.map((purpose) => (
+                <option key={purpose} value={purpose}>{purpose}</option>
+              ))}
+            </select>
+            
+            <label>Preferred Design Style</label>
+              <select name="preferredDesignStyle" value={formData.preferredDesignStyle} className="form-control" onChange={handleChange}>
+                <option value="">Select a Design Style</option>
+                {designStyleOptions.map((style) => (
+                  <option key={style} value={style}>{style}</option>
+                ))}
+              </select>
+              
+              {formData.preferredDesignStyle === "Other" && (
+                <input type="text" name="customDesignStyle" className="form-control" value={formData.customDesignStyle} onChange={handleChange} placeholder="Describe your preferred style..." />
+              )}
+
         <label>Website Package</label>
           <select name="packageType" value={formData.packageType} className="form-control" onChange={handleChange} required>
             <option value="">Select a Package</option>
@@ -208,6 +261,47 @@ const WebDevForm = ({ setIsOpen, onSuccess }) => {
             </button>
           ))}
         </div>
+
+        <label>Additional Features (Optional)</label>
+            <div className="d-flex flex-wrap">
+              {additionalFeaturesOptions.map((feature) => (
+                <button
+                  type="button"
+                  key={feature}
+                  className={`btn m-1 ${formData.additionalFeatures.includes(feature) ? "btn-success" : "btn-outline-primary"}`}
+                  onClick={() => handleFeatureToggle("additionalFeatures", feature)}
+                >
+                  {feature}
+                </button>
+              ))}
+            </div>
+            
+            {formData.additionalFeatures.includes("Other") && (
+              <input
+                type="text"
+                name="customAdditionalFeatures"
+                value={formData.customAdditionalFeatures}
+                onChange={handleChange}
+                placeholder="Describe any other features you need..."
+              />
+            )}
+        <label>Maintenance Plan (Optional)</label>
+          <select name="maintenancePlan" value={formData.maintenancePlan} className="form-control" onChange={handleChange}>
+            <option value="">Select a Maintenance Plan</option>
+            {Object.keys(maintenancePricing).map((plan) => (
+              <option key={plan} value={plan}>{plan}</option>
+            ))}
+          </select>
+
+        <label>Project Deadline</label>
+          <input type="date" name="deadline" value={formData.deadline} className="form-control" onChange={handleChange} required />
+          {errors.deadline && <small className="text-danger">{errors.deadline}</small>}
+
+          <label>Competitor Websites (Optional)</label>
+          <textarea name="competitorWebsites" value={formData.competitorWebsites} className="form-control" onChange={handleChange} placeholder="List competitor websites, separated by commas..." />
+
+          <label>Additional Notes (Optional)</label>
+          <textarea name="notes" value={formData.notes} onChange={handleChange} className="form-control" placeholder="Any extra details you'd like to share..." />
     
 
         <h4 className="mt-3 text-primary">Estimated Price: ${estimatedPrice.toLocaleString()}</h4>

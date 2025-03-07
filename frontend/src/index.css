@@ -65,13 +65,6 @@ html {
   color: var(--btn-text);
 }
 
-/* button{
-  background-color: var(--btn-bg);
-  color: var(--btn-text);
-  border: none;
-  padding: 10px 15px;
-  cursor: pointer;
-} */
 .offcanvas-header {
   cursor: default;
 }
