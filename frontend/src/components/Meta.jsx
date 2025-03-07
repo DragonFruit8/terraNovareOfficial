@@ -16,11 +16,11 @@ const Meta = ({ title = "Terra'Novare", description, keywords, url, image }) => 
       <meta property="og:image" content={image} />
       <meta property="og:type" content="website" />
 
-      {/* Twitter Card */}
-      <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={image} />
-      <meta name="twitter:card" content="summary_large_image" />
+      {/* TikTok Card */}
+      <meta name="tiktok:title" content={title} />
+      <meta name="tiktok:description" content={description} />
+      <meta name="tiktok:image" content={image} />
+      <meta name="tiktok:card" content="summary_large_image" />
     </Helmet>
   );
 };
