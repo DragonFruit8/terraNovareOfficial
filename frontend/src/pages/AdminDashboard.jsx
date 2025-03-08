@@ -878,7 +878,7 @@ const AdminDashboard = () => {
         <table className="table table-bordered">
           <thead>
             <tr>
-              <th>#</th>
+              <th>Name</th>
               <th>Email</th>
               <th>Product</th>
               <th>Quantity</th>
@@ -896,11 +896,11 @@ const AdminDashboard = () => {
               </tr>
             ) : (
               requests.map((request, index) => (
-                <tr key={request.id}>
-                  <td>{index + 1}</td>
+                <tr key={request.id}>  
+                  <td>{request.fullname}</td>
                   <td>{request.user_email}</td>
                   <td>{request.product}</td>
-                  <td>{request.quantity}</td>
+                  <td>{request.stock}</td>
                   <td>{request.status}</td>
                   <td>{new Date(request.requested_at).toLocaleDateString()}</td>
                   <td>

@@ -155,15 +155,23 @@ export const getProductRequests = async (req, res) => {
     } else {
       // ✅ Fetch all product requests (admin)
       query = `
-        SELECT pr.id, pr.user_email, pr.product, pr.status, pr.requested_at,
-        p.stock, -- Keep stock from products table
-        u.address, u.city, u.state, u.country
+        SELECT 
+            pr.id, 
+            pr.user_email, 
+            pr.product, 
+            pr.status, 
+            pr.requested_at, 
+            p.stock, -- Keep stock from products table
+            u.fullname,  -- Include full name
+            u.address, 
+            u.city, 
+            u.state, 
+            u.country
         FROM product_requests pr
         JOIN users u ON pr.user_id = u.user_id
         JOIN products p ON pr.product_id = p.product_id -- Join products to get stock
         ORDER BY pr.requested_at DESC;
-
-      `;
+        `;
       params = []; // No parameters for fetching all
     }
 
