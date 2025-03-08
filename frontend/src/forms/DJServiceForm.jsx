@@ -63,7 +63,6 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
       }
     } catch (error) {
       console.error("❌ Error calculating distance:", error.response?.data || error.message);
-      setErrorMessage("Error calculating distance. Please try again.");
     }
   };
 
@@ -77,7 +76,7 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
 
       zipTimeoutRef.current = setTimeout(() => {
         handleCalculateDistance(value);
-      }, 2000); // ✅ Debounce API calls (2 sec delay)
+      }, 5000); // ✅ Debounce API calls (10 sec delay)
     }
   };
 
@@ -88,62 +87,62 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
     const setupFee = 50.0; // Fixed setup fee
     const hours = parseFloat(formData.hours) || 0;
     const distance = parseFloat(formData.distance) || 0; // ✅ Uses calculated distance
-
     return (hourlyRate * hours + mileageRate * distance + setupFee).toFixed(2);
   };
 
   // ✅ Form submission with automatically calculated distance
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!formData.zip2 || formData.zip2.length < 5) {
       alert("Please enter a valid ZIP code before submitting.");
       return;
     }
-
+  
     if (!formData.distance || isNaN(formData.distance)) {
       alert("Error: Distance calculation failed. Please try again.");
       return;
     }
-
+    setErrorMessage("");
     try {
-    // console.log("🚀 Submitting form with:", formData);
-
+      // Calculate the estimated quote
       const estimatedQuote = calculateQuote();
-
+  
+      // Submit the form data
       await axiosInstance.post("/forms/dj", { ...formData, estimatedQuote });
-
+  
       toast.success("🎵 Booking request sent successfully!");
-
+  
       // ✅ Show Thank You message after successful submission
       if (typeof onSuccess === "function") {
         onSuccess();
       }
-
-      setTimeout(() => setIsOpen(false), 1500); // ✅ Close modal after 1.5 sec
-
-      // ✅ Clear form AFTER modal closes
-      setTimeout(() => {
-        setFormData({
-          eventType: "default",
-          eventDate: "",
-          genres: [],
-          artists: [],
-          venue: "",
-          organizer: "",
-          email: "",
-          phone: "",
-          notes: "",
-          zip2: "",
-          hours: "",
-          distance: "",
-        });
-      }, 2000);
+  
+      // ✅ Close modal after 1.5 sec
+      setTimeout(() => setIsOpen(false), 1500);
+  
+      // ✅ Immediately reset form data right after submission
+      setFormData({
+        eventType: "default",
+        eventDate: "",
+        genres: [],
+        artists: [],
+        venue: "",
+        organizer: "",
+        email: "",
+        phone: "",
+        notes: "",
+        zip2: "",
+        hours: "",
+        distance: "",
+      });
+  
     } catch (error) {
       console.error("❌ Error sending request:", error.response?.data || error.message);
       alert("Failed to send request.");
     }
   };
+  
 
   return (
     <div className="container mt-3">
@@ -229,7 +228,9 @@ const DJServiceForm = ({ setIsOpen, onSuccess }) => {
 
         <label>Estimated Performance Hours</label>
         <input type="number" className="form-control" name="hours" value={formData.hours} onChange={handleChange} required />
-        
+        {/* Error Message */}
+
+        {errorMessage && <p className="warning text-danger">{errorMessage}</p>}
         <button type="submit" className="btn btn-success mt-3">🎶 Submit Booking Request</button>
       </form>
     </div>

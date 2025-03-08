@@ -36,7 +36,7 @@ import Sidebar from "./components/Sidebar";
 // import Success from "./pages/Success"
 import Terms from "./pages/Terms";
 import TermConditions from "./pages/TermConditions";
-import UnderConstruction from "./components/UnderConstruction";
+// import UnderConstruction from "./components/UnderConstruction";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -46,12 +46,12 @@ const TRACKING_ID = "G-2GV3JM9TGV";
 
 
 const App = () => {
-  const isLocalhost = window.location.hostname === "localhost";
-  const isProduction = process.env.REACT_APP_ENV === "production";
-  const isVPS = window.location.hostname.includes("terranovare.tech");
+  // const isLocalhost = window.location.hostname === "localhost";
+  // const isProduction = process.env.REACT_APP_ENV === "production";
+  // const isVPS = window.location.hostname.includes("terranovare.tech");
   const { userData, theme } = useUser();
 
-  const shouldBlockFeature = isLocalhost && !isProduction && !isVPS;
+  // const shouldBlockFeature = isLocalhost && !isProduction && !isVPS;
 
   useEffect(() => {
     document.body.className = theme; // ✅ Apply theme to body
@@ -73,7 +73,7 @@ const App = () => {
       <HelmetProvider>
         <ToastContainer position="top-center" autoClose={2000} />
         <ThemeProvider>
-          {!shouldBlockFeature ? <UnderConstruction /> : (console.log("🚫 Production security feature is disabled on localhost."))}
+          {/* {!shouldBlockFeature ? <UnderConstruction /> : (console.log("🚫 Production security feature is disabled on localhost."))} */}
           <a href="#main-content" className="skip-link">
         Skip to Content
       </a>
