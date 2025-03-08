@@ -427,7 +427,7 @@ const AdminDashboard = () => {
       theme: "grid",
       styles: { fontSize: 10 }, // Adjust font size if needed
       columnStyles: {
-        0: { cellWidth: "auto" }, // ID
+        0: { cellWidth: "auto" }, // Customer Name
         1: { cellWidth: "auto" }, // User Email
         2: { cellWidth: "auto" }, // Product
         3: { cellWidth: "auto" }, // Quantity
