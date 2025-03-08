@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import logger from '../logger.js';
+ 
 
 // ✅ Always create a new transporter instance
 const transporter = nodemailer.createTransport({
@@ -69,12 +69,12 @@ export const sendProductRequestEmail = async (to, productName) => {
   };
 
   try {
-    // logger.info("📧 Sending email to:", to);
+    // console.log("📧 Sending email to:", to);
     const info = await transporter.sendMail(mailOptions);
-    // logger.info("✅ Email sent successfully:", info.response);
+    // console.log("✅ Email sent successfully:", info.response);
     return info;
   } catch (error) {
-    logger.error("❌ Error sending email:", error);
+    console.error("❌ Error sending email:", error);
     throw new Error("Failed to send email");
   }
 };

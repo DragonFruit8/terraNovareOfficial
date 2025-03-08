@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import logger from '../logger.js';
+ 
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ export const handleWebDevInquiry = async (req, res) => {
     } = req.body;
 
     if (!name || !email || !phone || !packageType || !budget) {
-      logger.error("❌ Missing required fields in web development inquiry.");
+      console.error("❌ Missing required fields in web development inquiry.");
       return res.status(400).json({ error: "Missing required fields." });
     }
 
@@ -87,7 +87,7 @@ export const handleWebDevInquiry = async (req, res) => {
     res.status(200).json({ message: "Inquiry submitted successfully!" });
 
   } catch (error) {
-    logger.error("❌ Error processing inquiry:", error);
+    console.error("❌ Error processing inquiry:", error);
     res.status(500).json({ error: "Internal Server Error." });
   }
 };

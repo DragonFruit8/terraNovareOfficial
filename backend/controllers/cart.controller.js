@@ -1,11 +1,11 @@
 import pool from "../config/db.js"; // Neon database connection
 import jwt from "jsonwebtoken";
-import logger from '../logger.js';
+ 
 
 export const getCart = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
-      logger.error("Error: Missing user ID in request");
+      console.error("Error: Missing user ID in request");
       return res.status(400).json({ error: "User ID is required" });
     }
 
@@ -23,7 +23,7 @@ export const getCart = async (req, res) => {
     const cart_id = cart.rows[0].cart_id;
     res.json(cart.rows);
   } catch (error) {
-    logger.error("Error fetching cart:", error);
+    console.error("Error fetching cart:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -70,7 +70,7 @@ export const addToCart = async (req, res) => {
 
     return res.json({ message: "Item added to cart successfully", data: cartItem.rows[0] });
   } catch (error) {
-    logger.error("❌ Error adding to cart:", error);
+    console.error("❌ Error adding to cart:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -118,7 +118,7 @@ export const removeFromCart = async (req, res) => {
 
     res.json({ message: "Item removed from cart", data: removedItem.rows[0] });
   } catch (error) {
-    logger.error("❌ Error removing from cart:", error);
+    console.error("❌ Error removing from cart:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -135,7 +135,7 @@ export const incrementItem = async (req, res) => {
     );
     res.json({ message: "Item quantity increased" });
   } catch (error) {
-    logger.error("Error incrementing item:", error);
+    console.error("Error incrementing item:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -172,7 +172,7 @@ export const decrementItem = async (req, res) => {
 
     return res.json({ message: "Item quantity decreased", data: cartItem.rows[0] });
   } catch (error) {
-    logger.error("Error decrementing item:", error);
+    console.error("Error decrementing item:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

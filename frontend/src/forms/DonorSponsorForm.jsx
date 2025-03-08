@@ -56,22 +56,20 @@ export default function DonorSponsorForm({ onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({}); // Clear previous errors
     let newErrors = {};
   
-    // ✅ Improved Validation
+    // Validate required fields
     if (!formData.name.trim()) newErrors.name = "Name is required.";
     if (!formData.email.trim()) newErrors.email = "Email is required.";
-    
-    // Validate contributionType only if it's not the default
     if (formData.contributionType === "default") {
       newErrors.contributionType = "Please select a valid option.";
     }
-    
-    // If donation is selected, check if the amount is provided
     if (formData.contributionType === "donation" && !formData.amount) {
       newErrors.amount = "Please enter a donation amount.";
     }
   
+    // If errors exist, stop form submission
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -79,13 +77,14 @@ export default function DonorSponsorForm({ onSuccess }) {
   
     try {
       setLoading(true);
-      const stripe = await stripePromise;
-      if (!stripe) throw new Error("Stripe failed to initialize");
   
-      if (formData.contributionType === "donation" && formData.amount) {
+      // If donation, handle Stripe checkout
+      if (formData.contributionType === "donation") {
+        const stripe = await stripePromise;
+        if (!stripe) throw new Error("Stripe failed to initialize");
+  
         alert("Thank you for your support! Redirecting to checkout...");
   
-        // Handle donation checkout process
         const response = await axiosInstance.post("/create-checkout-session", {
           amount: Number(formData.amount),
           email: formData.email,
@@ -93,26 +92,28 @@ export default function DonorSponsorForm({ onSuccess }) {
   
         if (response.data.id) {
           onSuccess();
-          setTimeout(() => stripe.redirectToCheckout({ sessionId: response.data.id }), 3000);
-        }
-      } else if (formData.contributionType !== "default") {
-        // For any other contributionType, submit to donor-sponsor
-        const response = await axiosInstance.post("/forms/inquiry/donor-sponsor", formData);
-        if (response.status === 200) {
-          onSuccess();
-          alert("Form submitted successfully!");
-        } else {
-          throw new Error("Failed to submit form.");
+          return stripe.redirectToCheckout({ sessionId: response.data.id });
         }
       }
-      toast.success("🚀 Inquiry submitted successfully!");
+  
+      // For all other contributions, submit to donor-sponsor route
+      const response = await axiosInstance.post("/forms/donor-sponsor", formData);
+  
+      if (response.status === 200) {
+        onSuccess();
+        toast.success("🚀 Inquiry submitted successfully!");
+        alert("Form submitted successfully!");
+      } else {
+        throw new Error("Failed to submit form.");
+      }
     } catch (error) {
-      console.error("Error processing donation:", error.message);
+      console.error("Error processing form:", error.message);
       alert("Failed to process form.");
     } finally {
       setLoading(false);
     }
   };
+  
   
 
   return (

@@ -1,16 +1,16 @@
 import { transporter } from "../services/email.service.js"; // ✅ Reuse global transporter
 import bcrypt from "bcryptjs";
 import pool from "../config/db.js";
-import logger from '../logger.js';
+ 
 
 export const getUserProfile = async (req, res) => {
   try {
     if (!req.user || !req.user.user_id) {
-      // logger.error("🔍 Incoming User ID: Undefined (Invalid Token)");
+      // console.error("🔍 Incoming User ID: Undefined (Invalid Token)");
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
 
-    // logger.info("🔍 Incoming User ID:", req.user.user_id);
+    // console.log("🔍 Incoming User ID:", req.user.user_id);
 
     const user = await pool.query(
       `SELECT user_id, username, fullname, email, roles, address, city, state, country
@@ -25,30 +25,30 @@ export const getUserProfile = async (req, res) => {
 
     res.json(user.rows[0]);
   } catch (error) {
-    logger.error("❌ Error fetching user data:", error.message);
+    console.error("❌ Error fetching user data:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 export const getAllUsers = async (req, res) => {
   try {
-    // logger.info("🔍 Checking user roles:", req.user);
+    // console.log("🔍 Checking user roles:", req.user);
 
     if (!req.user?.roles || !req.user.roles.includes("admin")) {
-      logger.error("❌ Unauthorized: User is not an admin.");
+      console.error("❌ Unauthorized: User is not an admin.");
       return res
         .status(403)
         .json({ error: "Unauthorized: Admin access required" });
     }
 
-    // logger.info("✅ Fetching users from database...");
+    // console.log("✅ Fetching users from database...");
     const users = await pool.query(
       "SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC"
     );
 
-    // logger.info("✅ Users fetched:", users.rows);
+    // console.log("✅ Users fetched:", users.rows);
     res.status(200).json(users.rows);
   } catch (error) {
-    logger.error("❌ Error fetching users:", error);
+    console.error("❌ Error fetching users:", error);
     res
       .status(500)
       .json({ error: "Internal Server Error", details: error.message });
@@ -74,7 +74,7 @@ export const requestEmailVerification = async (req, res) => {
 
     res.json({ message: "Verification email sent!" });
   } catch (error) {
-    logger.error("Error sending verification email:", error);
+    console.error("Error sending verification email:", error);
     res.status(500).json({ error: "Failed to send verification email" });
   }
 };
@@ -126,12 +126,12 @@ export const sendProductRequestEmail = async (to, productName) => {
   };
 
   try {
-    // logger.info("📨 Sending email to:", to);
+    // console.log("📨 Sending email to:", to);
     const info = await transporter.sendMail(mailOptions);
-    // logger.info("✅ Email sent successfully:", info.response);
+    // console.log("✅ Email sent successfully:", info.response);
     return info;
   } catch (error) {
-    logger.error("❌ Error sending email:", error);
+    console.error("❌ Error sending email:", error);
     throw new Error("Failed to send email");
   }
 };
@@ -142,7 +142,7 @@ export const updateUserProfile = async (req, res) => {
     if (!req.user || !req.user.user_id) {
       return res.status(401).json({ error: "Unauthorized" });
     }
-    // logger.info("Update profile request body:", req.body, req.user.user_id, );
+    // console.log("Update profile request body:", req.body, req.user.user_id, );
 
     const userId = req.user.user_id;
     const { username, address, city, state, country } = req.body;
@@ -189,7 +189,7 @@ export const updateUserProfile = async (req, res) => {
     // Return the updated user profile
     res.json(result.rows[0]);
   } catch (error) {
-    logger.error("❌ Error updating profile:", error.stack || error);
+    console.error("❌ Error updating profile:", error.stack || error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -234,10 +234,10 @@ export const updateUserPassword = async (req, res) => {
       [hashedPassword, userId]
     );
 
-    // logger.info("✅ Password updated for user:", userId);
+    // console.log("✅ Password updated for user:", userId);
     return res.json({ message: "Password updated successfully!" });
   } catch (error) {
-    logger.error("❌ Error updating password:", error.message);
+    console.error("❌ Error updating password:", error.message);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };

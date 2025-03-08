@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import pool from "../config/db.js";
 import axios from "axios";
 import dotenv from "dotenv";
-import logger from '../logger.js';
+ 
 dotenv.config();
 
 // ✅ Email Transporter Setup
@@ -73,7 +73,7 @@ export const signup = async (req, res) => {
     // ✅ Securely hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // logger.info("🔹 Inserting new user into database...");
+    // console.log("🔹 Inserting new user into database...");
 
     // ✅ Insert user into DB & return user info
     const newUser = await pool.query(
@@ -83,7 +83,7 @@ export const signup = async (req, res) => {
       [username.trim(), fullname.trim(), email, hashedPassword, `{${userRole}}`] // ✅ PostgreSQL-friendly roles
     );
 
-    // logger.info("✅ User registered successfully:", newUser.rows[0]);
+    // console.log("✅ User registered successfully:", newUser.rows[0]);
 
     return res.status(201).json({
       message: "User registered successfully!",
@@ -92,7 +92,7 @@ export const signup = async (req, res) => {
     });
 
   } catch (error) {
-    logger.error("❌ Error registering user:", error);
+    console.error("❌ Error registering user:", error);
 
     // ✅ Handle duplicate email error
     if (error.code === "23505") {
@@ -116,7 +116,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ error: "reCAPTCHA token missing" });
     }
 
-    // logger.info("🔹 Verifying reCAPTCHA token...");
+    // console.log("🔹 Verifying reCAPTCHA token...");
 
     const googleResponse = await axios.post(
       `https://www.google.com/recaptcha/api/siteverify`,
@@ -129,13 +129,13 @@ export const login = async (req, res) => {
       }
     );
 
-    // logger.info("🔹 Google reCAPTCHA Response:", googleResponse.data);
+    // console.log("🔹 Google reCAPTCHA Response:", googleResponse.data);
 
     if (!googleResponse.data.success) {
       return res.status(400).json({ error: "reCAPTCHA verification failed" });
     }
 
-    // logger.info("✅ reCAPTCHA verified. Proceeding with login...");
+    // console.log("✅ reCAPTCHA verified. Proceeding with login...");
 
     // ✅ Query DB for user
     const { rows } = await pool.query(
@@ -158,7 +158,7 @@ export const login = async (req, res) => {
     // 🔹 **Fix: Ensure roles is always an array**
     const roles = Array.isArray(user.roles) ? user.roles : [user.roles];
 
-    // logger.info("🔹 User roles:", roles);
+    // console.log("🔹 User roles:", roles);
 
     // ✅ Generate JWT token
     const token = jwt.sign(
@@ -172,7 +172,7 @@ export const login = async (req, res) => {
       { expiresIn: "12h" }
     );
 
-    // logger.info("✅ Login successful:", { user_id: user.user_id, email: user.email });
+    // console.log("✅ Login successful:", { user_id: user.user_id, email: user.email });
 
     // ✅ Return token & user data (excluding password)
     res.json({
@@ -185,7 +185,7 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    logger.error("❌ Login Error:", error);
+    console.error("❌ Login Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -199,17 +199,17 @@ export const getAllUsers = async (req, res) => {
 
     res.json(users);
   } catch (error) {
-    logger.error("❌ Error fetching users:", error);
+    console.error("❌ Error fetching users:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
 // ✅ Fetch User Profile
 export const getUserProfile = async (req, res) => {
   try {
-    logger.info("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
+    console.log("🔍 Incoming User ID:", req.user?.user_id); // ✅ Debugging user ID
 
     if (!req.user || !req.user.user_id) {
-      logger.error("🚫 Missing user ID in request!");
+      console.error("🚫 Missing user ID in request!");
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
 
@@ -225,10 +225,10 @@ export const getUserProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // logger.info("✅ User fetched successfully:", user.rows[0]);
+    // console.log("✅ User fetched successfully:", user.rows[0]);
     res.json(user.rows[0]);
   } catch (error) {
-    logger.error("❌ Error fetching user data:", error.message);
+    console.error("❌ Error fetching user data:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -245,7 +245,7 @@ export const getCurrentUser = async (req, res) => {
 
     res.json(user);
   } catch (error) {
-    logger.error("❌ Error fetching user:", error);
+    console.error("❌ Error fetching user:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -287,7 +287,7 @@ export const updateUserProfile = async (req, res) => {
 
     res.status(200).json(updatedUser.rows[0]);
   } catch (error) {
-    logger.error("❌ Error updating user profile:", error.message);
+    console.error("❌ Error updating user profile:", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -331,7 +331,7 @@ export const updatePassword = async (req, res) => {
 
     res.json({ message: "Password updated successfully" });
   } catch (error) {
-    logger.error("❌ Error updating password:", error);
+    console.error("❌ Error updating password:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -367,7 +367,7 @@ export const forgotPassword = async (req, res) => {
 
     res.json({ message: "Password reset email sent!" });
   } catch (error) {
-    logger.error("❌ Error in forgotPassword:", error);
+    console.error("❌ Error in forgotPassword:", error);
     res.status(500).json({ error: "Error sending email" });
   }
 };
@@ -409,7 +409,7 @@ export const checkUsernameAvailability = async (req, res) => {
 
     res.status(200).json({ available: true });
   } catch (error) {
-    logger.error("❌ Error checking username:", error);
+    console.error("❌ Error checking username:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

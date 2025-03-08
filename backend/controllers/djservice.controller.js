@@ -10,11 +10,11 @@ export const handleDJInquiry = async (req, res) => {
 
     // ✅ Validate required fields before proceeding
     if (!eventType || !eventDate || !venue || !organizer || !email || !phone || !hours || !distance) {
-      logger.error("❌ Missing required fields in inquiry request.");
+      console.error("❌ Missing required fields in inquiry request.");
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    logger.info("📩 Preparing to send emails for DJ Inquiry...");
+    console.log("📩 Preparing to send emails for DJ Inquiry...");
 
     // ✅ Set up email transporter
     const transporter = nodemailer.createTransport({
@@ -49,7 +49,7 @@ export const handleDJInquiry = async (req, res) => {
     };
 
     await transporter.sendMail(adminMailOptions);
-    logger.info("✅ Admin email sent successfully!");
+    console.log("✅ Admin email sent successfully!");
 
     // ✅ Email to Customer
     const customerMailOptions = {
@@ -76,12 +76,12 @@ export const handleDJInquiry = async (req, res) => {
     };
 
     await transporter.sendMail(customerMailOptions);
-    logger.info("✅ Customer email sent successfully!");
+    console.log("✅ Customer email sent successfully!");
 
     // ✅ Response back to frontend
     res.status(200).json({ message: "Inquiry submitted successfully!" });
   } catch (error) {
-    logger.error("❌ Error sending inquiry:", error);
+    console.error("❌ Error sending inquiry:", error);
     res.status(500).json({ error: "Internal Server Error. Please try again later." });
   }
 };

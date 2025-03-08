@@ -29,7 +29,7 @@ import fs from "fs";
 import multer from "multer";
 import axios from "axios";
 import { getLatLng } from "./utils/getLatLng.js"; 
-import { createLogger, format, transports } from 'winston';
+
 
 dotenv.config({ path: "./.env" });
 
@@ -54,23 +54,10 @@ app.options("*", (req, res) => {
   res.status(200).end();
 });
 
-const logger = createLogger({
-  level: 'info', // Change to 'debug' for more details
-  format: format.combine(
-    format.timestamp(),
-    format.json()
-  ),
-  transports: [
-    new transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new transports.File({ filename: 'logs/combined.log' }),
-    new transports.Console({ format: format.simple() }) // Optional: Show logs in console too
-  ],
-});
-
 const uploadDir = path.resolve("uploads/music");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-  logger.info("📂 Created upload directory:", uploadDir);
+  console.log("📂 Created upload directory:", uploadDir);
 }
 
 const storage = multer.diskStorage({
@@ -85,13 +72,18 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+const upload = multer({ 
+  storage,
+  limits: {
+  fileSize: 3000000
+  }, // 3MB file size limit
+ });
 
 app.post("/api/upload-music", upload.single("music"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded." });
   }
-  logger.info("✅ Uploaded File:", req.file.filename);
+  console.log("✅ Uploaded File:", req.file.filename);
   res.json({
     message: "✅ File uploaded successfully!",
     filename: req.file.filename,
@@ -135,7 +127,7 @@ app.use("/api/user", authenticateUser, userRoutes);
 app.use("/api/forms", inquiryRoutes);
 
 if (!getLatLng) {
-  logger.error("❌ getLatLng is not imported correctly.");
+  console.log("❌ getLatLng is not imported correctly.");
 }
 
 // ✅ Proxy API for calculating distance between ZIP codes
@@ -144,16 +136,16 @@ app.post("/api/distance", async (req, res) => {
     const { zip1, zip2 } = req.body;
     if (!zip1 || !zip2) return res.status(400).json({ error: "ZIP codes are required" });
 
-    logger.info(`📌 Received ZIP codes: zip1=${zip1}, zip2=${zip2}`);
+    console.log(`📌 Received ZIP codes: zip1=${zip1}, zip2=${zip2}`);
 
     // ✅ Fetch latitude/longitude for both ZIPs
     const coords1 = await getLatLng(zip1);
     const coords2 = await getLatLng(zip2);
 
-    logger.info(`📍 Coordinates: ${zip1} → ${coords1}, ${zip2} → ${coords2}`);
+    console.log(`📍 Coordinates: ${zip1} → ${coords1}, ${zip2} → ${coords2}`);
 
     if (!coords1 || !coords2) {
-      logger.error("❌ Geocoding failed! Invalid ZIP codes.");
+      console.log("❌ Geocoding failed! Invalid ZIP codes.");
       return res.status(400).json({ error: `Invalid ZIP Code(s): ${zip2}` });
     }
 
@@ -172,33 +164,34 @@ app.post("/api/distance", async (req, res) => {
       }
     );
 
-    logger.info("🛰 Distance API Response:", response.data);
+    console.log("🛰 Distance API Response:", response.data);
 
     const distanceInMiles = (response.data.distances[0][1] / 1609.34).toFixed(2);
     res.json({ distance: distanceInMiles });
   } catch (error) {
-    logger.error("❌ Distance API Error:", error.response?.data || error.message);
+    console.log("❌ Distance API Error:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to fetch distance" });
   }
 });
 
+// ✅ Print all routes when server starts
+// const routeCheck = printRoutes(app);
 // ✅ Health Check Endpoint
 app.get("/api/health", (req, res) => {
+  // console.log(routeCheck);
   res.status(200).json({ status: "Server is running! Check your console..." });
 });
 
 // ✅ Global Error Handling
 app.use((err, req, res, next) => {
-  logger.error("❌ Server Error:", err);
+  console.log("❌ Server Error:", err);
   res.status(500).json({ error: "Internal server error" });
 });
 
-// ✅ Print all routes when server starts
-printRoutes(app);
 
 const PORT = process.env.PORT || 9000;
 app.listen(PORT, () => {
-  logger.info(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
   syncAllProducts();
 });
 

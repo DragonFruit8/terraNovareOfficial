@@ -1,21 +1,29 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import logger from '../logger.js';
+
 
 
 dotenv.config();
 
 export const handleSponsorInquiry = async (req, res) => {
   try {
-    const { name, email, organization, contributionType, involvement, impacts, message, amount } = req.body;
+    const { 
+      name, 
+      email, 
+      organization, 
+      contributionType, 
+      involvement, 
+      impacts, 
+      message, 
+      amount } = req.body;
 
     // ✅ Validate required fields
     if (!name || !email || !contributionType) {
-      logger.error("❌ Missing required fields in sponsorship inquiry.");
+      console.error("❌ Missing required fields in sponsorship inquiry.");
       return res.status(400).json({ error: "Missing required fields." });
     }
 
-    logger.info("📩 Preparing to send sponsorship inquiry emails...");
+    console.log("📩 Preparing to send sponsorship inquiry emails...");
 
     // ✅ Set up email transporter
     const transporter = nodemailer.createTransport({
@@ -47,7 +55,7 @@ export const handleSponsorInquiry = async (req, res) => {
     };
 
     await transporter.sendMail(adminMailOptions);
-    logger.info("✅ Admin email sent successfully!");
+    console.info("✅ Admin email sent successfully!");
 
     // ✅ Email to Sponsor
     const sponsorMailOptions = {
@@ -75,12 +83,12 @@ export const handleSponsorInquiry = async (req, res) => {
     };
 
     await transporter.sendMail(sponsorMailOptions);
-    logger.info("✅ Sponsor email sent successfully!");
+    console.info("✅ Sponsor email sent successfully!");
 
     // ✅ Respond to frontend
     res.status(200).json({ message: "Sponsorship inquiry submitted successfully!" });
   } catch (error) {
-    logger.error("❌ Error sending sponsorship inquiry:", error);
+    console.error("❌ Error sending sponsorship inquiry:", error);
     res.status(500).json({ error: "Internal Server Error. Please try again later." });
   }
 };

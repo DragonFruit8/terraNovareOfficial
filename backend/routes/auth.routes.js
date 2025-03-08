@@ -18,13 +18,13 @@ import { verifyPassword } from "../controllers/verify.controller.js";
 import { authenticateUser } from "../middleware/auth.middleware.js";
 import { verifyToken } from "../middleware/verifyToken.js";
 import { createCheckoutSession } from "../services/stripe.service.js";
-import logger from '../logger.js';
+ 
 
 const router = express.Router();
 
 router.get("/me", authenticateUser, getCurrentUser);
 router.get("/check-admin", verifyToken, (req, res) => {
-  logger.info("🔍 Checking admin status:", req.user.roles); // Debugging
+  console.log("🔍 Checking admin status:", req.user.roles); // Debugging
 
   if (req.user.roles.includes("admin")) {
     return res.json({ isAdmin: true });
@@ -60,7 +60,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { failureRedirect: "/login" }),
   (req, res) => {
-    // logger.info("✅ Authenticated User:", req.user); // Debugging user data
+    // console.log("✅ Authenticated User:", req.user); // Debugging user data
     res.redirect("/"); // Redirect the user after successful login
   }
 );

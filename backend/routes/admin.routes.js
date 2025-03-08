@@ -10,7 +10,7 @@ import {
   removeAdmin
 } from "../controllers/admin.controller.js";
 import { authenticateUser, isAdmin } from "../middleware/auth.middleware.js";
-import logger from '../logger.js';
+ 
 
 const router = express.Router();
 

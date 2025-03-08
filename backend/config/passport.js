@@ -39,7 +39,7 @@ passport.use(
         }
         return done(null, user.rows[0]);
       } catch (error) {
-        logger.error("Google OAuth Error:", error);
+        console.error("Google OAuth Error:", error);
         return done(error, null);
       }
     }
