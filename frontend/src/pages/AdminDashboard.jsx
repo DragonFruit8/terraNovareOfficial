@@ -397,7 +397,7 @@ const AdminDashboard = () => {
     autoTable(doc, {
       head: [
         [
-          "ID",
+          "Name",
           "Email",
           "Product",
           "QTY.",
@@ -409,7 +409,7 @@ const AdminDashboard = () => {
         ],
       ],
       body: requests.map((request) => [
-        request.id,
+        request.fullname,
         request.user_email,
         request.product,
         request.quantity || "N/A",
