@@ -50,6 +50,10 @@ const Footer = () => {
             <p>Email: <br /><Email /></p>
             <p>Phone: <br /> <Phone /> </p>
           </div>
+
+          <div className="col-md-4 p-2" >
+          <Link className="nav-link" to="/feedback">📢 Report a Bug / Give Feedback</Link>
+          </div>
         </div>
 
         {/* Copyright */}

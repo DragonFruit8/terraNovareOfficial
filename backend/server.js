@@ -3,8 +3,10 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import session from "express-session";
 import passport from "./config/passport.js";
-import printRoutes from "./utils/printRoutes.js";
+// import printRoutes from "./utils/printRoutes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import emailRoutes from "./routes/email.js"
+import feedbackRoutes from "./routes/feedback.js";
 import webhookRouter from "./routes/webhook.routes.js";
 import orderRoutes from "./routes/orders.routes.js";
 import stripeRoutes from "./routes/stripe.routes.js";
@@ -115,6 +117,8 @@ app.use("/api/stripe/webhook", express.raw({ type: "application/json" }), webhoo
 
 // ✅ API Routes
 app.use("/api", authRoutes, limiter);
+app.use("/api", emailRoutes);
+app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/verify-recaptcha", verifyRecaptcha);

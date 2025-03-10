@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
+// import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axios.config";
+import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
 import Meta from "../components/Meta";
 import Spinner from "../components/Spinner";
@@ -9,10 +11,12 @@ import Button from "react-bootstrap/Button";
 
 const Shop = () => {
   const { userData } = useUser();
+  const { cartData, addToCart, increment, decrement, disableAddToCart } = useCart();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [requestedProducts, setRequestedProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null); // 🔥 Track selected product for modal
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  // const navigate = useNavigate(); // Use for redirecting
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -25,9 +29,12 @@ const Shop = () => {
       });
 
       clearTimeout(timeoutId);
-      setProducts(response.data);
+      setProducts(response.data || []);
     } catch (error) {
-      console.error("❌ Error fetching products:", error.response?.data || error.message);
+      console.error(
+        "❌ Error fetching products:",
+        error.response?.data || error.message
+      );
       toast.error("❌ Failed to load products.");
     } finally {
       setLoading(false);
@@ -40,23 +47,23 @@ const Shop = () => {
 
   useEffect(() => {
     const fetchRequestedProducts = async () => {
-      if (!userData?.email) return; // ✅ Prevent fetching if no user
-  
+      if (!userData?.email) return;
+
       try {
         const { data } = await axiosInstance.get(
           `/products/requested?email=${encodeURIComponent(userData.email)}`
         );
-  
-        // ✅ Ensure we only store the product IDs
         setRequestedProducts(data.map((req) => req.product_id));
       } catch (error) {
-        console.error("❌ Error fetching requested products:", error.response?.data || error.message);
+        console.error(
+          "❌ Error fetching requested products:",
+          error.response?.data || error.message
+        );
       }
     };
-  
+
     fetchRequestedProducts();
-  }, [userData]); // ✅ Re-run when user logs in
-  
+  }, [userData]);
 
   const handleBuyNow = async (product) => {
     if (!product.stripe_price_id?.startsWith("price_")) {
@@ -76,7 +83,10 @@ const Shop = () => {
         throw new Error("Stripe session URL missing");
       }
     } catch (error) {
-      console.error("❌ Checkout session error:", error.response?.data || error.message);
+      console.error(
+        "❌ Checkout session error:",
+        error.response?.data || error.message
+      );
       toast.error("❌ Payment failed. Try again.");
     }
   };
@@ -98,46 +108,50 @@ const Shop = () => {
 
       toast.success("✅ Product request submitted!");
     } catch (error) {
-      console.error("❌ Error requesting product:", error.response?.data || error.message);
+      console.error(
+        "❌ Error requesting product:",
+        error.response?.data || error.message
+      );
       toast.error("❌ Failed to request product.");
-      setRequestedProducts((prev) => prev.filter((id) => id !== product.product_id));
+      setRequestedProducts((prev) =>
+        prev.filter((id) => id !== product.product_id)
+      );
     }
   };
 
-  const handleImageClick = (product) => {
-    setSelectedProduct(product); // Open modal with clicked product
-  };
-
-  const handleCloseModal = () => {
-    setSelectedProduct(null);
-  };
+  const handleImageClick = (product) => setSelectedProduct(product);
+  const handleCloseModal = () => setSelectedProduct(null);
 
   const renderProductCard = (product, isPresale = false) => {
-    const isRequested = requestedProducts.includes(product.product_id); // ✅ Check if already requested
-  
+    const isRequested = requestedProducts.includes(product.product_id);
+    const cartItems = cartData.items || []; // Ensure `items` exists
+    const cartItem = cartItems.find(
+      (item) => item.product_id === product.product_id
+    );
+    const quantity = cartItem?.quantity || 0;
+
     return (
       <div key={product.product_id} className="col-md-4 mb-4 p-4">
         <div className={`card p-3 ${isPresale ? "border-warning" : ""}`}>
-          {/* ✅ Improved readability in heading */}
           <h3 className={`mb-2 ${isPresale ? "text-warning" : ""}`}>
             {product.name} {isPresale && "🔥 (Presale)"}
           </h3>
-  
-          {/* ✅ Improved accessibility (click to open modal) */}
           <img
             src={product.image_url}
             alt={product.name}
             className="img-fluid rounded mb-2"
-            style={{ maxHeight: "400px", objectFit: "cover", cursor: "pointer" }}
+            style={{
+              maxHeight: "400px",
+              objectFit: "cover",
+              cursor: "pointer",
+            }}
             onClick={() => handleImageClick(product)}
             role="button"
             aria-label={`View details for ${product.name}`}
           />
-  
-          {/* ✅ Ensure description is properly spaced */}
-          <p className="text-muted"><small>{product.description}</small></p>
-  
-          {/* ✅ Combine `userData && product.price` check to reduce redundancy */}
+          <p className="text-muted">
+            <small>{product.description}</small>
+          </p>
           {userData ? (
             product.price ? (
               <p className="fw-bold">
@@ -152,34 +166,65 @@ const Shop = () => {
           ) : (
             <p className="text-muted">🔒 Login to see pricing</p>
           )}
-  
-          {/* ✅ Improved button accessibility & prevent unnecessary re-renders */}
           {userData && (
             <button
-              className={`btn mt-3 ${isRequested ? "btn-secondary" : "btn-primary"}`}
+              className={`btn mt-3 ${
+                isRequested ? "btn-secondary" : "btn-primary"
+              }`}
               onClick={() => handleProductRequest(product)}
               disabled={isRequested}
-              aria-label={isRequested ? "Already requested" : "Request this product"}
+              aria-label={
+                isRequested ? "Already requested" : "Request this product"
+              }
             >
               {isRequested ? "Already Requested ✅" : "Request Product"}
             </button>
           )}
-  
-          {/* ✅ Ensure "Buy Now" button only appears when Stripe price ID exists */}
           {product.stripe_price_id && (
             <button
               className="btn btn-success my-2"
               onClick={() => handleBuyNow(product)}
-              aria-label={`Buy ${product.name} now`}
             >
               Buy Now
             </button>
+          )}
+          {!disableAddToCart && (
+            <button
+              className="btn btn-primary"
+              onClick={() => addToCart(product)}
+            >
+              Add to Cart
+            </button>
+          )}
+          {/* <button
+            className="btn btn-primary my-2"
+            onClick={() =>
+              quantity > 0 ? navigate("/cart") : addToCart(product)
+            }
+          >
+            {quantity > 0 ? "Go to Cart 🛒" : "Add to Cart"}
+          </button> */}
+          {quantity > 0 && (
+            <div className="d-flex justify-content-center my-2">
+              <button
+                className="btn btn-danger me-3"
+                onClick={() => decrement(product.product_id)}
+              >
+                -
+              </button>
+              <span>{quantity}</span>
+              <button
+                className="btn btn-success ms-3"
+                onClick={() => increment(product.product_id)}
+              >
+                +
+              </button>
+            </div>
           )}
         </div>
       </div>
     );
   };
-    
 
   return (
     <>
@@ -205,48 +250,37 @@ const Shop = () => {
               <div>
                 <h3 className="mt-4 text-warning">🔥 Presale Products</h3>
                 <div className="row">
-                  {products.filter((product) => product.is_presale).map((product) => renderProductCard(product, true))}
+                  {products
+                    .filter((product) => product.is_presale)
+                    .map((product) => renderProductCard(product, true))}
                 </div>
               </div>
             )}
 
             <h3 className="mt-4">All Products</h3>
             <div className="row">
-              {products.filter((product) => !product.is_presale).length === 0 ? (
-                <p>No products available.</p>
-              ) : (
-                products.filter((product) => !product.is_presale).map((product) => renderProductCard(product, false))
-              )}
+              {products
+                .filter((product) => !product.is_presale)
+                .map((product) => renderProductCard(product))}
             </div>
           </>
         )}
       </div>
 
-      {/* 🔥 Product Modal */}
       {selectedProduct && (
         <Modal show={true} onHide={handleCloseModal} centered>
           <Modal.Header closeButton>
             <Modal.Title>{selectedProduct.name}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <img src={selectedProduct.image_url} alt={selectedProduct.name} className="img-fluid mb-3 rounded" />
+            <img
+              src={selectedProduct.image_url}
+              alt={selectedProduct.name}
+              className="img-fluid mb-3 rounded"
+            />
             <p>{selectedProduct.description}</p>
-            {selectedProduct.price && (
-              <p>
-                <strong>Price:</strong>{" "}
-                {new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(selectedProduct.price)}
-              </p>
-            )}
           </Modal.Body>
           <Modal.Footer>
-            {selectedProduct.stripe_price_id && (
-              <Button variant="success" onClick={() => handleBuyNow(selectedProduct)}>
-                Buy Now
-              </Button>
-            )}
             <Button variant="secondary" onClick={handleCloseModal}>
               Close
             </Button>

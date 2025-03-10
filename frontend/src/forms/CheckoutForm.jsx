@@ -1,53 +1,62 @@
-import { CardElement, useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
-import { useState } from "react";
+import React, { useState } from "react";
+import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import axiosInstance from "../api/axios.config";
+import { useCart } from "../context/CartContext";
+import { useUser } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
-const CheckoutForm = ({ productId, quantity }) => {
+const CheckoutForm = ({ cartItems }) => {
   const stripe = useStripe();
   const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [message, setMessage] = useState("");
+  const { cartData, clearCart } = useCart();
+  const { userData } = useUser();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     if (!stripe || !elements) return;
 
-    setIsProcessing(true);
     try {
-      // Get Payment Intent Client Secret
-      const { data } = await axiosInstance.post("/stripe/create-payment-intent", {
-        productId,
-        quantity,
+      // ✅ Send cart details to backend for payment processing
+      const { data } = await axiosInstance.post("/stripe/checkout", {
+        email: userData?.email,
+        cartItems,
       });
 
-      const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        },
-      });
+      if (data?.clientSecret) {
+        const { paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+          payment_method: { card: elements.getElement(CardElement) },
+        });
 
-      if (error) {
-        setMessage(error.message);
-      } else if (paymentIntent.status === "succeeded") {
-        setMessage("Payment successful! 🎉");
+        if (paymentIntent.status === "succeeded") {
+          // ✅ Send confirmation email after successful payment
+          await axiosInstance.post("/send-confirmation-email", {
+            email: userData?.email,
+            cartItems,
+            total: cartData.items.reduce((sum, { price, quantity }) => sum + parseFloat(price) * quantity, 0),
+          });
+
+          // ✅ Clear cart after successful purchase
+          clearCart();
+          navigate("/success");
+        }
       }
     } catch (error) {
-      setMessage("Payment failed. Please try again.");
+      console.error("❌ Payment error:", error.response?.data || error.message);
     } finally {
-      setIsProcessing(false);
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 border rounded">
-      <h2 aria-hidden="false" >Complete Your Purchase</h2>
-      <CardElement className="form-control mb-3" />
-        <PaymentElement />
-      <button className="btn btn-primary" disabled={isProcessing || !stripe}>
-        {isProcessing ? "Processing..." : "Pay Now"}
+    <form onSubmit={handleSubmit}>
+      <CardElement className="mb-3" />
+      <button className="btn btn-success" type="submit" disabled={loading}>
+        {loading ? "Processing..." : "Pay Now"}
       </button>
-      {message && <p aria-hidden="false" className="mt-3 text-danger">{message}</p>}
     </form>
   );
 };

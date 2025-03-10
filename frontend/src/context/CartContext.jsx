@@ -1,94 +1,127 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import cartService from "../services/cart.service";
 import { useUser } from "./UserContext"; // ✅ Import UserContext
 
 const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
-  const { userData, isLoggedIn } = useUser(); // ✅ Use userData from UserContext
-  const [cartData, setCartData] = useState({ items: [] });
+  const { isLoggedIn } = useUser(); // ✅ Use userData from UserContext
+  const [disableAddToCart, setDisableAddToCart] = useState(true); // ✅ Set to `true` initially
+  const [cartData, setCartData] = useState(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : { items: [] }; // ✅ Always an object with `items: []`
+  });
 
-  // ✅ Fetch Cart when User Logs In
+  // ✅ Ensure `cartData` is loaded properly from localStorage
   useEffect(() => {
-    const fetchCart = async () => {
+    const savedCart = localStorage.getItem("cart");
+    // DELETE AFTER IMPLEMENT
+    setDisableAddToCart(true);
+    if (savedCart) {
       try {
-        if (!userData || !userData.id) return;
-        const response = await cartService.getCart(userData.id);
-        setCartData(response.data || { items: [] });
+        const parsedCart = JSON.parse(savedCart);
+        if (!parsedCart.items) parsedCart.items = []; // ✅ Ensure `items` is always an array
+        setCartData(parsedCart);
       } catch (error) {
-        console.error("Error fetching cart:", error);
+        console.error("Error parsing cart data:", error);
+        setCartData({ items: [] }); // ✅ Reset cart if corrupted
       }
-    };
-    fetchCart();
-  }, [userData]); // ✅ Runs when userData changes
+    }
+  }, []);
+
+  // ✅ Sync `cartData` with localStorage every time it updates
+  useEffect(() => {
+    if (cartData && cartData.items) {
+      localStorage.setItem("cart", JSON.stringify(cartData));
+    }
+  }, [cartData]);
 
   // ✅ Add to Cart Function
-  const addToCart = async (product) => {
-    try {
-      const response = await cartService.addToCart(product.product_id, 1);
-      if (!response || !response.data) {
-        console.error("❌ No response from addToCart API");
-        return;
-      }
-  
-      setCartData((prev) => {
-        const updatedItems = prev?.items ? [...prev.items, product] : [product]; // ✅ Ensure prev.items is always an array
-  
-        return { ...prev, items: updatedItems };
-      });
-  
-      // console.log("🛒 Cart Updated:", response.data);
-    } catch (error) {
-      console.error("Error adding to cart:", error);
-    }
-  };
-  
+  const addToCart = (product) => {
+    setCartData((prevCart) => {
+      const updatedCart = { ...prevCart };
+      if (!updatedCart.items) updatedCart.items = []; // ✅ Ensure `items` exists
 
-  const increment = async (product_id) => {
-    try {
-      await cartService.increment(product_id); // Removed response assignment
-      setCartData((prev) => ({
-        ...prev,
-        items: prev.items.map((item) =>
-          item.product_id === product_id ? { ...item, quantity: item.quantity + 1 } : item
-        ),
-      }));
-    } catch (error) {
-      console.error("Error increasing quantity:", error);
-    }
+      const existingItem = updatedCart.items.find(
+        (item) => item.product_id === product.product_id
+      );
+
+      if (existingItem) {
+        updatedCart.items = updatedCart.items.map((item) =>
+          item.product_id === product.product_id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      } else {
+        updatedCart.items = [...updatedCart.items, { ...product, quantity: 1 }];
+      }
+
+      return updatedCart;
+    });
   };
-  
-  const decrement = async (product_id) => {
-    try {
-      await cartService.decrement(product_id); // Removed response assignment
-      setCartData((prev) => ({
-        ...prev,
-        items: prev.items.map((item) =>
-          item.product_id === product_id && item.quantity > 1
+
+  const increment = (productId) => {
+    setCartData((prevCart) => ({
+      ...prevCart,
+      items: prevCart.items?.map((item) =>
+        item.product_id === productId
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      ) || [],
+    }));
+  };
+
+  const decrement = (productId) => {
+    setCartData((prevCart) => ({
+      ...prevCart,
+      items: prevCart.items
+        ?.map((item) =>
+          item.product_id === productId
             ? { ...item, quantity: item.quantity - 1 }
             : item
-        ),
-      }));
-    } catch (error) {
-      console.error("Error decreasing quantity:", error);
-    }
+        )
+        .filter((item) => item.quantity > 0) || [],
+    }));
   };
 
+  const removeFromCart = (productId) => {
+    setCartData((prevCart) => ({
+      ...prevCart,
+      items: prevCart.items?.filter((item) => item.product_id !== productId) || [],
+    }));
+  };
 
-  const removeFromCart = async (product_id) => {
-    try {
-      await cartService.removeFromCart(product_id);
-      setCartData((prev) => ({
-        ...prev,
-        items: prev.items.filter((item) => item.product_id !== product_id),
-      }));
-    } catch (error) {
-      console.error("Error removing from cart:", error);
-    }
+  const mergedCart = (userCart) => {
+    let mergedItems = [...(userCart.items || [])];
+
+    (cartData.items || []).forEach((cartItem) => {
+      const existingItem = mergedItems.find(
+        (item) => item.product_id === cartItem.product_id
+      );
+
+      if (existingItem) {
+        existingItem.quantity += cartItem.quantity;
+      } else {
+        mergedItems.push(cartItem);
+      }
+    });
+
+    setCartData({ items: mergedItems });
+    localStorage.setItem("cart", JSON.stringify({ items: mergedItems }));
   };
 
   return (
-    <CartContext.Provider value={{ isLoggedIn, cartData, addToCart, increment, decrement, removeFromCart }}>
+    <CartContext.Provider
+      value={{
+        isLoggedIn,
+        cartData,
+        addToCart,
+        increment,
+        decrement,
+        removeFromCart,
+        mergedCart,
+        disableAddToCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

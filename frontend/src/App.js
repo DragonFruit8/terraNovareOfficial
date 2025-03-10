@@ -12,6 +12,7 @@ import CompleteProfile from "./pages/CompleteProfile";
 import Brand from "./pages/Brand";
 import DarkLightToggle from "./components/DarkLightToggle";
 // import Dashboard from "./pages/Dashboard";
+import Feedback from "./pages/Feedback"
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Footer from "./components/Footer";
@@ -101,6 +102,7 @@ const App = () => {
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/complete-profile" element={<CompleteProfile />} />
                 <Route path="/forgot" element={<ForgotPassword />} />
+                <Route path="/feedback" element={<Feedback />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/mission" element={<Mission />} />
                 <Route path="/next" element={<Next />} />

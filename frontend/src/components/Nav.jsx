@@ -1,3 +1,4 @@
+import { useCart } from "../context/CartContext";
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User } from "react-feather";
@@ -14,6 +15,11 @@ const Nav = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navbarRef = useRef(null);
+  const { cartData } = useCart();
+
+  // ✅ Calculate total quantity of all items
+  const totalItems =
+    cartData?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -68,24 +74,39 @@ const Nav = () => {
           aria-expanded={isNavOpen}
           aria-label="Toggle navigation"
         >
-         <FaBars />
+          <FaBars />
         </button>
 
         {/* Collapsible Navigation */}
         <div ref={navbarRef} className="collapse navbar-collapse">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li aria-hidden="false" className="nav-item">
-              <Link aria-hidden="false" className="nav-link" to="/mission" onClick={toggleNav}>
+              <Link
+                aria-hidden="false"
+                className="nav-link"
+                to="/mission"
+                onClick={toggleNav}
+              >
                 Mission
               </Link>
             </li>
             <li aria-hidden="false" className="nav-item">
-              <Link aria-hidden="false" className="nav-link" to="/brand" onClick={toggleNav}>
+              <Link
+                aria-hidden="false"
+                className="nav-link"
+                to="/brand"
+                onClick={toggleNav}
+              >
                 Brand
               </Link>
             </li>
             <li aria-hidden="false" className="nav-item">
-              <Link aria-hidden="false" className="nav-link" to="/next" onClick={toggleNav}>
+              <Link
+                aria-hidden="false"
+                className="nav-link"
+                to="/next"
+                onClick={toggleNav}
+              >
                 What's Next
               </Link>
             </li>
@@ -102,9 +123,23 @@ const Nav = () => {
                     Shop
                   </Link>
                 </li>
+                {totalItems > 0 && (
+                  <li aria-hidden="false" className="nav-item me-3">
+                    <Link className="nav-link position-relative" to="/cart">
+                      🛒
+                      <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                        {totalItems}
+                      </span>
+                    </Link>
+                  </li>
+                )}
 
                 {/* Dropdown - Wrapped in a Relative Container */}
-                <li aria-hidden="false" ref={dropdownRef} className="nav-item dropdown position-relative">
+                <li
+                  aria-hidden="false"
+                  ref={dropdownRef}
+                  className="nav-item dropdown position-relative"
+                >
                   <button
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="btn btn-secondary dropdown-toggle"
@@ -150,21 +185,42 @@ const Nav = () => {
                         </>
                       )}
                       <div className="dropdown-item p-2">
-                        <button className="btn btn-danger m-0" onClick={handleLogout}>
+                        <button
+                          className="btn btn-danger m-0"
+                          onClick={handleLogout}
+                        >
                           <LogOut /> Logout
                         </button>
                       </div>
                     </div>
                   )}
                 </li>
-
               </>
             ) : (
-              <li aria-hidden="false" className="nav-item">
-                <Link aria-hidden="false" className="btn btn-primary" to="/login">
-                  Login
-                </Link>
-              </li>
+              <>
+                <li
+                  aria-hidden="false"
+                  className="d-flex nav-item gap-2 align-items-center "
+                >
+                  <Link aria-hidden="false" className="nav-link" to="/shop">
+                    Shop
+                  </Link>
+
+                  {/* <Link className="nav-link position-relative" to="/cart">
+                    🛒
+                      <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                        {totalItems}
+                      </span>
+                  </Link> */}
+                  <Link
+                    aria-hidden="false"
+                    className="btn btn-primary"
+                    to="/login"
+                  >
+                    Login
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
         </div>
