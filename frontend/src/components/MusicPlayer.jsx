@@ -7,7 +7,7 @@ const MusicPlayer = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [playbackError, setPlaybackError] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.2);
+  const [volume, setVolume] = useState(0.05);
   const [isAdmin, setIsAdmin] = useState(false);
   const [message, setMessage] = useState("");
   const [renameFields, setRenameFields] = useState({});

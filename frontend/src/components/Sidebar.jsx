@@ -42,14 +42,46 @@ const Sidebar = () => {
 
       {/* Sidebar Drawer */}
       <div ref={sidebarRef} className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div >
-          <button id="sidebarClose" className="btn btn-close btn-close-white" onClick={()=> setIsOpen(false)}></button>
+        <div>
+          <button
+            id="sidebarClose"
+            className="btn btn-close btn-close-white"
+            onClick={() => setIsOpen(false)}
+          ></button>
         </div>
         <ul>
-          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
-          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/mission" onClick={() => setIsOpen(false)}>Missions</Link></li>
-          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/brand" onClick={() => setIsOpen(false)}>Brand</Link></li>
-          <li aria-hidden="false" className="nav-item"><Link className="nav-link" to="/next" onClick={() => setIsOpen(false)}>What's Next</Link></li>
+          <li aria-hidden="false" className="nav-item">
+            <Link
+              className="nav-link"
+              to="/mission"
+              onClick={() => setIsOpen(false)}
+            >
+              Missions
+            </Link>
+          </li>
+          <li aria-hidden="false" className="nav-item">
+            <Link
+              className="nav-link"
+              to="/brand"
+              onClick={() => setIsOpen(false)}
+            >
+              Brand
+            </Link>
+          </li>
+          <li aria-hidden="false" className="nav-item">
+            <Link
+              className="nav-link"
+              to="/next"
+              onClick={() => setIsOpen(false)}
+            >
+              What's Next
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link className="nav-link" to="/efinity"  onClick={() => setIsOpen(false)}>
+              E-Finity
+            </Link>
+          </li>
         </ul>
       </div>
     </>

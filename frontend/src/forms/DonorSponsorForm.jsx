@@ -83,7 +83,7 @@ export default function DonorSponsorForm({ onSuccess }) {
         const stripe = await stripePromise;
         if (!stripe) throw new Error("Stripe failed to initialize");
   
-        alert("Thank you for your support! Redirecting to checkout...");
+        toast.success("Thank you for your support! Redirecting to checkout...");
   
         const response = await axiosInstance.post("/create-checkout-session", {
           amount: Number(formData.amount),
@@ -101,8 +101,7 @@ export default function DonorSponsorForm({ onSuccess }) {
   
       if (response.status === 200) {
         onSuccess();
-        toast.success("🚀 Inquiry submitted successfully!");
-        alert("Form submitted successfully!");
+        toast.success("🚀 Form submitted successfully!");
       } else {
         throw new Error("Failed to submit form.");
       }

@@ -1,8 +1,10 @@
 import React from "react";
 import "../index.css";
 import Meta from "../components/Meta";
+import { useNavigate } from "react-router-dom";
 
 export default function Brand() {
+  const navigate = useNavigate();
   return (
     <>
           <Meta
@@ -81,6 +83,11 @@ export default function Brand() {
             <p aria-hidden="false" className="lead">
             to oversee sustainable development, the introduction of progressive incentive models, and the careful monitoring of land and resource utilization. By breaking down barriers to industry entry and fostering knowledge-sharing, we create opportunities for individuals to engage, learn, and contribute to the betterment of their local ecosystem. E-Finity is more than a support network—it’s a movement toward sustainable progress, where every individual plays a role in shaping a thriving, cooperative future.
             </p>
+          </div>
+          <div>
+            <button className="btn btn-secondary" onClick={()=> navigate("/efinity")}>
+              Learn More
+            </button>
           </div>
           {/* <div className="col-md-5">
             <svg

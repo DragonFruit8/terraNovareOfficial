@@ -42,7 +42,7 @@ export const getAllUsers = async (req, res) => {
 
     // console.log("✅ Fetching users from database...");
     const users = await pool.query(
-      "SELECT user_id AS id, email, roles FROM users ORDER BY user_id ASC"
+      "SELECT user_id AS id, fullname, email, roles FROM users ORDER BY user_id ASC"
     );
 
     // console.log("✅ Users fetched:", users.rows);

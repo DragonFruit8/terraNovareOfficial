@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 // import { useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axios.config";
 import { useCart } from "../context/CartContext";
@@ -11,11 +12,22 @@ import Button from "react-bootstrap/Button";
 
 const Shop = () => {
   const { userData } = useUser();
-  const { cartData, addToCart, increment, decrement, disableAddToCart } = useCart();
+  const { cartData, addToCart, increment, decrement, disableAddToCart } =
+    useCart();
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [requestedProducts, setRequestedProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showThankYou, setShowThankYou] = useState(false);
+  // const handleClose = () => setShow(false);
+  
+    const handleSuccess = () => {
+      setShowThankYou(true); // ✅ Show Thank You message
+      setTimeout(() => {
+        setShowThankYou(false); // Reset for next time
+      }, 5000);
+    };
   // const navigate = useNavigate(); // Use for redirecting
 
   const fetchProducts = useCallback(async () => {
@@ -69,20 +81,24 @@ const Shop = () => {
     if (!product.stripe_price_id?.startsWith("price_")) {
       toast.error("⚠️ Payment failed. Invalid product price.");
       return;
+    } else if (!userData?.email) {
+      toast.error("⚠️ Please login to Buy Now");
+      navigate("/login")
     }
-  
+
     try {
       const { data } = await axiosInstance.post("/stripe/checkout", {
         price_id: product.stripe_price_id,
         userEmail: userData?.email,
       });
-  
+
       if (data?.status === 200) {
         await axiosInstance.post("/send-confirmation-email", {
           userEmail: userData?.email,
         });
+        handleSuccess()
       }
-  
+
       if (data?.url) {
         window.location.href = data.url;
       } else {
@@ -95,7 +111,7 @@ const Shop = () => {
       );
       toast.error("❌ Payment failed. Try again.");
     }
-  };  
+  };
 
   const handleProductRequest = async (product) => {
     if (requestedProducts.includes(product.product_id)) {
@@ -138,74 +154,85 @@ const Shop = () => {
     // const releaseDate = new Date(product.release_date);
 
     return (
-      <div key={product.product_id} className="col-md-4 mb-4 p-4">
-        <div className={`card p-3 ${isPresale ? "border-warning" : ""}`}>
-          <h3 className={`mb-2 ${isPresale ? "text-warning" : ""}`}>
-            {product.name} {isPresale && "🔥 (Presale)"}
-          </h3>
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="img-fluid rounded mb-2"
-            style={{
-              maxHeight: "400px",
-              objectFit: "cover",
-              cursor: "pointer",
-            }}
-            onClick={() => handleImageClick(product)}
-            role="button"
-            aria-label={`View details for ${product.name}`}
-          />
-          <p className="text-muted">
-            {/* <small>{formatter.formate(product.release_date)}</small> */}
-            <small>{product.description}</small>
-            
-          </p>
-          {userData ? (
-            product.price ? (
-              <p className="fw-bold">
-                {new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(product.price)}
+      <>
+        {showThankYou ? (
+          // ✅ "Thank You" Screen
+          <div className="text-center">
+            <h2 aria-hidden="false" className="modal-title">
+              🎉 Thank You! 🎉
+            </h2>
+            <p aria-hidden="false" className="lead">
+              Your support means the world to us!
+            </p>
+          </div>
+        ) : (
+          <div key={product.product_id} className="col-md-4 mb-4 p-4">
+            <div className={`card p-3 ${isPresale ? "border-warning" : ""}`}>
+              <h3 className={`mb-2 ${isPresale ? "text-warning" : ""}`}>
+                {product.name} {isPresale && "🔥 (Presale)"}
+              </h3>
+              <img
+                src={product.image_url}
+                alt={product.name}
+                className="img-fluid rounded mb-2"
+                style={{
+                  maxHeight: "400px",
+                  objectFit: "cover",
+                  cursor: "pointer",
+                }}
+                onClick={() => handleImageClick(product)}
+                role="button"
+                aria-label={`View details for ${product.name}`}
+              />
+              <p className="text-muted">
+                {/* <small>{formatter.formate(product.release_date)}</small> */}
+                <small>{product.description}</small>
               </p>
-            ) : (
-              <p className="text-muted">Price not available</p>
-            )
-          ) : (
-            <p className="text-muted">🔒 Login to see pricing</p>
-          )}
-          {userData && (
-            <button
-              className={`btn mt-3 ${
-                isRequested ? "btn-secondary" : "btn-primary"
-              }`}
-              onClick={() => handleProductRequest(product)}
-              disabled={isRequested}
-              aria-label={
-                isRequested ? "Already requested" : "Request this product"
-              }
-            >
-              {isRequested ? "Already Requested ✅" : "Request Product"}
-            </button>
-          )}
-          {product.stripe_price_id && (
-            <button
-              className="btn btn-success my-2"
-              onClick={() => handleBuyNow(product)}
-            >
-              Buy Now
-            </button>
-          )}
-          {!disableAddToCart && (
-            <button
-              className="btn btn-primary"
-              onClick={() => addToCart(product)}
-            >
-              Add to Cart
-            </button>
-          )}
-          {/* <button
+              {userData ? (
+                product.price ? (
+                  <p className="fw-bold">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }).format(product.price)}
+                  </p>
+                ) : (
+                  <p className="text-muted">Price not available</p>
+                )
+              ) : (
+                <p className="text-muted">🔒 Login to see pricing</p>
+              )}
+              {userData && (
+                <button
+                  className={`btn mt-3 ${
+                    isRequested ? "btn-secondary" : "btn-primary"
+                  }`}
+                  onClick={() => handleProductRequest(product)}
+                  disabled={isRequested}
+                  aria-label={
+                    isRequested ? "Already requested" : "Request this product"
+                  }
+                >
+                  {isRequested ? "Already Requested ✅" : "Request Product"}
+                </button>
+              )}
+              {product.stripe_price_id && (
+                <button
+                  className="btn btn-success my-2"
+                  onClick={() => handleBuyNow(product)}
+                >
+                  Buy Now
+                </button>
+              )}
+              {!disableAddToCart && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => addToCart(product)}
+                >
+                  Add to Cart
+                </button>
+              )}
+              {/* <button
             className="btn btn-primary my-2"
             onClick={() =>
               quantity > 0 ? navigate("/cart") : addToCart(product)
@@ -213,25 +240,27 @@ const Shop = () => {
           >
             {quantity > 0 ? "Go to Cart 🛒" : "Add to Cart"}
           </button> */}
-          {quantity > 0 && (
-            <div className="d-flex justify-content-center my-2">
-              <button
-                className="btn btn-danger me-3"
-                onClick={() => decrement(product.product_id)}
-              >
-                -
-              </button>
-              <span>{quantity}</span>
-              <button
-                className="btn btn-success ms-3"
-                onClick={() => increment(product.product_id)}
-              >
-                +
-              </button>
+              {quantity > 0 && (
+                <div className="d-flex justify-content-center my-2">
+                  <button
+                    className="btn btn-danger me-3"
+                    onClick={() => decrement(product.product_id)}
+                  >
+                    -
+                  </button>
+                  <span>{quantity}</span>
+                  <button
+                    className="btn btn-success ms-3"
+                    onClick={() => increment(product.product_id)}
+                  >
+                    +
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </>
     );
   };
 

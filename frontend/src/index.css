@@ -69,6 +69,10 @@ html {
   filter: invert(1);
   color: var(--btn-text);
 }
+.dark-mode .btn-close {
+  filter: invert(1);
+  color: var(--btn-text);
+}
 
 .offcanvas-header {
   cursor: default;

@@ -89,9 +89,7 @@ export default function Next() {
           </h1>
           <div className="col-md-8">
             <h2 aria-hidden="false" className="featurette-heading">
-              Terra'Novare stands as the guiding force behind E-Finity
-              <span className="text-muted">
-
+              Terra'Novare stands as the guiding force behind E-Finity <span className="text-muted"> 
                  ensuring its mission stays true while forging financial pathways
                 and enterprise connections.
               </span>
@@ -173,7 +171,7 @@ export default function Next() {
               <h2 aria-hidden="false" className="my-4">How I'm Fundraising</h2>
               <MusicPlayer tracks={songList} isAdmin={user?.roles?.includes("admin")} />
               <div className="mt-4">
-                <button className="btn btn-secondary" onClick={() => navigate("/#bottom")}>
+                <button className="btn btn-success" onClick={() => navigate("/#bottom")}>
                   Book Now
                 </button>
               </div>

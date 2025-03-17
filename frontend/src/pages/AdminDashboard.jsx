@@ -556,6 +556,7 @@ const AdminDashboard = () => {
         <table className="table table-bordered">
           <thead>
             <tr>
+              <th>Name</th>
               <th>Email</th>
               <th>ID</th>
               <th>Roles</th>
@@ -565,6 +566,7 @@ const AdminDashboard = () => {
           <tbody>
             {users.map((user, index) => (
               <tr key={user.id || index}>
+                <td>{user.fullname}</td>
                 <td>{user.email}</td>
                 <td>{user.id}</td> {/* ✅ Display the correct user ID */}
                 <td>{user.roles.join(", ")}</td>

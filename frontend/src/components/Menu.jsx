@@ -106,7 +106,7 @@ const Menu = () => {
       {/* Instagram */}
       <li aria-hidden="false">
         <Link
-          to="https://discord.gg/5Jvz3tU3WJ"
+          to="https://discord.gg/mUJuAYbS"
           target="_blank"
           rel="noopener noreferrer"
           style={{
