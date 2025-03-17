@@ -66,22 +66,15 @@ const AdminDashboard = () => {
       navigate("/login");
       return;
     }
-
-    // console.log("📡 Fetching admin profile with token:", token); // ✅ Log token before request
-
     try {
       const response = await axiosInstance.get("/user/me", {
         headers: { Authorization: `Bearer ${token}` }, // ✅ Attach token
       });
-
-      // console.log("✅ Response received:", response.data); // ✅ Log response
-
       if (!response.data.roles.includes("admin")) {
         console.warn("🚫 User is not an admin, redirecting...");
         navigate("/");
         return;
       }
-
       setAdminProfile(response.data);
     } catch (error) {
       console.error(
@@ -97,7 +90,6 @@ const AdminDashboard = () => {
     }
   }, [navigate, setAdminProfile]);
 
-  /** ✅ Fetch Data Functions */
   const fetchUsers = useCallback(async () => {
     if (!token) {
       toast.error("⚠️ Unauthorized! Please log in.");
@@ -636,9 +628,9 @@ const AdminDashboard = () => {
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan="4">No products found.</td>
-              </tr>
+              <>
+              <p>No products Found</p>
+              </>
             )}
           </tbody>
         </table>

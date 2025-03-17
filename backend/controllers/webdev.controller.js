@@ -78,7 +78,7 @@ export const handleWebDevInquiry = async (req, res) => {
     });
 
     await transporter.sendMail({
-      from: `"Web Dev Team" <${process.env.EMAIL_USER}>`,
+      from: `"Web Dev Team" <${process.env.ADMIN_EMAIL}>`,
       to: email,
       subject: `🌐 Your Inquiry Confirmation`,
       html: emailContent,

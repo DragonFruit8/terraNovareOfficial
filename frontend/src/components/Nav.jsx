@@ -76,38 +76,26 @@ const Nav = () => {
         >
           <FaBars />
         </button>
-
-        {/* Collapsible Navigation */}
         <div ref={navbarRef} className="collapse navbar-collapse">
-          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-            <li aria-hidden="false" className="nav-item">
-              <Link
-                aria-hidden="false"
-                className="nav-link"
-                to="/mission"
-                onClick={toggleNav}
-              >
+          <ul className="navbar-nav ps-3 me-auto mb-2 mb-lg-0 d-flex flex-row gap-3">
+            <li className="nav-item">
+              <Link className="nav-link" to="/mission" onClick={toggleNav}>
                 Mission
               </Link>
             </li>
-            <li aria-hidden="false" className="nav-item">
-              <Link
-                aria-hidden="false"
-                className="nav-link"
-                to="/brand"
-                onClick={toggleNav}
-              >
+            <li className="nav-item">
+              <Link className="nav-link" to="/brand" onClick={toggleNav}>
                 Brand
               </Link>
             </li>
-            <li aria-hidden="false" className="nav-item">
-              <Link
-                aria-hidden="false"
-                className="nav-link"
-                to="/next"
-                onClick={toggleNav}
-              >
+            <li className="nav-item">
+              <Link className="nav-link" to="/next" onClick={toggleNav}>
                 What's Next
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link className="nav-link" to="/efinity" onClick={toggleNav}>
+                E-Finity
               </Link>
             </li>
           </ul>

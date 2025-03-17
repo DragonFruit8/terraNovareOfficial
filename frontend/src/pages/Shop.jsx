@@ -70,13 +70,19 @@ const Shop = () => {
       toast.error("⚠️ Payment failed. Invalid product price.");
       return;
     }
-
+  
     try {
       const { data } = await axiosInstance.post("/stripe/checkout", {
         price_id: product.stripe_price_id,
         userEmail: userData?.email,
       });
-
+  
+      if (data?.status === 200) {
+        await axiosInstance.post("/send-confirmation-email", {
+          userEmail: userData?.email,
+        });
+      }
+  
       if (data?.url) {
         window.location.href = data.url;
       } else {
@@ -89,7 +95,7 @@ const Shop = () => {
       );
       toast.error("❌ Payment failed. Try again.");
     }
-  };
+  };  
 
   const handleProductRequest = async (product) => {
     if (requestedProducts.includes(product.product_id)) {
@@ -129,6 +135,7 @@ const Shop = () => {
       (item) => item.product_id === product.product_id
     );
     const quantity = cartItem?.quantity || 0;
+    // const releaseDate = new Date(product.release_date);
 
     return (
       <div key={product.product_id} className="col-md-4 mb-4 p-4">
@@ -150,7 +157,9 @@ const Shop = () => {
             aria-label={`View details for ${product.name}`}
           />
           <p className="text-muted">
+            {/* <small>{formatter.formate(product.release_date)}</small> */}
             <small>{product.description}</small>
+            
           </p>
           {userData ? (
             product.price ? (

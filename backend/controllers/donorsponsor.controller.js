@@ -36,7 +36,7 @@ export const handleSponsorInquiry = async (req, res) => {
 
     // ✅ Email to Admin
     const adminMailOptions = {
-      from: `"Sponsor Inquiry" <${process.env.EMAIL_USER}>`,
+      from: `"Sponsor Inquiry" <${email}>`,
       to: process.env.ADMIN_EMAIL,
       subject: `🌟 New Sponsorship Inquiry from ${name}`,
       html: `
@@ -59,7 +59,7 @@ export const handleSponsorInquiry = async (req, res) => {
 
     // ✅ Email to Sponsor
     const sponsorMailOptions = {
-      from: `"Sponsorship Team" <${process.env.EMAIL_USER}>`,
+      from: `"Sponsorship Team" <${process.env.ADMIN_EMAIL}>`,
       to: email,
       subject: `🌟 Thank You for Your Sponsorship Inquiry, ${name}!`,
       html: `

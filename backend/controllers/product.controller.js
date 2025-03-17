@@ -17,6 +17,7 @@ export const getProducts = async (req, res) => {
             p.image_url, 
             p.price,
             p.is_presale,
+            p.release_date,
             p.stripe_price_id, 
             CASE 
                WHEN pr.product_id IS NOT NULL THEN TRUE 

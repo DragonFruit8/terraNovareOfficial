@@ -86,7 +86,7 @@ export const sendProductRequestEmail = async (to, productName) => {
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_USER,
+    from: process.env.ADMIN_EMAIL,
     to,
     subject: `${productName} Request Confirmation`,
     html: `<html>

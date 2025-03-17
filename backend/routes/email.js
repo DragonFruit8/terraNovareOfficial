@@ -25,7 +25,7 @@ router.post("/send-confirmation-email", async (req, res) => {
     .join("\n");
 
   const mailOptions = {
-    from: process.env.ADMIN,
+    from: process.env.ADMIN_EMAIL,
     to: email, // Customer email
     bcc: process.env.EMAIL_USER, // Sends a copy to yourself
     subject: "✅ Order Confirmation - Terra'Novare",
