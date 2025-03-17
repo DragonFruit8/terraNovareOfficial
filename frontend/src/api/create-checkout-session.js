@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         },
       ],
       success_url: `${process.env.CLIENT_URL}/shop?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/cancel`,
+      cancel_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/shop`,
     });
 
     res.json({ id: session.id });

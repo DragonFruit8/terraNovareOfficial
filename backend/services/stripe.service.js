@@ -67,7 +67,7 @@ export const createCheckoutSession = async (req, res) => {
       ],
       // success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
       success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      cancel_url: `${process.env.CLIENT_URL}/shop`,
     });
 
     // console.log("Stripe session created successfully:", session.id);

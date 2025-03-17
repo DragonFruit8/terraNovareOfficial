@@ -42,7 +42,7 @@ router.post("/checkout", async (req, res) => {
       customer_email: userEmail,
       line_items: [{ price: price_id, quantity: 1 }],
       success_url: `${process.env.CLIENT_URL}/shop?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/cancel`,
+      cancel_url: `${process.env.CLIENT_URL}/shop`,
     });
 
     console.log(`✅ Stripe session created: ${session.id}`);
