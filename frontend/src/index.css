@@ -159,3 +159,18 @@ a:focus
 {
   outline: var(--secondary-color);
 }
+
+#success {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  z-index: 1000;
+  justify-content: center;
+  left: 200px;
+  background-color: var(--neutral-blue);
+  padding: 20px;
+  border: black solid 1px;
+  text-align: center;
+  box-shadow: 5px 5px 20px white;
+}

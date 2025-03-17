@@ -765,3 +765,15 @@ a:focus
     min-width: 20px;
   }
   
+p, p #text-muted {
+    color: var(--text-light);
+}
+.dark-mode p #text-muted, .dark-mode h1 {
+    color: var(--text-light);
+}
+#success #text-muted {
+    color: var(--text-light);
+}
+.card > p {
+    color: var(--text-color) !important;
+}

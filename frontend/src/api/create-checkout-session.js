@@ -29,7 +29,7 @@ export default async function handler(req, res) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.CLIENT_URL}/shop?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_CLIENT_URL}/cancel`,
     });
 
@@ -39,3 +39,23 @@ export default async function handler(req, res) {
     res.status(500).json({ error: error.message });
   }
 }
+
+router.get("/success", async (req, res) => {
+  try {
+    const sessionId = req.query.session_id;
+    if (!sessionId) {
+      return res.status(400).json({ error: "Session ID is required" });
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    res.json({
+      id: session.id,
+      status: session.payment_status,
+      customer: session.customer_details,
+    });
+
+  } catch (error) {
+    console.error("❌ Stripe Success Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});

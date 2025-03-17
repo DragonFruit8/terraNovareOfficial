@@ -27,38 +27,53 @@ router.post("/create-payment-intent", async (req, res) => {
 
 router.post("/checkout", async (req, res) => {
   try {
-    const { price_id, userEmail } = req.body; // ✅ Extract only price_id and userEmail
+    const { price_id, userEmail } = req.body;
 
-    // Validate input
+    // ✅ Validate Input
     if (!price_id || !userEmail) {
       console.error("⚠️ Missing price ID or user email:", { price_id, userEmail });
-      return res.status(400).json({ error: "Missing price ID or user email" });
+      return res.status(400).json({ error: "Missing required parameters: price ID or user email." });
     }
 
-    // console.log("✅ Creating Stripe Checkout Session with:", { price_id, userEmail });
-
-    // Create the Stripe Checkout session
+    // ✅ Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       customer_email: userEmail,
-      line_items: [
-        {
-          price: price_id, // ✅ Use only price_id
-          quantity: 1,
-        },
-      ],
-      success_url: `${process.env.CLIENT_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+      line_items: [{ price: price_id, quantity: 1 }],
+      success_url: `${process.env.CLIENT_URL}/shop?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.CLIENT_URL}/cancel`,
     });
 
-    res.json({ url: session.url }); // ✅ Return the checkout URL
+    console.log(`✅ Stripe session created: ${session.id}`);
+    res.json({ url: session.url });
 
   } catch (error) {
-    console.error("❌ Stripe Checkout Error:", error);
-    res.status(500).json({ error: error.message });
+    console.error("❌ Stripe Checkout Error:", error.message);
+    res.status(500).json({ error: "Failed to create checkout session." });
   }
 });
 
+
+
+router.get("/success", async (req, res) => {
+  try {
+    const sessionId = req.query.session_id;
+    if (!sessionId) {
+      return res.status(400).json({ error: "Session ID is required" });
+    }
+
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    res.json({
+      id: session.id,
+      status: session.payment_status,
+      customer: session.customer_details,
+    });
+
+  } catch (error) {
+    console.error("❌ Stripe Success Error:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 export default router;
