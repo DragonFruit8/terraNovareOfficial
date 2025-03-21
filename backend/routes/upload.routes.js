@@ -31,7 +31,7 @@ const upload = multer({
  });
 
 // ✅ Upload Route with Proper Response
-router.post("/upload-music", upload.single("music"), (req, res) => {
+router.post("/", upload.single("music"), (req, res) => {
   if (!req.file) {
     console.error("❌ Upload Failed: No file received.");
     return res.status(400).json({ success: false, error: "No file uploaded." });

@@ -72,7 +72,7 @@ export const getMusicList = async (req, res) => {
   try {
     console.log("📂 Fetching music files from:", uploadDir);
     const files = await fs.promises.readdir(uploadDir);
-    const musicFiles = files.filter(file => file.match(/\.(mp3|wav|ogg|flac)$/i)); // ✅ Supports more formats
+    const musicFiles = files.filter(file => file.match(/\.(mp3|mp4|wav|ogg|flac)$/i)); // ✅ Supports more formats
 
     res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
     res.setHeader("Pragma", "no-cache");

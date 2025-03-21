@@ -32,7 +32,7 @@ const MusicUpload = ({ fetchMusicFiles }) => { // ✅ Ensure fetchMusicFiles is 
       if (data.success) { // ✅ Checks if response has { success: true }
       // console.log("✅ Upload Success:", data);
         setUploadMessage("✅ Upload successful!");
-        fetchMusicFiles(); // ✅ Refresh song list after upload
+        // fetchMusicFiles(); // ✅ Refresh song list after upload
         setSelectedFile(null);
       } else {
         console.error("❌ Upload Error:", data.error);

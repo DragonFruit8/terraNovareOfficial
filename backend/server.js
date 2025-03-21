@@ -81,22 +81,22 @@ const upload = multer({
   }, // 3MB file size limit
  });
 
-app.post("/api/upload-music", upload.single("music"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "No file uploaded." });
-  }
-  console.log("✅ Uploaded File:", req.file.filename);
-  res.json({
-    message: "✅ File uploaded successfully!",
-    filename: req.file.filename,
-    fileUrl: `/uploads/music/${req.file.filename}`,
-  });
-});
+// app.post("/api/upload-music", upload.single("music"), (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).json({ error: "No file uploaded." });
+//   }
+//   console.log("✅ Uploaded File:", req.file.filename);
+//   res.json({
+//     message: "✅ File uploaded successfully!",
+//     filename: req.file.filename,
+//     fileUrl: `/uploads/music/${req.file.filename}`,
+//   });
+// });
 
 // ✅ Serve Music Files
 app.use("/uploads/music", express.static(uploadDir));
 app.use("/api/music", musicRoutes);
-app.use("/api/uploads", uploadRoutes);
+app.use("/api/upload-music", uploadRoutes);
 
 // ✅ Middleware
 app.use(express.json({

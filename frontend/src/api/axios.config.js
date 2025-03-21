@@ -32,7 +32,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    // console.log(`🚀 Axios Request: ${config.method.toUpperCase()} ${config.url}`, config);
+    console.log(`🚀 Axios Request: ${config.method.toUpperCase()} ${config.url}`, config);
     return config;
   },
   (error) => Promise.reject(error)
