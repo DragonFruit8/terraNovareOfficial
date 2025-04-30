@@ -38,6 +38,7 @@ import Sidebar from "./components/Sidebar";
 // import Success from "./pages/Success"
 import Terms from "./pages/Terms";
 import TermConditions from "./pages/TermConditions";
+import TestForm from "./forms/TestForm"
 // import UnderConstruction from "./components/UnderConstruction";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -106,6 +107,7 @@ const App = () => {
                 <Route path="/forgot" element={<ForgotPassword />} />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/DSA" element={<TestForm />} />
                 <Route path="/mission" element={<Mission />} />
                 <Route path="/next" element={<Next />} />
                 <Route path="/orders" element={<Orders />} />
